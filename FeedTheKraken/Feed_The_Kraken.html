@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Feed the Kraken</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #64ffda;
+            --sailor-color: #2196F3;
+            --pirate-color: #F44336;
+            --cult-color: #FFEB3B;
+            --btn-color: #64ffda;
+            --btn-text: #0a192f;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Game Board Visuals */
+        .hex-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+            position: relative;
+            background: linear-gradient(135deg, #0f2545 0%, #1a3a5e 100%);
+            border-radius: 12px;
+            border: 2px solid #303C55;
+            overflow: visible;
+            padding: 15px;
+            min-height: 500px;
+            height: 70vh;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        #map-visuals {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #map-visuals svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        
+        .role-sailor { color: var(--sailor-color); }
+        .role-pirate { color: var(--pirate-color); }
+        .role-cult { color: var(--cult-color); }
+
+        .nav-card-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .nav-card {
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid white;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .nav-card:active { transform: scale(0.95); }
+        .card-blue { background-color: var(--sailor-color); color: white; }
+        .card-red { background-color: var(--pirate-color); color: white; }
+        .card-yellow { background-color: var(--cult-color); color: black; }
+        
+        .log-entry {
+            font-size: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid #233554;
+            padding: 5px 0;
+            color: #8892b0;
+        }
+
+        /* Modal for Pass Phone */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .info-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .badge-captain { background-color: #FFC107; color: black; }
+        .badge-lieutenant { background-color: #9E9E9E; color: black; }
+        .badge-navigator { background-color: #00BCD4; color: white; }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        .player-chip:active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(0.95);
+        }
+        .saved-list-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .saved-list-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .container, .modal-overlay > .container { animation: fadeIn 0.3s ease-out; }
+        
+        @keyframes cardReveal {
+            0% { transform: scale(0.3) rotateY(90deg); opacity: 0; }
+            50% { transform: scale(1.2) rotateY(0deg); opacity: 1; }
+            100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+        }
+        
+        @keyframes cardPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(100, 255, 218, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(100, 255, 218, 0.8); }
+        }
+        
+        .card-reveal-animation {
+            animation: cardReveal 0.8s ease-out;
+        }
+        
+        .card-pulse-animation {
+            animation: cardPulse 1s ease-in-out infinite;
+        }
+        
+        #card-reveal-modal {
+            z-index: 2000;
+        }
+        
+        #card-reveal-card {
+            width: 150px;
+            height: 220px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            border: 3px solid white;
+            margin: 20px auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .ship-moving {
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        #ship-glow.ship-moving {
+            transition: cx 1.5s cubic-bezier(0.4, 0, 0.2, 1), cy 1.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>Feed the Kraken</h1>
+        <p>Secret Role Deduction Game</p>
+
+        <div class="setup-info">
+            <strong>Goal:</strong> Navigate the ship to your faction's destination.<br>
+            • <span style="color:var(--sailor-color)">Sailors</span>: East (Blue)<br>
+            • <span style="color:var(--pirate-color)">Pirates</span>: West (Red)<br>
+            • <span style="color:var(--cult-color)">Cult</span>: North (Yellow)
+        </div>
+
+        <div class="input-group">
+            <label>Number of Players:</label>
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(-1)">-</button>
+                <span id="player-count-display" style="font-size:1.5rem; font-weight:bold;">7</span>
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(1)">+</button>
+            </div>
+            </div>
+
+        <div id="player-inputs-container" style="margin-top:20px;"></div>
+        
+        <!-- Saved Players List -->
+        <div class="saved-list-container">
+            <div class="saved-list-label">Saved Names (tap to fill):</div>
+            <div id="saved-list" style="text-align: center;"></div>
+        </div>
+        
+        <!-- Critical Numbers Summary -->
+        <div id="setup-summary" style="margin-top: 20px; padding: 12px; background: rgba(17, 34, 64, 0.6); border-radius: 8px; border: 1px solid #303C55;">
+            <div style="font-size: 0.8rem; line-height: 1.5; color: #8892b0;">
+                <div style="font-size: 0.7rem; color: #64ffda; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">📋 Setup Summary</div>
+                <div id="summary-content"></div>
+            </div>
+        </div>
+
+        <button class="action-btn" onclick="startRoleDistribution()">Start Game</button>
+        
+        <div style="margin-top: 15px;">
+             <label style="color: #8892b0; font-size: 0.9rem;">Map Journey:</label>
+             <select id="map-type-select" class="player-input" style="margin-top:5px;" onchange="updateSetupSummary()">
+                 <option value="short">Short Journey (Required for 5-6 players)</option>
+                 <option value="long">Long Journey (Recommended for 7+ players)</option>
+             </select>
+             <p style="font-size: 0.75rem; color: #8892b0; margin-top: 5px;">
+                 <strong>Off-Duty Signs:</strong> After each round, mark officers as off-duty:<br>
+                 5-6 players: Navigator only<br>
+                 7-8 players: Lieutenant + Navigator<br>
+                 9-11 players: Captain + Lieutenant + Navigator
+             </p>
+            </div>
+        </div>
+
+    <!-- 2. Role Distribution Phase (Pass Phone) -->
+    <div id="distribution-screen" class="container hidden">
+        <div id="dist-pass-view">
+            <p>Pass device to:</p>
+            <h2 id="dist-player-name" style="font-size:2rem; color:var(--accent-color);">Player Name</h2>
+            <div style="font-size:4rem; margin:20px;">📱</div>
+            <button class="action-btn" onclick="revealRole()">Reveal Role</button>
+    </div>
+
+        <div id="dist-reveal-view" class="hidden">
+            <h2 id="reveal-name-header">Player Name</h2>
+            <div class="role-card">
+                <div id="role-title" class="role-title">Role</div>
+                <div id="role-desc" style="font-size:0.95rem; margin-bottom:10px;"></div>
+                <div id="role-extra" style="font-size:0.9rem; color:#ffd700;"></div>
+            </div>
+            <p style="font-size:0.8rem;">Memorize your secret role.</p>
+            <button class="action-btn" onclick="nextDistribute()">Hide & Next</button>
+        </div>
+    </div>
+
+    <!-- 3. Main Game Screen -->
+    <div id="game-screen" class="container hidden" style="padding: 10px; max-width: 95vw; position: relative;">
+        <!-- Setup Summary Button -->
+        <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">
+            <button class="secondary-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="showSetupSummaryModal()" title="View Setup Summary">
+                📋 Summary
+            </button>
+    </div>
+
+        <!-- Map Visualization - Full Size -->
+        <div id="map-container" class="hex-grid">
+            <div id="map-visuals">
+                <!-- Nodes generated by JS -->
+        </div>
+            </div>
+
+        <!-- Action Area -->
+        <div id="action-area" style="margin-top: 10px;">
+            <!-- Dynamic content -->
+            </div>
+        </div>
+
+    <!-- Navigation Modal (Pass Phone) -->
+    <div id="nav-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:400px; margin:0;">
+            <h2 id="nav-phase-title">Captain's Turn</h2>
+            <p id="nav-instruction">Pass device to Captain.</p>
+            
+            <div id="nav-cards-area" class="hidden">
+                <div class="nav-card-container" id="nav-card-selection">
+                    <!-- Cards injected via JS -->
+        </div>
+    </div>
+
+            <button id="nav-action-btn" class="action-btn" onclick="proceedNavPhase()">I am Ready</button>
+    </div>
+        </div>
+        
+    <!-- Generic Modal for Actions (Search, etc) -->
+    <div id="action-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:400px;">
+            <h2 id="action-modal-title">Action</h2>
+            <div id="action-modal-content"></div>
+            <!-- Dynamic action buttons here -->
+            <div id="action-modal-actions" style="margin-top:15px;"></div>
+            <button id="action-modal-close" class="action-btn" style="margin-top:10px;" onclick="closeActionModal()">Close</button>
+    </div>
+    </div>
+
+    <!-- Log Modal -->
+    <div id="log-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px; max-height:80vh; overflow-y:auto;">
+            <h2>Logbook</h2>
+            <div id="log-content" style="text-align:left; width:100%;"></div>
+            <button class="action-btn" onclick="document.getElementById('log-modal').classList.add('hidden')">Close</button>
+        </div>
+    </div>
+
+    <!-- End Game Modal -->
+    <div id="end-game-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px; border: 2px solid var(--accent-color);">
+            <h1 id="end-game-title" style="margin-bottom: 20px;">GAME OVER</h1>
+            <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
+            <button class="action-btn" onclick="location.reload()">New Game</button>
+        </div>
+    </div>
+
+    <!-- Manage Modal -->
+    <div id="manage-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px; max-height:80vh; overflow-y:auto;">
+            <h2>Manage Players</h2>
+            <div id="manage-content"></div>
+            <button class="action-btn" onclick="document.getElementById('manage-modal').classList.add('hidden'); updateMainDisplay();">Close</button>
+        </div>
+    </div>
+
+    <!-- Card Reveal Modal -->
+    <div id="card-reveal-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:300px; margin:0;">
+            <h2 style="margin-bottom: 10px;">🧭 Navigator Plays</h2>
+            <div id="card-reveal-card"></div>
+            <p id="card-reveal-text" style="font-size: 1rem; margin-top: 15px;"></p>
+            <button id="card-reveal-continue-btn" class="action-btn" style="margin-top: 20px;">Continue</button>
+        </div>
+    </div>
+
+    <!-- Search Result Modal -->
+    <div id="search-result-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:400px; margin:0;">
+            <h2 style="margin-bottom: 15px;">🔍 Cabin Search Result</h2>
+            <div id="search-result-content" style="padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 15px 0;"></div>
+            <p style="font-size: 0.85rem; color: #8892b0; margin-top: 10px;">Pass phone to Captain</p>
+            <button id="search-result-close-btn" class="action-btn" style="margin-top: 20px;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration & Logic ---
+        
+        // --- Global Variables ---
+        var MAP_NODES = {};
+        var currentNodeId = 0;
+        var blockedCaptainId = -1; 
+        var gunStashCount = 0; 
+        var isGameEnded = false; 
+        
+        var playerCount = 7;
+        var players = [];
+        var captainIndex = 0; // Tracked for Mutiny logging
+        var drawPile = [];
+        var discardPile = [];
+        var currentHand = [];
+        var gameLog = [];
+        var navPhaseStep = 0;
+        var tempCards = [];
+        var offDutyPlayers = [];
+        var cultRitualDeck = [];
+        var cultRitualDiscard = [];
+        var savedPlayers = [];
+        var isFirstRound = true;
+
+        // --- Player Name Memory ---
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('kraken_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">No saved names</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        // Role Distribution Configuration (Official Feed the Kraken Rules)
+        var ROLES_CONFIG = {
+            // 5 players: Randomly choose between 3/1/1 or 2/2/1
+            5: { sailor: null, pirate: null, cult: 1 }, // Special handling needed
+            6: { sailor: 3, pirate: 2, cult: 1 },
+        7: { sailor: 4, pirate: 2, cult: 1 },
+            8: { sailor: 4, pirate: 3, cult: 1 },
+        9: { sailor: 5, pirate: 3, cult: 1 },
+            10: { sailor: 5, pirate: 4, cult: 1 },
+            11: { sailor: 5, pirate: 4, cult: 1, cultist: 1 }
+        };
+
+        // Off-Duty Signs Configuration
+        var OFF_DUTY_CONFIG = {
+            5: { count: 1, roles: ['navigator'] },
+            6: { count: 1, roles: ['navigator'] },
+            7: { count: 2, roles: ['lieutenant', 'navigator'] },
+            8: { count: 2, roles: ['lieutenant', 'navigator'] },
+            9: { count: 3, roles: ['captain', 'lieutenant', 'navigator'] },
+            10: { count: 3, roles: ['captain', 'lieutenant', 'navigator'] },
+            11: { count: 3, roles: ['captain', 'lieutenant', 'navigator'] }
+        };
+        
+        function initMap(type) {
+            MAP_NODES = {};
+            
+            // Row configuration: number of nodes per row [row0, row1, row2, row3, row4, row5]
+            // Row 0: Start (1 node)
+            // Row 1: 3 nodes
+            // Row 2: 5 nodes
+            // Row 3: 5 nodes
+            // Row 4: 7 nodes (regular nodes)
+            // Row 5: Victory (7 nodes: 3 red, 1 yellow, 3 blue)
+            var rows = [1, 3, 5, 5, 7, 7];
+            
+            // Node storage: key = "r_c" where r=row, c=column (center=0)
+            var nodeMap = {};
+            var nodeIdCounter = 0;
+            
+            // Generate all nodes with coordinates
+            for (var r = 0; r < rows.length; r++) {
+                var nodeCount = rows[r];
+                var startCol = -(nodeCount - 1) / 2; // Center column is 0
+                
+                for (var i = 0; i < nodeCount; i++) {
+                    var c = startCol + i;
+                    var key = r + "_" + c;
+                    var nodeId = nodeIdCounter++;
+                    
+                    // Determine node type
+                    var nodeType = 'none';
+                    var label = '';
+                    
+                    if (r === 0) {
+                        nodeType = 'none';
+                        label = 'Start';
+                    } else if (r === 5) {
+                        // Victory row (row 5)
+                        if (c <= -1) {
+                            nodeType = 'win_pirate';
+                            label = 'Crimson Cove';
+                        } else if (c === 0) {
+                            nodeType = 'win_cult';
+                            label = 'The Kraken';
+            } else {
+                            nodeType = 'win_sailor';
+                            label = 'Bluewater Bay';
+                        }
+                    } else {
+                        // Regular nodes - only specific nodes have actions
+                        nodeType = 'none'; // Default: no action
+                        
+                        // See someone's faction (cabin search): (2,1), (2,-1), (3,-2)
+                        if ((r === 2 && c === 1) || (r === 2 && c === -1) || (r === 3 && c === -2)) {
+                            nodeType = 'search';
+                        }
+                        // Kraken (cult ritual): (4,-1), (4,1)
+                        else if ((r === 4 && c === -1) || (r === 4 && c === 1)) {
+                            nodeType = 'cult';
+                        }
+                        
+                        label = 'R' + r + 'C' + (c >= 0 ? '+' + c : c);
+                    }
+                    
+                    // Calculate visual coordinates (x: 0-100, y: 0-100, bottom-up)
+                    // Maximized spacing for clarity
+                    var x = 50 + (c * 20); // 20 units per column (maximized horizontal spacing)
+                    var y = 95 - (r * 18); // 18 units per row (maximized vertical spacing)
+                    
+                    nodeMap[key] = {
+                        id: nodeId,
+                        r: r,
+                        c: c,
+                        type: nodeType,
+                        label: label,
+                        x: x,
+                        y: y,
+                        nextBlue: null,
+                        nextRed: null,
+                        nextYellow: null
+                    };
+                }
+            }
+            
+            // Calculate connections using movement rules
+            for (var key in nodeMap) {
+                var node = nodeMap[key];
+                var r = node.r;
+                var c = node.c;
+                
+                if (r === 5) {
+                    // Victory nodes have no outgoing connections
+                    continue;
+                }
+                
+                // Blue movement: if c >= 0, go to (r+1, c+1), else go to (r, c+1)
+                var blueTargetR, blueTargetC;
+                if (r === 4 && c === 3) {
+                    // Special case: row 4, last column connects to row 5, last column (blue victory)
+                    blueTargetR = 5;
+                    blueTargetC = 3;
+                } else if (c >= 0) {
+                    blueTargetR = r + 1;
+                    blueTargetC = c + 1;
+                } else {
+                    blueTargetR = r;
+                    blueTargetC = c + 1;
+                }
+                var blueKey = blueTargetR + "_" + blueTargetC;
+                if (nodeMap[blueKey]) {
+                    node.nextBlue = nodeMap[blueKey].id;
+                }
+                
+                // Red movement: if c <= 0, go to (r+1, c-1), else go to (r, c-1)
+                var redTargetR, redTargetC;
+                if (r === 4 && c === -3) {
+                    // Special case: row 4, first column connects to row 5, first column (red victory)
+                    redTargetR = 5;
+                    redTargetC = -3;
+                } else if (c <= 0) {
+                    redTargetR = r + 1;
+                    redTargetC = c - 1;
+                } else {
+                    redTargetR = r;
+                    redTargetC = c - 1;
+                }
+                var redKey = redTargetR + "_" + redTargetC;
+                if (nodeMap[redKey]) {
+                    node.nextRed = nodeMap[redKey].id;
+                }
+                
+                // Yellow movement: special logic for row 4
+                var yellowTargetR, yellowTargetC;
+                if (r === 4) {
+                    // At row 4: if c < -1, go to (4, c+1); if c > 1, go to (4, c-1); else go to (5, c)
+                    if (c < -1) {
+                        yellowTargetR = 4;
+                        yellowTargetC = c + 1;
+                    } else if (c > 1) {
+                        yellowTargetR = 4;
+                        yellowTargetC = c - 1;
+                    } else {
+                        yellowTargetR = 5;
+                        yellowTargetC = c;
+                    }
+                } else {
+                    // For other rows: always (r+1, c) except special case (1,0) -> (2, -1)
+                    yellowTargetR = r + 1;
+                    yellowTargetC = c;
+                    if (r === 1 && c === 0) {
+                        yellowTargetC = -1; // Special case
+                    }
+                }
+                var yellowKey = yellowTargetR + "_" + yellowTargetC;
+                if (nodeMap[yellowKey]) {
+                    node.nextYellow = nodeMap[yellowKey].id;
+                }
+            }
+            
+            // Convert to MAP_NODES format
+            for (var key in nodeMap) {
+                var node = nodeMap[key];
+                MAP_NODES[node.id] = {
+                    id: node.id,
+                    nextBlue: node.nextBlue,
+                    nextRed: node.nextRed,
+                    nextYellow: node.nextYellow,
+                    type: node.type,
+                    label: node.label,
+                    x: node.x,
+                    y: node.y
+                };
+            }
+        }
+
+        window.onload = function() {
+            loadSavedPlayers();
+            renderPlayerInputs();
+            updateSetupSummary();
+        };
+
+        function updatePlayerCount(delta) {
+            var newCount = playerCount + delta;
+            if (newCount >= 5 && newCount <= 11) {
+                playerCount = newCount;
+                document.getElementById('player-count-display').innerText = playerCount;
+                
+                // Auto-select map based on player count
+                var mapSelect = document.getElementById('map-type-select');
+                if (newCount <= 6) {
+                    mapSelect.value = 'short';
+                } else {
+                    mapSelect.value = 'long';
+                }
+                
+                renderPlayerInputs();
+                updateSetupSummary();
+            }
+        }
+        
+        function updateSetupSummary() {
+            var summaryDiv = document.getElementById('summary-content');
+            if (!summaryDiv) return;
+            
+            var count = playerCount;
+            var mapType = document.getElementById('map-type-select').value;
+            var html = '<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; font-size: 0.8rem;">';
+            
+            // Role Distribution (compact rebus style)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">👥</div><div>';
+            if (count === 5) {
+                html += '<span style="color:#2196F3">⚓3/2</span> <span style="color:#F44336">🏴‍☠️1/2</span> <span style="color:#FFEB3B">🔮1</span> <span style="opacity:0.7">(random)</span>';
+            } else {
+                var config = ROLES_CONFIG[count];
+                html += '<span style="color:#2196F3">⚓' + config.sailor + '</span> ';
+                html += '<span style="color:#F44336">🏴‍☠️' + config.pirate + '</span> ';
+                html += '<span style="color:#FFEB3B">🔮' + config.cult + '</span>';
+                if (config.cultist) {
+                    html += ' <span style="color:#FFEB3B">+1</span>';
+                }
+            }
+            html += '</div>';
+            
+            // Off-Duty Signs (compact)
+            var offDuty = OFF_DUTY_CONFIG[count];
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🚫</div><div>';
+            html += offDuty.count + '→';
+            html += offDuty.roles.map(function(r) {
+                if (r === 'captain') return '👑';
+                if (r === 'lieutenant') return '⭐';
+                if (r === 'navigator') return '🧭';
+                return r;
+            }).join('');
+            html += '</div>';
+            
+            // Navigation Deck (very compact)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🃏</div><div>';
+            if (count <= 6) {
+                html += '<span style="color:#FFEB3B">🟡5</span><span style="color:#2196F3">🔵5</span><span style="color:#F44336">🔴9</span> <span style="opacity:0.7">(19)</span>';
+            } else {
+                html += '<span style="color:#FFEB3B">🟡6</span><span style="color:#2196F3">🔵6</span><span style="color:#F44336">🔴11</span> <span style="opacity:0.7">(23)</span>';
+            }
+            html += '</div>';
+            
+            // Map Type (compact)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🗺️</div><div>';
+            if (count <= 6 || mapType === 'short') {
+                html += '<span style="color:#ff6666">Short</span>';
+            } else {
+                html += '<span style="color:#66ff66">Long</span>';
+            }
+            html += '</div>';
+            
+            // Starting Guns (compact)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🔫</div><div>3×' + count + '</div>';
+            
+            // Cult Ritual Deck (very compact)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🐙</div><div>';
+            html += '<span style="color:#FFEB3B">3</span>Conv <span style="color:#FFEB3B">1</span>Gun <span style="color:#FFEB3B">1</span>Srch';
+            html += '</div>';
+            
+            // Mutiny Requirements (compact)
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">⚔️</div><div>';
+            if (count >= 5 && count <= 7) {
+                html += '<span style="color:#ff9800">3+</span>🔫';
+            } else if (count >= 8 && count <= 9) {
+                html += '<span style="color:#ff9800">4+</span>🔫';
+            } else if (count >= 10 && count <= 11) {
+                html += '<span style="color:#ff9800">5+</span>🔫';
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            
+            summaryDiv.innerHTML = html;
+        }
+        
+        function showSetupSummaryModal() {
+            var modal = document.getElementById('action-modal');
+            var title = document.getElementById('action-modal-title');
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            modal.classList.remove('hidden');
+            title.innerText = "📋 Setup Summary";
+            title.style.color = "#64ffda";
+            actions.innerHTML = "";
+            
+            // Generate the same summary as in setup screen
+            var count = playerCount;
+            var mapType = document.getElementById('map-type-select') ? document.getElementById('map-type-select').value : 'long';
+            var html = '<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; font-size: 0.8rem; text-align: left;">';
+            
+            // Role Distribution
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">👥</div><div>';
+            if (count === 5) {
+                html += '<span style="color:#2196F3">⚓3/2</span> <span style="color:#F44336">🏴‍☠️1/2</span> <span style="color:#FFEB3B">🔮1</span> <span style="opacity:0.7">(random)</span>';
+            } else {
+                var config = ROLES_CONFIG[count];
+                html += '<span style="color:#2196F3">⚓' + config.sailor + '</span> ';
+                html += '<span style="color:#F44336">🏴‍☠️' + config.pirate + '</span> ';
+                html += '<span style="color:#FFEB3B">🔮' + config.cult + '</span>';
+                if (config.cultist) {
+                    html += ' <span style="color:#FFEB3B">+1</span>';
+                }
+            }
+            html += '</div>';
+            
+            // Off-Duty Signs
+            var offDuty = OFF_DUTY_CONFIG[count];
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🚫</div><div>';
+            html += offDuty.count + '→';
+            html += offDuty.roles.map(function(r) {
+                if (r === 'captain') return '👑';
+                if (r === 'lieutenant') return '⭐';
+                if (r === 'navigator') return '🧭';
+                return r;
+            }).join('');
+            html += '</div>';
+            
+            // Navigation Deck
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🃏</div><div>';
+            if (count <= 6) {
+                html += '<span style="color:#FFEB3B">🟡5</span><span style="color:#2196F3">🔵5</span><span style="color:#F44336">🔴9</span> <span style="opacity:0.7">(19)</span>';
+            } else {
+                html += '<span style="color:#FFEB3B">🟡6</span><span style="color:#2196F3">🔵6</span><span style="color:#F44336">🔴11</span> <span style="opacity:0.7">(23)</span>';
+            }
+            html += '</div>';
+            
+            // Map Type
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🗺️</div><div>';
+            if (count <= 6 || mapType === 'short') {
+                html += '<span style="color:#ff6666">Short</span>';
+            } else {
+                html += '<span style="color:#66ff66">Long</span>';
+            }
+            html += '</div>';
+            
+            // Starting Guns
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🔫</div><div>3×' + count + '</div>';
+            
+            // Cult Ritual Deck
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">🐙</div><div>';
+            html += '<span style="color:#FFEB3B">3</span>Conv <span style="color:#FFEB3B">1</span>Gun <span style="color:#FFEB3B">1</span>Srch';
+            html += '</div>';
+            
+            // Mutiny Requirements
+            html += '<div style="font-weight: bold; color: #64ffda; font-size: 0.75rem;">⚔️</div><div>';
+            if (count >= 5 && count <= 7) {
+                html += '<span style="color:#ff9800">3+</span>🔫';
+            } else if (count >= 8 && count <= 9) {
+                html += '<span style="color:#ff9800">4+</span>🔫';
+            } else if (count >= 10 && count <= 11) {
+                html += '<span style="color:#ff9800">5+</span>🔫';
+            }
+            html += '</div>';
+            
+            html += '</div>';
+            
+            content.innerHTML = html;
+            // Note: Modal already has a built-in close button, no need to add another
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            container.innerHTML = '';
+            for (var i = 0; i < playerCount; i++) {
+                var inp = document.createElement('input');
+                inp.className = 'player-input';
+                inp.placeholder = 'Player ' + (i + 1);
+                inp.style.marginBottom = '8px';
+                container.appendChild(inp);
+            }
+        }
+
+        // --- Distribution ---
+        let distIndex = 0;
+
+        function startRoleDistribution() {
+            players = [];
+            var pInputs = document.getElementById('player-inputs-container').querySelectorAll('input');
+            for(var i=0; i<pInputs.length; i++) {
+                var name = pInputs[i].value.trim() || ('Player ' + (i + 1));
+                players.push({
+                    name: name,
+                    role: null,
+                    isSilenced: false,
+                    isCultist: false,
+                    safeFromCult: false,
+                    guns: 3,
+                    eliminated: false
+                });
+                
+                // Save unique names
+                if (pInputs[i].value.trim() !== '' && savedPlayers.indexOf(name) === -1) {
+                    savedPlayers.push(name);
+            }
+            }
+            localStorage.setItem('kraken_players', JSON.stringify(savedPlayers));
+            renderSavedList();
+
+            var config = ROLES_CONFIG[playerCount];
+            var deck = [];
+            
+            // Special handling for 5 players: randomly choose between 3/1/1 or 2/2/1
+            if (playerCount === 5) {
+                var bagChoice = Math.random() < 0.5;
+                if (bagChoice) {
+                    // Bag 1: 3 Sailors, 1 Pirate
+                    for (var j = 0; j < 3; j++) deck.push('Sailor');
+                    deck.push('Pirate');
+                } else {
+                    // Bag 2: 2 Sailors, 2 Pirates
+                    for (var j = 0; j < 2; j++) deck.push('Sailor');
+                    for (var j = 0; j < 2; j++) deck.push('Pirate');
+                }
+                deck.push('Cult Leader');
+            } else {
+                // Standard distribution for other player counts
+            for (var j = 0; j < config.sailor; j++) deck.push('Sailor');
+            for (var j = 0; j < config.pirate; j++) deck.push('Pirate');
+            for (var j = 0; j < config.cult; j++) deck.push('Cult Leader');
+            if (config.cultist) deck.push('Cultist');
+            }
+
+            shuffleDeck(deck);
+
+            players.forEach(function(p, i) {
+                p.role = deck[i];
+            });
+
+            // Enforce map selection based on player count
+            var mapType = document.getElementById('map-type-select').value;
+            if (playerCount <= 6) {
+                // 5-6 players must use Short Journey
+                mapType = 'short';
+                document.getElementById('map-type-select').value = 'short';
+            } else if (playerCount >= 7) {
+                // 7+ players should use Long Journey (but can choose Short for faster game)
+                if (mapType !== 'long') {
+                    mapType = document.getElementById('map-type-select').value; // Allow user choice
+                }
+            }
+            
+            initMap(mapType);
+            currentNodeId = 0;
+            isGameEnded = false;
+            offDutyPlayers = [];
+
+            distIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('distribution-screen').classList.remove('hidden');
+            updateDistPass();
+        }
+
+        function updateDistPass() {
+            document.getElementById('dist-player-name').innerText = players[distIndex].name;
+            document.getElementById('dist-pass-view').classList.remove('hidden');
+            document.getElementById('dist-reveal-view').classList.add('hidden');
+        }
+
+        function revealRole() {
+            var p = players[distIndex];
+            document.getElementById('reveal-name-header').innerText = p.name;
+            var title = document.getElementById('role-title');
+            var desc = document.getElementById('role-desc');
+            var extra = document.getElementById('role-extra');
+
+            title.className = 'role-title';
+            extra.innerText = "";
+
+            if (p.role === 'Sailor') {
+                title.innerText = "⚓ Sailor";
+                title.classList.add('role-sailor');
+                desc.innerText = "You are a loyal Sailor. Goal: Bluewater Bay (East/Blue).";
+            } else if (p.role === 'Pirate') {
+                title.innerText = "🏴‍☠️ Pirate";
+                title.classList.add('role-pirate');
+                desc.innerText = "You are a Pirate. Goal: Crimson Cove (West/Red).";
+                var pirates = [];
+                players.forEach(function(pl, i) {
+                    if (pl.role === 'Pirate' && i !== distIndex) pirates.push(pl.name);
+                });
+                if (pirates.length > 0) {
+                    extra.innerText = "Fellow Pirates: " + pirates.join(', ');
+                } else {
+                    extra.innerText = "(You are the only Pirate)";
+                }
+
+            } else if (p.role === 'Cult Leader') {
+                title.innerText = "🐙 Cult Leader";
+                title.classList.add('role-cult');
+                desc.innerText = "You are the Cult Leader. Goal: The Kraken (North/Yellow) OR get sacrificed.";
+            } else if (p.role === 'Cultist') {
+                title.innerText = "🐙 Cultist";
+                title.classList.add('role-cult');
+                desc.innerText = "Serve the Cult Leader. Goal: North.";
+            }
+
+            document.getElementById('dist-pass-view').classList.add('hidden');
+            document.getElementById('dist-reveal-view').classList.remove('hidden');
+        }
+
+        function nextDistribute() {
+            distIndex++;
+            if (distIndex >= playerCount) {
+                startGameLoop();
+            } else {
+                updateDistPass();
+            }
+        }
+
+        // --- Game Loop ---
+        function startGameLoop() {
+            document.getElementById('distribution-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            // Initialize Navigation Deck based on player count
+            drawPile = [];
+            
+            if (playerCount <= 6) {
+                // Short Game (5-6 players): Remove 4 cards
+                // Remove: 1x Cult Uprising (Yellow), 1x Drunk (Blue), 2x Armed (Red)
+                // 5 yellow (all regular), 5 blue (2 disarmed + 3 drunk), 9 red (4 regular + 5 drunk)
+                for(var i=0; i<5; i++) drawPile.push({color: 'yellow', type: 'regular'});
+                for(var i=0; i<2; i++) drawPile.push({color: 'blue', type: 'disarmed'});
+                for(var i=0; i<3; i++) drawPile.push({color: 'blue', type: 'drunk'});
+                for(var i=0; i<4; i++) drawPile.push({color: 'red', type: 'regular'});
+                for(var i=0; i<5; i++) drawPile.push({color: 'red', type: 'drunk'});
+            } else {
+                // Standard Game (7+ players): Full 23-card deck
+                // 6 yellow (all regular), 6 blue (0 regular + 4 drunk + 2 disarmed), 11 red (6 regular + 5 drunk)
+                for(var i=0; i<6; i++) drawPile.push({color: 'yellow', type: 'regular'});
+                for(var i=0; i<4; i++) drawPile.push({color: 'blue', type: 'drunk'});
+                for(var i=0; i<2; i++) drawPile.push({color: 'blue', type: 'disarmed'});
+                for(var i=0; i<6; i++) drawPile.push({color: 'red', type: 'regular'});
+                for(var i=0; i<5; i++) drawPile.push({color: 'red', type: 'drunk'});
+            }
+            
+            shuffleDeck(drawPile);
+
+            // Initialize Cult Ritual Deck (5 cards: 3x Conversion, 1x Guns Stash, 1x Cabin Search)
+            cultRitualDeck = [];
+            cultRitualDiscard = [];
+            for(var i=0; i<3; i++) cultRitualDeck.push('conversion');
+            cultRitualDeck.push('guns_stash');
+            cultRitualDeck.push('cabin_search');
+            shuffleDeck(cultRitualDeck);
+
+            renderMap();
+            
+            // Randomly select first captain
+            isFirstRound = true;
+            var livingPlayers = players.filter(function(p) { return !p.eliminated; });
+            if (livingPlayers.length > 0) {
+                captainIndex = Math.floor(Math.random() * livingPlayers.length);
+                // Find the actual index in the players array
+                var count = 0;
+                for (var i = 0; i < players.length; i++) {
+                    if (!players[i].eliminated) {
+                        if (count === captainIndex) {
+                            captainIndex = i;
+                            break;
+                        }
+                        count++;
+                    }
+                }
+                addLog(`🎲 First Captain randomly selected: ${players[captainIndex].name}`);
+            }
+            
+            startRound();
+        }
+
+        function updateMainDisplay() {
+            // No op
+        }
+
+        function renderMap() {
+            var container = document.getElementById('map-visuals');
+            container.innerHTML = '';
+            
+            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.style.overflow = "visible";
+            svg.style.minHeight = "400px";
+
+            // Color definitions - these should match the actual game directions
+            var blueColor = "#2196F3";    // Sailor/East (right side)
+            var redColor = "#F44336";     // Pirate/West (left side)
+            var yellowColor = "#FFEB3B";  // Cult/North (top)
+            var accentColor = "#64ffda";  // Accent/Current
+
+            // Define arrow markers in defs
+            var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            
+            // Blue arrow marker - very narrow to match thin lines
+            var blueMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            blueMarker.setAttribute("id", "arrow-blue");
+            blueMarker.setAttribute("markerWidth", "3");
+            blueMarker.setAttribute("markerHeight", "3");
+            blueMarker.setAttribute("refX", "2.5");
+            blueMarker.setAttribute("refY", "1.5");
+            blueMarker.setAttribute("orient", "auto");
+            var blueArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            blueArrowPath.setAttribute("d", "M0,0 L0,3 L2.5,1.5 z");
+            blueArrowPath.setAttribute("fill", blueColor);
+            blueMarker.appendChild(blueArrowPath);
+            defs.appendChild(blueMarker);
+            
+            // Red arrow marker - very narrow to match thin lines
+            var redMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            redMarker.setAttribute("id", "arrow-red");
+            redMarker.setAttribute("markerWidth", "3");
+            redMarker.setAttribute("markerHeight", "3");
+            redMarker.setAttribute("refX", "2.5");
+            redMarker.setAttribute("refY", "1.5");
+            redMarker.setAttribute("orient", "auto");
+            var redArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            redArrowPath.setAttribute("d", "M0,0 L0,3 L2.5,1.5 z");
+            redArrowPath.setAttribute("fill", redColor);
+            redMarker.appendChild(redArrowPath);
+            defs.appendChild(redMarker);
+            
+            // Yellow arrow marker - very narrow to match thin lines
+            var yellowMarker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            yellowMarker.setAttribute("id", "arrow-yellow");
+            yellowMarker.setAttribute("markerWidth", "3");
+            yellowMarker.setAttribute("markerHeight", "3");
+            yellowMarker.setAttribute("refX", "2.5");
+            yellowMarker.setAttribute("refY", "1.5");
+            yellowMarker.setAttribute("orient", "auto");
+            var yellowArrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            yellowArrowPath.setAttribute("d", "M0,0 L0,3 L2.5,1.5 z");
+            yellowArrowPath.setAttribute("fill", yellowColor);
+            yellowMarker.appendChild(yellowArrowPath);
+            defs.appendChild(yellowMarker);
+            
+            svg.appendChild(defs);
+
+            // Track connections to handle overlaps
+            var connectionMap = {};
+            
+            // First pass: collect all connections
+            for (var key in MAP_NODES) {
+                var node = MAP_NODES[key];
+                if (node.nextBlue && MAP_NODES[node.nextBlue]) {
+                    var endId = node.nextBlue;
+                    if (!connectionMap[endId]) connectionMap[endId] = [];
+                    connectionMap[endId].push({start: node, end: MAP_NODES[endId], color: blueColor, type: "blue"});
+                }
+                if (node.nextRed && MAP_NODES[node.nextRed]) {
+                    var endId = node.nextRed;
+                    if (!connectionMap[endId]) connectionMap[endId] = [];
+                    connectionMap[endId].push({start: node, end: MAP_NODES[endId], color: redColor, type: "red"});
+                }
+                if (node.nextYellow && MAP_NODES[node.nextYellow]) {
+                    var endId = node.nextYellow;
+                    if (!connectionMap[endId]) connectionMap[endId] = [];
+                    connectionMap[endId].push({start: node, end: MAP_NODES[endId], color: yellowColor, type: "yellow"});
+                }
+            }
+
+            // Draw connections with symmetric offset for overlapping paths
+            for (var endId in connectionMap) {
+                var connections = connectionMap[endId];
+                for (var i = 0; i < connections.length; i++) {
+                    var conn = connections[i];
+                    // Symmetric offset: evenly spaced around center line
+                    var offset = 0;
+                    if (connections.length > 1) {
+                        var spacing = 1; // Small spacing for minimal offset
+                        var centerIndex = (connections.length - 1) / 2;
+                        offset = (i - centerIndex) * spacing;
+                    }
+                    drawLine(svg, conn.start, conn.end, conn.color, conn.type, offset);
+                }
+            }
+
+            // Draw nodes (on top of lines)
+            for (var key in MAP_NODES) {
+                var node = MAP_NODES[key];
+                drawNode(svg, node, accentColor);
+            }
+            
+            // Draw ship at current node position (on top of everything)
+            var currentNode = MAP_NODES[currentNodeId];
+            if (currentNode) {
+                drawShip(svg, currentNode);
+            }
+
+            container.appendChild(svg);
+        }
+        
+        function drawShip(svg, node) {
+            if (!node.x || !node.y) return;
+            
+            // Remove old ship if it exists
+            var oldShip = svg.querySelector("#ship-group");
+            var oldGlow = svg.querySelector("#ship-glow");
+            if (oldShip) oldShip.remove();
+            if (oldGlow) oldGlow.remove();
+            
+            var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("id", "ship-group");
+            g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+            
+            // Ship hull (wooden boat bottom) - classic curved shape
+            var hull = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            hull.setAttribute("d", "M -7,3 Q -7,1 -5,0.5 L 5,0.5 Q 7,1 7,3 L 6.5,4 L -6.5,4 Z");
+            hull.setAttribute("fill", "#8B4513");
+            hull.setAttribute("stroke", "#654321");
+            hull.setAttribute("stroke-width", "0.4");
+            g.appendChild(hull);
+            
+            // Ship deck (top surface)
+            var deck = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            deck.setAttribute("d", "M -6,0.5 L 6,0.5 L 5.5,-0.5 L -5.5,-0.5 Z");
+            deck.setAttribute("fill", "#D2691E");
+            deck.setAttribute("stroke", "#8B4513");
+            deck.setAttribute("stroke-width", "0.3");
+            g.appendChild(deck);
+            
+            // Main mast (tall center mast)
+            var mast = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            mast.setAttribute("x1", "0");
+            mast.setAttribute("y1", "-0.5");
+            mast.setAttribute("x2", "0");
+            mast.setAttribute("y2", "-5.5");
+            mast.setAttribute("stroke", "#654321");
+            mast.setAttribute("stroke-width", "0.5");
+            mast.setAttribute("stroke-linecap", "round");
+            g.appendChild(mast);
+            
+            // Main sail (large square sail)
+            var sail = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            sail.setAttribute("d", "M 0,-1 L 3,-1 L 3,-4.5 L 0,-4.5 Z");
+            sail.setAttribute("fill", "#F5F5DC");
+            sail.setAttribute("stroke", "#DDD");
+            sail.setAttribute("stroke-width", "0.25");
+            g.appendChild(sail);
+            
+            // Sail details (cross pattern for old-style look)
+            var sailLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            sailLine1.setAttribute("x1", "0.5");
+            sailLine1.setAttribute("y1", "-1");
+            sailLine1.setAttribute("x2", "0.5");
+            sailLine1.setAttribute("y2", "-4.5");
+            sailLine1.setAttribute("stroke", "#888");
+            sailLine1.setAttribute("stroke-width", "0.2");
+            g.appendChild(sailLine1);
+            
+            var sailLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            sailLine2.setAttribute("x1", "1.5");
+            sailLine2.setAttribute("y1", "-1");
+            sailLine2.setAttribute("x2", "1.5");
+            sailLine2.setAttribute("y2", "-4.5");
+            sailLine2.setAttribute("stroke", "#888");
+            sailLine2.setAttribute("stroke-width", "0.2");
+            g.appendChild(sailLine2);
+            
+            var sailLine3 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            sailLine3.setAttribute("x1", "2.5");
+            sailLine3.setAttribute("y1", "-1");
+            sailLine3.setAttribute("x2", "2.5");
+            sailLine3.setAttribute("y2", "-4.5");
+            sailLine3.setAttribute("stroke", "#888");
+            sailLine3.setAttribute("stroke-width", "0.2");
+            g.appendChild(sailLine3);
+            
+            // Horizontal sail lines
+            var sailLineH1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            sailLineH1.setAttribute("x1", "0");
+            sailLineH1.setAttribute("y1", "-2.25");
+            sailLineH1.setAttribute("x2", "3");
+            sailLineH1.setAttribute("y2", "-2.25");
+            sailLineH1.setAttribute("stroke", "#888");
+            sailLineH1.setAttribute("stroke-width", "0.2");
+            g.appendChild(sailLineH1);
+            
+            // Flag at top of mast
+            var flag = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            flag.setAttribute("d", "M 0,-5.5 L 0,-6.2 L 2,-5.9 L 0,-5.7 Z");
+            flag.setAttribute("fill", "#64ffda");
+            flag.setAttribute("stroke", "#4dd0e1");
+            flag.setAttribute("stroke-width", "0.2");
+            g.appendChild(flag);
+            
+            // Gentle floating animation (subtle bobbing motion)
+            var floatAnim = document.createElementNS("http://www.w3.org/2000/svg", "animateTransform");
+            floatAnim.setAttribute("attributeName", "transform");
+            floatAnim.setAttribute("type", "translate");
+            floatAnim.setAttribute("values", "0,0;0,-0.6;0,0");
+            floatAnim.setAttribute("dur", "3s");
+            floatAnim.setAttribute("repeatCount", "indefinite");
+            floatAnim.setAttribute("additive", "sum");
+            g.appendChild(floatAnim);
+            
+            // Glow effect around ship (subtle)
+            var shipGlow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            shipGlow.setAttribute("id", "ship-glow");
+            shipGlow.setAttribute("cx", node.x);
+            shipGlow.setAttribute("cy", node.y);
+            shipGlow.setAttribute("r", "9");
+            shipGlow.setAttribute("fill", "none");
+            shipGlow.setAttribute("stroke", "#64ffda");
+            shipGlow.setAttribute("stroke-width", "0.6");
+            shipGlow.setAttribute("opacity", "0.3");
+            
+            var glowAnim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+            glowAnim.setAttribute("attributeName", "r");
+            glowAnim.setAttribute("values", "9;11;9");
+            glowAnim.setAttribute("dur", "2.5s");
+            glowAnim.setAttribute("repeatCount", "indefinite");
+            shipGlow.appendChild(glowAnim);
+            
+            svg.appendChild(shipGlow);
+            svg.appendChild(g);
+        }
+
+        function drawLine(svg, start, end, color, type, offset) {
+            if (!start || !end) return;
+            
+            // Get center coordinates - use the exact same properties as circles use (cx/cy = node.x/node.y)
+            // These MUST match the circle centers exactly
+            var startX = start.x;
+            var startY = start.y;
+            var endX = end.x;
+            var endY = end.y;
+            
+            // Verify coordinates exist and are numbers
+            if (typeof startX !== 'number' || typeof startY !== 'number' ||
+                typeof endX !== 'number' || typeof endY !== 'number') {
+                return;
+            }
+
+            offset = offset || 0;
+            
+            // Calculate direction vector from start center to end center
+            var dx = endX - startX;
+            var dy = endY - startY;
+            var length = Math.sqrt(dx * dx + dy * dy);
+            
+            if (length === 0) return;
+            
+            // Calculate unit direction vector
+            var ux = dx / length;
+            var uy = dy / length;
+            
+            // Calculate perpendicular unit vector (90 degrees rotated clockwise)
+            // This is used for offsetting parallel arrows symmetrically
+            var px = -uy;  // Perpendicular X
+            var py = ux;   // Perpendicular Y
+            
+            // Start point: exact center of start node + perpendicular offset
+            // This should match circle center (cx, cy) exactly when offset=0
+            var x1 = startX + offset * px;
+            var y1 = startY + offset * py;
+            
+            // End point: exact center of end node + perpendicular offset
+            // This should match circle center (cx, cy) exactly when offset=0
+            var x2 = endX + offset * px;
+            var y2 = endY + offset * py;
+            
+            // Calculate midpoint for arrow marker
+            var midX = (x1 + x2) / 2;
+            var midY = (y1 + y2) / 2;
+            
+            // Create a path from center to center with midpoint
+            // The circles drawn on top will naturally clip the visible portion
+            // Using a path with 3 points allows marker-mid to place arrow at center
+            var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            var pathData = "M " + x1 + "," + y1 + " L " + midX + "," + midY + " L " + x2 + "," + y2;
+            path.setAttribute("d", pathData);
+            path.setAttribute("stroke", color);
+            path.setAttribute("stroke-width", "0.8");
+            path.setAttribute("opacity", "0.75");
+            path.setAttribute("stroke-linecap", "round");
+            path.setAttribute("fill", "none");
+            
+            // Add arrow marker at the midpoint (center of arrow)
+            if (type === "blue") {
+                path.setAttribute("marker-mid", "url(#arrow-blue)");
+            } else if (type === "red") {
+                path.setAttribute("marker-mid", "url(#arrow-red)");
+            } else if (type === "yellow") {
+                path.setAttribute("marker-mid", "url(#arrow-yellow)");
+            }
+            
+            svg.appendChild(path);
+        }
+
+        function drawNode(svg, node, accentColor) {
+            if (!node.x || !node.y) return;
+            
+            var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            var isCurrent = (node.id === currentNodeId);
+            var isWin = node.type && node.type.startsWith('win');
+            
+            // Main node circle - larger sizes
+            var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", node.x);
+            circle.setAttribute("cy", node.y);
+            
+            if (isWin) {
+                circle.setAttribute("r", "7");
+                if (node.type === 'win_sailor') {
+                    circle.setAttribute("fill", "#2196F3");
+                } else if (node.type === 'win_pirate') {
+                    circle.setAttribute("fill", "#F44336");
+                } else if (node.type === 'win_cult') {
+                    circle.setAttribute("fill", "#FFEB3B");
+                }
+                circle.setAttribute("stroke", "#fff");
+                circle.setAttribute("stroke-width", "2");
+            } else {
+                circle.setAttribute("r", "5");
+                circle.setAttribute("fill", "#233554");
+                circle.setAttribute("stroke", "#8892b0");
+                circle.setAttribute("stroke-width", "1");
+            }
+            
+            g.appendChild(circle);
+            
+            // Action icon on node (for action nodes) - centered on the node
+            if (node.type && node.type !== 'none' && node.type !== 'start' && !isWin) {
+                var iconBg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                iconBg.setAttribute("cx", node.x);
+                iconBg.setAttribute("cy", node.y);
+                iconBg.setAttribute("r", "3.5");
+                iconBg.setAttribute("fill", "#0a192f");
+                iconBg.setAttribute("stroke", accentColor);
+                iconBg.setAttribute("stroke-width", "1");
+                g.appendChild(iconBg);
+                
+                var iconText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                iconText.setAttribute("x", node.x);
+                iconText.setAttribute("y", node.y + 1.5);
+                iconText.setAttribute("text-anchor", "middle");
+                iconText.setAttribute("font-size", "5");
+                iconText.setAttribute("fill", accentColor);
+                
+                var icon = "";
+                if (node.type === 'search') icon = "🔍";
+                else if (node.type === 'tongue') icon = "👅";
+                else if (node.type === 'whip') icon = "⛓️";
+                else if (node.type === 'cult') icon = "🐙";
+                
+                iconText.textContent = icon;
+                g.appendChild(iconText);
+            }
+            
+            // Win icon for victory nodes - thematic symbols
+            if (isWin) {
+                var winIcon = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                winIcon.setAttribute("x", node.x);
+                winIcon.setAttribute("y", node.y + 2);
+                winIcon.setAttribute("text-anchor", "middle");
+                winIcon.setAttribute("font-size", "8");
+                if (node.type === 'win_sailor') {
+                    winIcon.textContent = "⚓"; // Anchor - safe harbor for Sailors
+                } else if (node.type === 'win_pirate') {
+                    winIcon.textContent = "☠️"; // Skull and crossbones - pirate treasure
+                } else if (node.type === 'win_cult') {
+                    winIcon.textContent = "🐙"; // Kraken - the beast for Cult
+                } else {
+                    winIcon.textContent = "🏁";
+                }
+                g.appendChild(winIcon);
+            }
+            
+            // Node label - only show "Start"
+            if (node.label === "Start") {
+                var label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", node.x);
+                label.setAttribute("y", node.y + 11);
+                label.setAttribute("text-anchor", "middle");
+                label.setAttribute("font-size", "4");
+                label.setAttribute("fill", accentColor);
+                label.setAttribute("font-weight", "bold");
+                label.textContent = "Start";
+                g.appendChild(label);
+            }
+            
+            svg.appendChild(g);
+        }
+
+        function startRound() {
+            if (isGameEnded) return;
+            
+            var area = document.getElementById('action-area');
+            var buttonText = "Start Navigation Phase";
+            if (isFirstRound) {
+                var captainName = players[captainIndex] ? players[captainIndex].name : "Unknown";
+                buttonText = `Start Navigation Phase (First Captain: ${captainName})`;
+            }
+            area.innerHTML = `
+                <button class="action-btn" onclick="startNavigationPhase()">${buttonText}</button>
+            `;
+        }
+        
+        function startNavigationPhase() {
+            navPhaseStep = 0;
+            showNavModal();
+        }
+
+
+        // --- Navigation Phase ---
+        function showNavModal() {
+            var modal = document.getElementById('nav-modal');
+            var title = document.getElementById('nav-phase-title');
+            var instr = document.getElementById('nav-instruction');
+            var btn = document.getElementById('nav-action-btn');
+            var cardArea = document.getElementById('nav-cards-area');
+
+            modal.classList.remove('hidden');
+            cardArea.classList.add('hidden');
+            btn.classList.remove('hidden');
+
+            if (navPhaseStep === 0) {
+                title.innerText = "Step 1: Captain";
+                var captainName = players[captainIndex] ? players[captainIndex].name : "Unknown";
+                if (isFirstRound) {
+                    instr.innerText = `Pass device to ${captainName} (randomly selected first Captain).`;
+                } else {
+                    instr.innerText = `Pass device to the Captain.`;
+                }
+                btn.innerText = "I am Captain";
+                btn.onclick = function() { navStepCaptainDraw(); };
+            } else if (navPhaseStep === 1) {
+                title.innerText = "Step 2: Lieutenant";
+                instr.innerText = `Pass device to the Lieutenant.`;
+                btn.innerText = "I am Lieutenant";
+                btn.onclick = function() { navStepLieutDiscard(); };
+            } else if (navPhaseStep === 2) {
+                title.innerText = "Step 3: Navigator";
+                instr.innerText = `Pass device to the Navigator.`;
+                btn.innerText = "I am Navigator";
+                btn.onclick = function() { navStepNavigatorChoose(); };
+            }
+        }
+
+        function navStepCaptainDraw() {
+            currentHand = [drawCard(), drawCard()];
+            renderHand("Choose 1 card to KEEP (Pass to Box). The other is discarded.", function(keepIndex) {
+                var kept = currentHand[keepIndex];
+                var discarded = currentHand[1-keepIndex];
+                discardPile.push(discarded);
+                tempCards = [kept];
+                navPhaseStep = 1;
+                showNavModal();
+            });
+        }
+
+        function navStepLieutDiscard() {
+            currentHand = [drawCard(), drawCard()];
+            renderHand("Choose 1 card to KEEP (Pass to Box). The other is discarded.", function(keepIndex) {
+                var kept = currentHand[keepIndex];
+                var discarded = currentHand[1-keepIndex];
+                discardPile.push(discarded);
+                tempCards.push(kept);
+                navPhaseStep = 2;
+                showNavModal();
+            });
+        }
+
+        function navStepNavigatorChoose() {
+            currentHand = tempCards;
+            shuffleDeck(currentHand);
+            renderHand("Choose 1 card to PLAY.", function(playIndex) {
+                var played = currentHand[playIndex];
+                var discarded = currentHand[1-playIndex];
+                discardPile.push(discarded);
+                resolveNavigation(played);
+            });
+        }
+
+        function renderHand(text, callback) {
+            var cardArea = document.getElementById('nav-cards-area');
+            var container = document.getElementById('nav-card-selection');
+            var btn = document.getElementById('nav-action-btn');
+            
+            document.getElementById('nav-instruction').innerText = text;
+            btn.classList.add('hidden');
+            cardArea.classList.remove('hidden');
+            container.innerHTML = '';
+
+            currentHand.forEach(function(cardObj, index) {
+                var card = document.createElement('div');
+                var color = typeof cardObj === 'string' ? cardObj : cardObj.color;
+                card.className = `nav-card card-${color}`;
+                var displayText = color.toUpperCase();
+                if (typeof cardObj === 'object') {
+                    if (cardObj.type === 'drunk') {
+                        displayText += '\n🍺';
+                    } else if (cardObj.type === 'disarmed') {
+                        displayText += '\n🔫❌';
+                    }
+                }
+                card.innerText = displayText;
+                card.onclick = function() { callback(index); };
+                container.appendChild(card);
+            });
+        }
+
+        function drawCard() {
+            if (drawPile.length === 0) {
+                if (discardPile.length === 0) {
+                    // Reshuffle fallback: match the initial deck composition
+                    if (playerCount <= 6) {
+                        // Short Game: 5 yellow (regular), 5 blue (2 disarmed + 3 drunk), 9 red (4 regular + 5 drunk)
+                        for(var i=0; i<5; i++) discardPile.push({color: 'yellow', type: 'regular'});
+                        for(var i=0; i<2; i++) discardPile.push({color: 'blue', type: 'disarmed'});
+                        for(var i=0; i<3; i++) discardPile.push({color: 'blue', type: 'drunk'});
+                        for(var i=0; i<4; i++) discardPile.push({color: 'red', type: 'regular'});
+                        for(var i=0; i<5; i++) discardPile.push({color: 'red', type: 'drunk'});
+                    } else {
+                        // Standard Game: 6 yellow (regular), 6 blue (0 regular + 4 drunk + 2 disarmed), 11 red (6 regular + 5 drunk)
+                        for(var i=0; i<6; i++) discardPile.push({color: 'yellow', type: 'regular'});
+                        for(var i=0; i<4; i++) discardPile.push({color: 'blue', type: 'drunk'});
+                        for(var i=0; i<2; i++) discardPile.push({color: 'blue', type: 'disarmed'});
+                        for(var i=0; i<6; i++) discardPile.push({color: 'red', type: 'regular'});
+                        for(var i=0; i<5; i++) discardPile.push({color: 'red', type: 'drunk'});
+                    }
+                }
+                drawPile = discardPile.slice();
+                discardPile = [];
+                shuffleDeck(drawPile);
+                addLog("Deck reshuffled.");
+            }
+            return drawPile.pop();
+        }
+
+        function resolveNavigation(cardObj) {
+            document.getElementById('nav-modal').classList.add('hidden');
+            
+            // Handle both old string format and new object format for backwards compatibility
+            var color = typeof cardObj === 'string' ? cardObj : cardObj.color;
+            var cardType = typeof cardObj === 'object' ? cardObj.type : 'regular';
+            
+            var node = MAP_NODES[currentNodeId];
+            var nextId = null;
+            if (color === 'blue') nextId = node.nextBlue;
+            else if (color === 'red') nextId = node.nextRed;
+            else if (color === 'yellow') nextId = node.nextYellow;
+
+            if (nextId !== undefined && MAP_NODES[nextId]) {
+                var oldNodeId = currentNodeId;
+                var nextNode = MAP_NODES[nextId];
+                
+                // Show card reveal animation
+                showCardReveal(cardObj, color, function() {
+                    // After card reveal, animate ship movement
+                    animateShipMovement(oldNodeId, nextId, color, cardType, nextNode);
+                });
+            } else {
+                alert("Error: No path for " + color);
+                finishTurn();
+            }
+        }
+        
+        function showCardReveal(cardObj, color, callback) {
+            var modal = document.getElementById('card-reveal-modal');
+            var cardElement = document.getElementById('card-reveal-card');
+            var textElement = document.getElementById('card-reveal-text');
+            var continueBtn = document.getElementById('card-reveal-continue-btn');
+            
+            // Set card appearance
+            cardElement.className = '';
+            cardElement.classList.add('card-' + color);
+            cardElement.classList.add('card-reveal-animation');
+            
+            var displayText = color.toUpperCase();
+            if (typeof cardObj === 'object') {
+                if (cardObj.type === 'drunk') {
+                    displayText += '\n🍺';
+                } else if (cardObj.type === 'disarmed') {
+                    displayText += '\n🔫❌';
+                }
+            }
+            cardElement.innerText = displayText;
+            
+            // Set direction text
+            var directionText = '';
+            if (color === 'blue') directionText = 'Moving EAST (Blue)';
+            else if (color === 'red') directionText = 'Moving WEST (Red)';
+            else if (color === 'yellow') directionText = 'Moving NORTH (Yellow)';
+            textElement.innerText = directionText;
+            
+            // Set up button click handler
+            continueBtn.onclick = function() {
+                modal.classList.add('hidden');
+                setTimeout(callback, 300);
+            };
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function animateShipMovement(oldNodeId, nextId, color, cardType, nextNode) {
+            var oldNode = MAP_NODES[oldNodeId];
+            var newNode = MAP_NODES[nextId];
+            
+            if (!oldNode || !newNode) {
+                // Fallback to immediate update
+                currentNodeId = nextId;
+                renderMap();
+                continueAfterMovement(color, cardType, nextNode);
+                return;
+            }
+            
+            // Update current node ID
+            currentNodeId = nextId;
+            
+            // Get SVG elements
+            var svg = document.querySelector('#map-visuals svg');
+            if (!svg) {
+                renderMap();
+                continueAfterMovement(color, cardType, nextNode);
+                return;
+            }
+            
+            var shipGroup = svg.querySelector('#ship-group');
+            var shipGlow = svg.querySelector('#ship-glow');
+            
+            if (shipGroup && shipGlow) {
+                var startX = oldNode.x;
+                var startY = oldNode.y;
+                var endX = newNode.x;
+                var endY = newNode.y;
+                
+                // Update log
+                addLog(`Ship moves ${color.toUpperCase()} to ${nextNode.label}.`);
+                
+                // Set starting position
+                shipGroup.setAttribute("transform", `translate(${startX}, ${startY})`);
+                shipGlow.setAttribute("cx", startX);
+                shipGlow.setAttribute("cy", startY);
+                
+                // Use requestAnimationFrame for smooth JavaScript-based animation
+                var startTime = null;
+                var duration = 1500; // 1.5 seconds
+                
+                function animate(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    var elapsed = currentTime - startTime;
+                    var progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function for smooth motion
+                    var easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
+                    
+                    var currentX = startX + (endX - startX) * easeProgress;
+                    var currentY = startY + (endY - startY) * easeProgress;
+                    
+                    shipGroup.setAttribute("transform", `translate(${currentX}, ${currentY})`);
+                    shipGlow.setAttribute("cx", currentX);
+                    shipGlow.setAttribute("cy", currentY);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Animation complete
+                        continueAfterMovement(color, cardType, nextNode);
+                    }
+                }
+                
+                // Start animation
+                requestAnimationFrame(animate);
+            } else {
+                // Fallback: re-render map
+                renderMap();
+                continueAfterMovement(color, cardType, nextNode);
+            }
+        }
+        
+        function continueAfterMovement(color, cardType, nextNode) {
+                
+                if (nextNode.type.startsWith('win')) {
+                    endGame(nextNode.type, nextNode.label);
+                    return;
+                }
+
+                // Handle Drunk card: Change captain (must be acknowledged before continuing)
+                if (cardType === 'drunk') {
+                    handleDrunkCard(function() {
+                        // After drunk card is acknowledged, continue with normal flow
+                        if (color === 'yellow') {
+                            handleCultRitual(function() {
+                                // After ritual is resolved, continue with map action or finish turn
+                if (nextNode.type !== 'none') {
+                    handleMapAction(nextNode.type);
+                } else {
+                    finishTurn();
+                                }
+                            });
+                        } else {
+                            // For blue/red cards, proceed normally
+                            if (nextNode.type !== 'none') {
+                                handleMapAction(nextNode.type);
+                            } else {
+                                finishTurn();
+                            }
+                        }
+                    });
+                } else if (cardType === 'disarmed') {
+                    // Handle Disarmed card: Remove guns from players
+                    handleDisarmedCard(function() {
+                        // After disarmed card is resolved, continue with normal flow
+                        if (nextNode.type !== 'none') {
+                            handleMapAction(nextNode.type);
+                        } else {
+                            finishTurn();
+                        }
+                    });
+                } else if (color === 'yellow') {
+                    // If yellow card was played, draw from Cult Ritual Deck
+                    handleCultRitual(function() {
+                        // After ritual is resolved, continue with map action or finish turn
+                if (nextNode.type !== 'none') {
+                    handleMapAction(nextNode.type);
+                } else {
+                    finishTurn();
+                        }
+                    });
+                } else {
+                    // For blue/red cards, proceed normally
+                    if (nextNode.type !== 'none') {
+                        handleMapAction(nextNode.type);
+                    } else {
+                        finishTurn();
+                    }
+                }
+        }
+        
+        function handleDrunkCard(callback) {
+            // Drunk card changes the captain
+            var oldCaptain = players[captainIndex];
+            var oldCaptainName = oldCaptain ? oldCaptain.name : 'Unknown';
+            
+            // Show announcement modal
+            var modal = document.getElementById('action-modal');
+            var title = document.getElementById('action-modal-title');
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            modal.classList.remove('hidden');
+            title.innerText = "🍺 DRUNK CARD PLAYED!";
+            title.style.color = "#ff9800";
+            content.innerHTML = "<p style='font-size:1.1rem; font-weight:bold; color:#ff9800; margin-bottom:10px;'>CAPTAIN MUST CHANGE</p>" +
+                "<p>The current Captain has been incapacitated by the Drunk card.</p>" +
+                "<p style='font-size:0.9rem; color:#8892b0; margin-top:10px;'><strong>Previous Captain:</strong> " + oldCaptainName + "</p>" +
+                "<p style='font-size:0.9rem; color:#8892b0;'><strong>Action Required:</strong> Players must choose a new Captain (handled off-app).</p>";
+            actions.innerHTML = "";
+            
+            var b = document.createElement('button');
+            b.className = 'action-btn';
+            b.innerText = "Continue";
+            b.onclick = function() {
+                addLog(`🍺 DRUNK CARD PLAYED! Captain must be changed.`);
+                addLog(`(Off-app: Players choose new Captain. Previous Captain: ${oldCaptainName})`);
+                closeActionModal();
+                if (callback) callback();
+            };
+            actions.appendChild(b);
+        }
+        
+        function handleDisarmedCard(callback) {
+            // Disarmed card removes 1 gun from the Navigator
+            var modal = document.getElementById('action-modal');
+            var title = document.getElementById('action-modal-title');
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            modal.classList.remove('hidden');
+            title.innerText = "🔫❌ DISARMED CARD PLAYED!";
+            title.style.color = "#f44336";
+            content.innerHTML = "<p style='font-size:1.1rem; font-weight:bold; color:#f44336; margin-bottom:10px;'>NAVIGATOR DISARMED</p>" +
+                "<p>The Navigator must surrender 1 gun.</p>" +
+                "<p style='font-size:0.9rem; color:#8892b0; margin-top:10px;'>Select the Navigator to remove 1 gun:</p>";
+            actions.innerHTML = "";
+            
+            // Show all living players who could be the navigator
+            var livingPlayers = [];
+            players.forEach(function(p, i) {
+                if (!p.eliminated) {
+                    livingPlayers.push({index: i, player: p});
+                }
+            });
+            
+            if (livingPlayers.length === 0) {
+                content.innerHTML += "<p style='color:#8892b0; margin-top:10px;'>No players available.</p>";
+                var b = document.createElement('button');
+                b.className = 'action-btn';
+                b.innerText = "Continue";
+                b.onclick = function() {
+                    addLog(`🔫❌ DISARMED CARD PLAYED! No navigator available.`);
+                    closeActionModal();
+                    if (callback) callback();
+                };
+                actions.appendChild(b);
+            } else {
+                livingPlayers.forEach(function(e) {
+                    var b = document.createElement('button');
+                    b.className = 'secondary-btn';
+                    b.style.margin = '5px';
+                    b.style.width = 'auto';
+                    b.innerText = "Navigator: " + e.player.name + " (Has " + e.player.guns + " guns)";
+                    b.onclick = function() {
+                        if (e.player.guns > 0) {
+                            e.player.guns = Math.max(0, e.player.guns - 1);
+                            addLog(`🔫❌ DISARMED: Navigator ${e.player.name} lost 1 gun. (Now has ${e.player.guns} guns)`);
+                            alert(`🔫❌ DISARMED!\n\nNavigator ${e.player.name} lost 1 gun.\nRemaining guns: ${e.player.guns}`);
+                        } else {
+                            addLog(`🔫❌ DISARMED: Navigator ${e.player.name} had no guns to remove.`);
+                            alert(`🔫❌ DISARMED!\n\nNavigator ${e.player.name} had no guns to remove.`);
+                        }
+                        closeActionModal();
+                        if (callback) callback();
+                    };
+                    actions.appendChild(b);
+                });
+            }
+        }
+        
+        function endGame(type, label) {
+             isGameEnded = true;
+             var msg = "";
+             var color = "";
+             
+             if (type === 'win_sailor') {
+                 msg = "SAILORS WIN! The ship has reached Bluewater Bay.";
+                 color = "var(--sailor-color)";
+             } else if (type === 'win_pirate') {
+                 msg = "PIRATES WIN! The ship has reached Crimson Cove.";
+                 color = "var(--pirate-color)";
+             } else if (type === 'win_cult') {
+                 msg = "CULT VICTORY! The Kraken has been fed!";
+                 color = "var(--cult-color)";
+             }
+             
+             var modal = document.getElementById('end-game-modal');
+             document.getElementById('end-game-message').innerText = msg;
+             document.getElementById('end-game-title').style.color = color;
+             modal.classList.remove('hidden');
+        }
+
+        // --- Cult Ritual System ---
+        function handleCultRitual(callback) {
+            if (isGameEnded) {
+                if (callback) callback();
+                return;
+            }
+            
+            // Draw from Cult Ritual Deck
+            if (cultRitualDeck.length === 0) {
+                // Reshuffle if empty
+                if (cultRitualDiscard.length > 0) {
+                    cultRitualDeck = cultRitualDiscard.slice();
+                    cultRitualDiscard = [];
+                    shuffleDeck(cultRitualDeck);
+                    addLog("Cult Ritual Deck reshuffled.");
+                } else {
+                    // Reinitialize if both are empty
+                    for(var i=0; i<3; i++) cultRitualDeck.push('conversion');
+                    cultRitualDeck.push('guns_stash');
+                    cultRitualDeck.push('cabin_search');
+                    shuffleDeck(cultRitualDeck);
+                }
+            }
+            
+            var ritualCard = cultRitualDeck.pop();
+            cultRitualDiscard.push(ritualCard);
+            
+            var modal = document.getElementById('action-modal');
+            var title = document.getElementById('action-modal-title');
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            modal.classList.remove('hidden');
+            title.innerText = "🐙 Cult Ritual Triggered!";
+            title.style.color = "var(--cult-color)";
+            content.innerHTML = "";
+            actions.innerHTML = "";
+            
+            if (ritualCard === 'conversion') {
+                // Conversion to Cult - 60% chance
+                content.innerHTML = "<p><strong>Conversion to Cult</strong></p>" +
+                    "<p>Yellow card triggered a Cult Ritual! The Cult Leader may attempt to convert a player.</p>" +
+                    "<p style='font-size:0.9rem; color:#8892b0;'><strong>Night Phase Instructions:</strong></p>" +
+                    "<ol style='text-align:left; font-size:0.85rem; color:#8892b0;'>" +
+                    "<li>Everyone, close your eyes.</li>" +
+                    "<li>Cult Leader, open your eyes.</li>" +
+                    "<li>Cult Leader silently touches a player to recruit.</li>" +
+                    "<li>New Cultist, open your eyes and recognize your Leader.</li>" +
+                    "<li>Cult Leader and Cultist, close your eyes.</li>" +
+                    "<li>Everyone, open your eyes.</li>" +
+                    "</ol>" +
+                    "<p style='font-size:0.9rem; color:#ff6666;'><strong>Note:</strong> Players who have been Cabin Searched cannot be converted (they are safe from Cult).</p>" +
+                    "<p style='font-size:0.85rem; color:#8892b0; font-style:italic; margin-top:10px;'>Cult Leader: Handle conversion outside the app (pass phone to Cult Leader).</p>";
+                
+                var b = document.createElement('button');
+                b.className = 'action-btn';
+                b.style.marginTop = '15px';
+                b.innerText = "Continue";
+                b.onclick = function() {
+                    addLog("Cult Ritual: Conversion ritual completed (handled outside app).");
+                    closeActionModal();
+                    if (callback) callback();
+                };
+                actions.appendChild(b);
+                
+            } else if (ritualCard === 'guns_stash') {
+                // Cult's Guns Stash
+                content.innerHTML = "<p><strong>Cult's Guns Stash</strong></p>" +
+                    "<p>The Cult Leader receives guns from the stash.</p>" +
+                    "<p style='font-size:0.9rem; color:#8892b0;'>Cult Leader: You may distribute guns to Cult members (handled outside app).</p>";
+                
+                var cultLeader = players.find(function(p) { return p.role === 'Cult Leader'; });
+                if (cultLeader) {
+                    cultLeader.guns += 3;
+                    addLog(`Cult Ritual: Cult Leader received 3 guns from stash. (Now has ${cultLeader.guns} guns)`);
+                }
+                
+                var b = document.createElement('button');
+                b.className = 'action-btn';
+                b.innerText = "Continue";
+                b.onclick = function() {
+                    closeActionModal();
+                    if (callback) callback();
+                };
+                actions.appendChild(b);
+                
+            } else if (ritualCard === 'cabin_search') {
+                // Cult Cabin Search
+                content.innerHTML = "<p><strong>Cult Cabin Search</strong></p>" +
+                    "<p>The Cult Leader secretly learns the factions of the current navigation team.</p>" +
+                    "<p style='font-size:0.9rem; color:#8892b0;'>Night Phase: Everyone closes eyes. Cult Leader opens eyes. Captain, Lieutenant, and Navigator reveal their faction chips (30 seconds). Hide chips. Cult Leader closes eyes. Everyone opens eyes.</p>";
+                
+                var b = document.createElement('button');
+                b.className = 'action-btn';
+                b.style.marginTop = '15px';
+                b.innerText = "Continue";
+                b.onclick = function() {
+                    addLog("Cult Ritual: Cabin search completed (handled outside app).");
+                    closeActionModal();
+                    if (callback) callback();
+                };
+                actions.appendChild(b);
+            }
+        }
+
+        // --- Map Actions ---
+        function handleMapAction(type) {
+            if (isGameEnded) return;
+            var modal = document.getElementById('action-modal');
+            var title = document.getElementById('action-modal-title');
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            modal.classList.remove('hidden');
+            title.innerText = "Action: " + type.toUpperCase();
+            content.innerHTML = "";
+            actions.innerHTML = "";
+
+            if (type === 'search') {
+                content.innerHTML = "Captain must search a player's cabin to check their loyalty.";
+                players.forEach(function(p, i) {
+                    if (!p.eliminated) {
+                        var b = document.createElement('button');
+                        b.className = 'secondary-btn';
+                        b.style.margin = '5px';
+                        b.innerText = "Search " + p.name;
+                        b.onclick = function() { performCabinSearch(i); };
+                        actions.appendChild(b);
+                    }
+                });
+
+            } else if (type === 'tongue') {
+                content.innerHTML = "Captain must choose a player to Cut Tongue (cannot be Captain again).";
+                players.forEach(function(p, i) {
+                    if (!p.isSilenced && !p.eliminated) {
+                        var b = document.createElement('button');
+                        b.className = 'secondary-btn';
+                        b.style.margin = '5px';
+                        b.innerText = "Cut " + p.name;
+                        b.onclick = function() { 
+                             if(confirm("Cut " + p.name + "'s tongue? Irreversible.")) performTongueCut(i); 
+                        };
+                        actions.appendChild(b);
+                    }
+                });
+
+            } else if (type === 'whip') {
+                content.innerHTML = "Captain must Flog a player (Reveal loyalty clue).";
+                players.forEach(function(p, i) {
+                    if (!p.eliminated) {
+                        var b = document.createElement('button');
+                        b.className = 'secondary-btn';
+                        b.style.margin = '5px';
+                        b.innerText = "Flog " + p.name;
+                        b.onclick = function() { performFlogging(i); };
+                        actions.appendChild(b);
+                    }
+                });
+            } else if (type === 'cult') {
+                // Feed the Kraken - Sacrifice Mechanic
+                title.innerText = "🐙 FEED THE KRAKEN";
+                title.style.color = "var(--cult-color)";
+                content.innerHTML = "<p style='font-size:1.1rem; font-weight:bold; color:#ff6666; margin-bottom:10px;'>SACRIFICE RITUAL</p>" +
+                    "<p>The Captain must choose one player to throw overboard.</p>" +
+                    "<p style='font-size:0.9rem; color:#8892b0; margin-top:10px;'><strong>Critical Rules:</strong></p>" +
+                    "<ul style='text-align:left; font-size:0.85rem; color:#8892b0; margin:10px 0; padding-left:20px;'>" +
+                    "<li>If <strong style='color:#FFEB3B'>Cult Leader</strong> is sacrificed → <strong style='color:#FFEB3B'>CULT WINS IMMEDIATELY</strong></li>" +
+                    "<li>If <strong style='color:#2196F3'>Sailor</strong> or <strong style='color:#F44336'>Pirate</strong> is sacrificed → Player is eliminated</li>" +
+                    "</ul>" +
+                    "<p style='font-size:0.85rem; color:#ff6666; font-style:italic;'>The Captain has absolute power. No vote. Choose carefully.</p>";
+                
+                // Show all living players (not eliminated)
+                var livingPlayers = [];
+                players.forEach(function(p, i) {
+                    if (!p.eliminated) {
+                        livingPlayers.push({index: i, player: p});
+                    }
+                });
+                
+                if (livingPlayers.length === 0) {
+                    content.innerHTML += "<p style='color:#ff6666; margin-top:10px;'>No players available to sacrifice!</p>";
+                } else {
+                    livingPlayers.forEach(function(e) {
+                        var b = document.createElement('button');
+                        b.className = 'secondary-btn';
+                        b.style.margin = '5px';
+                        b.style.width = 'auto';
+                        b.innerText = "Sacrifice " + e.player.name;
+                        b.onclick = function() {
+                            var confirmMsg = "Throw " + e.player.name + " overboard to the Kraken?\n\n";
+                            if (e.player.role === 'Cult Leader') {
+                                confirmMsg += "⚠️ WARNING: This is the Cult Leader! The Cult will win immediately!";
+                            } else {
+                                confirmMsg += "This player will be eliminated from the game.";
+                            }
+                            
+                            if (confirm(confirmMsg)) {
+                                performSacrifice(e.index);
+                            }
+                        };
+                        actions.appendChild(b);
+                    });
+                }
+            }
+        }
+
+        function performCabinSearch(targetIndex) {
+            var p = players[targetIndex];
+            var faction = (p.role === 'Cult Leader' || p.role === 'Cultist' || p.isCultist) ? 'Cult' : p.role;
+            p.safeFromCult = true; 
+            
+            // Show search result in styled modal
+            var modal = document.getElementById('search-result-modal');
+            var content = document.getElementById('search-result-content');
+            
+            // Determine faction color and icon
+            var factionColor = '';
+            var factionIcon = '';
+            var factionName = '';
+            
+            if (faction === 'Sailor') {
+                factionColor = '#2196F3';
+                factionIcon = '⚓';
+                factionName = 'Sailor';
+            } else if (faction === 'Pirate') {
+                factionColor = '#F44336';
+                factionIcon = '🏴‍☠️';
+                factionName = 'Pirate';
+            } else if (faction === 'Cult') {
+                factionColor = '#FFEB3B';
+                factionIcon = '🐙';
+                factionName = 'Cult';
+            }
+            
+            content.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">${factionIcon}</div>
+                    <p style="font-size: 1.1rem; color: #8892b0; margin-bottom: 10px;">Result for</p>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-primary); margin-bottom: 20px;">${p.name}</p>
+                    <div style="padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; border: 2px solid ${factionColor};">
+                        <p style="font-size: 0.9rem; color: #8892b0; margin-bottom: 8px;">They belong to the</p>
+                        <p style="font-size: 1.3rem; font-weight: bold; color: ${factionColor}; margin: 0;">${factionName} Faction</p>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #64ffda; margin-top: 15px; font-style: italic;">✓ Safe from Cult conversion</p>
+                </div>
+            `;
+            
+            var closeBtn = document.getElementById('search-result-close-btn');
+            closeBtn.onclick = function() {
+                modal.classList.add('hidden');
+                closeActionModal();
+                finishTurn();
+            };
+            
+            modal.classList.remove('hidden');
+            addLog(`Captain searched ${p.name}'s cabin. (Safe from Cult)`);
+        }
+
+        function performTongueCut(targetIndex) {
+            players[targetIndex].isSilenced = true;
+            blockedCaptainId = targetIndex; 
+            addLog(`Captain cut ${players[targetIndex].name}'s tongue.`);
+            closeActionModal();
+            finishTurn();
+        }
+
+        function performFlogging(targetIndex) {
+            var p = players[targetIndex];
+            p.safeFromCult = true; 
+            
+            var trueFaction = (p.role === 'Cult Leader' || p.role === 'Cultist' || p.isCultist) ? 'Cult' : p.role;
+            var options = ['Sailor', 'Pirate', 'Cult'];
+            var falseFactions = options.filter(function(f) { return f !== trueFaction; });
+            var clue = falseFactions[Math.floor(Math.random() * falseFactions.length)];
+            
+            alert(`Public Flogging of ${p.name} reveals:\nThey are NOT ${clue}.`);
+            addLog(`${p.name} was flogged. Revealed: NOT ${clue}. (Safe from Cult)`);
+            closeActionModal();
+            finishTurn();
+        }
+        
+        function performSacrifice(targetIndex) {
+            var p = players[targetIndex];
+            
+            // Check if Cult Leader is being sacrificed
+            if (p.role === 'Cult Leader') {
+                // Cult Leader sacrificed - Cult wins immediately!
+                addLog(`🐙 FEED THE KRAKEN: ${p.name} (Cult Leader) was sacrificed!`);
+                addLog(`CULT VICTORY! The Cult Leader's sacrifice has awakened the Kraken!`);
+                closeActionModal();
+                endGame('win_cult', 'The Kraken');
+                return;
+            }
+            
+            // Regular player sacrificed - eliminate them
+            p.eliminated = true;
+            addLog(`🐙 FEED THE KRAKEN: ${p.name} was thrown overboard and eliminated from the game.`);
+            
+            // Check if game should continue (at least one non-eliminated player per faction should remain)
+            var livingSailors = players.filter(function(pl) { return pl.role === 'Sailor' && !pl.eliminated; }).length;
+            var livingPirates = players.filter(function(pl) { return pl.role === 'Pirate' && !pl.eliminated; }).length;
+            var livingCult = players.filter(function(pl) { return (pl.role === 'Cult Leader' || pl.isCultist) && !pl.eliminated; }).length;
+            
+            // If all of one faction are eliminated, that faction can't win (but game continues)
+            if (livingSailors === 0) {
+                addLog("All Sailors have been eliminated!");
+            }
+            if (livingPirates === 0) {
+                addLog("All Pirates have been eliminated!");
+            }
+            if (livingCult === 0) {
+                addLog("All Cult members have been eliminated!");
+            }
+            
+            closeActionModal();
+            finishTurn();
+        }
+        
+        // --- Cult Rituals ---
+        function setupCultConversion() {
+            var cultLeader = players.find(function(p) { return p.role === 'Cult Leader'; });
+            if (!cultLeader) {
+                alert("Error: No Cult Leader found.");
+                return;
+            }
+            
+            alert(`Pass device to Cult Leader (${cultLeader.name}).`);
+            
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            content.innerHTML = "<p>Cult Leader: Select a player to convert. (Cannot choose searched/flogged players)</p>";
+
+            actions.innerHTML = "";
+            
+            players.forEach(function(p, i) {
+                if (p.role !== 'Cult Leader' && !p.isCultist && p.role !== 'Cultist' && !p.safeFromCult) {
+                    var b = document.createElement('button');
+                    b.className = 'secondary-btn';
+                    b.style.margin = '5px';
+                    b.innerText = "Convert " + p.name;
+                    b.onclick = function() { 
+                         if(confirm("Convert " + p.name + "?")) {
+                             p.isCultist = true;
+                             alert(`You have converted ${p.name}.\n(Secretly notify them or tap them as per house rules.)`);
+                             addLog("Cult Ritual: Conversion performed.");
+                             closeActionModal();
+                             finishTurn();
+                         }
+                    };
+                    actions.appendChild(b);
+                }
+            });
+        }
+
+        function setupGunStash() {
+             var cultLeader = players.find(function(p) { return p.role === 'Cult Leader'; });
+             if (!cultLeader) return;
+             
+             alert(`Pass device to Cult Leader (${cultLeader.name}).`);
+             
+             gunStashCount = 0;
+             renderGunStashUI();
+        }
+
+        function renderGunStashUI() {
+            var content = document.getElementById('action-modal-content');
+            var actions = document.getElementById('action-modal-actions');
+            
+            content.innerHTML = `<p>Cult Leader: Distribute 3 guns (${3 - gunStashCount} remaining).</p>`;
+            actions.innerHTML = "";
+            
+            if (gunStashCount >= 3) {
+                var finishBtn = document.createElement('button');
+                finishBtn.className = 'action-btn';
+                finishBtn.innerText = "Finish Distribution";
+                finishBtn.onclick = function() {
+                    addLog("Cult Ritual: Guns distributed.");
+                    closeActionModal();
+                    finishTurn();
+                };
+                actions.appendChild(finishBtn);
+                return;
+            }
+             
+             players.forEach(function(p, i) {
+                 var b = document.createElement('button');
+                 b.className = 'secondary-btn';
+                 b.style.margin = '5px';
+                 b.innerText = "Give Gun to " + p.name + ` (Has ${p.guns})`;
+                 b.onclick = function() { 
+                     p.guns++;
+                     gunStashCount++;
+                     renderGunStashUI();
+                 };
+                 actions.appendChild(b);
+             });
+        }
+        
+        function getFaction(p) {
+            if (p.role === 'Cult Leader' || p.role === 'Cultist' || p.isCultist) return 'Cult';
+            return p.role;
+        }
+
+        function closeActionModal() {
+            document.getElementById('action-modal').classList.add('hidden');
+        }
+
+        function finishTurn() {
+            if(isGameEnded) return;
+            if (isFirstRound) {
+                isFirstRound = false;
+            }
+            startRound();
+        }
+
+        function showLog() {
+            var logDiv = document.getElementById('log-content');
+            logDiv.innerHTML = gameLog.map(function(l) { return `<div class="log-entry">${l}</div>`; }).join('');
+            document.getElementById('log-modal').classList.remove('hidden');
+        }
+        
+        function showManageModal() {
+            var container = document.getElementById('manage-content');
+            container.innerHTML = '';
+            
+            players.forEach(function(p, i) {
+                var div = document.createElement('div');
+                div.style.borderBottom = '1px solid #333';
+                div.style.padding = '10px 0';
+                div.style.textAlign = 'left';
+                
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>${p.name}</strong>
+                        <span>
+                            <button class="secondary-btn" style="width:30px; padding:2px;" onclick="adjustGun(${i}, -1)">-</button>
+                            🔫 ${p.guns}
+                            <button class="secondary-btn" style="width:30px; padding:2px;" onclick="adjustGun(${i}, 1)">+</button>
+                        </span>
+                    </div>
+                    <div style="margin-top:5px;">
+                        <label><input type="checkbox" ${p.isSilenced ? 'checked' : ''} onchange="toggleSilence(${i})"> Tongue Cut (Silenced)</label>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('manage-modal').classList.remove('hidden');
+        }
+
+        function adjustGun(index, delta) {
+            players[index].guns = Math.max(0, players[index].guns + delta);
+            showManageModal(); // Re-render
+        }
+
+        function toggleSilence(index) {
+            players[index].isSilenced = !players[index].isSilenced;
+            if (players[index].isSilenced) {
+                blockedCaptainId = index;
+            } else if (blockedCaptainId === index) {
+                blockedCaptainId = -1;
+            }
+            showManageModal();
+        }
+
+        function addLog(msg) {
+            var d = new Date();
+            var time = d.getHours() + ":" + (d.getMinutes()<10?'0':'') + d.getMinutes();
+            gameLog.unshift(`[${time}] ${msg}`);
+        }
+
+        function shuffleDeck(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+</script>
+</body>
+</html>

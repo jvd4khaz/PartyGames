@@ -1,0 +1,3212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blood on the Clocktower - Storyteller App</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #b71c1c;
+            --townsfolk-color: #0277bd;
+            --outsider-color: #1976d2;
+            --minion-color: #e65100;
+            --demon-color: #d50000;
+            --good-color: #4CAF50;
+            --evil-color: #F44336;
+            --btn-color: #b71c1c;
+            --btn-text: #ffffff;
+            --border-radius: 8px;
+            --night-bg: #1a1a2e;
+            --day-bg: #16213e;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .player-select-btn {
+            background: linear-gradient(135deg, rgba(183, 28, 28, 0.2) 0%, rgba(183, 28, 28, 0.1) 100%);
+            color: var(--accent-color);
+            border: 3px solid var(--accent-color);
+            padding: 18px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin: 12px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(183, 28, 28, 0.2);
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-select-btn:hover {
+            background: linear-gradient(135deg, rgba(183, 28, 28, 0.3) 0%, rgba(183, 28, 28, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(183, 28, 28, 0.4);
+        }
+        .player-select-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(183, 28, 28, 0.3);
+        }
+        .player-select-btn.dead {
+            opacity: 0.5;
+            border-color: #666;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Role Card */
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            margin-bottom: 10px; 
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .role-townsfolk { 
+            color: var(--townsfolk-color); 
+            text-shadow: 0 0 10px rgba(2, 119, 189, 0.5);
+        }
+        .role-outsider { 
+            color: var(--outsider-color); 
+            text-shadow: 0 0 10px rgba(25, 118, 210, 0.5);
+        }
+        .role-minion { 
+            color: var(--minion-color); 
+            text-shadow: 0 0 10px rgba(230, 81, 0, 0.5);
+        }
+        .role-demon { 
+            color: var(--demon-color); 
+            text-shadow: 0 0 10px rgba(213, 0, 0, 0.5);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Game Status */
+        .game-status {
+            display: none; /* Hidden - redundant info shown in day phase stat cards */
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .status-item {
+            text-align: center;
+        }
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Phase Display */
+        .phase-display {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .phase-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .phase-night {
+            background: var(--night-bg);
+            border: 2px solid #2a2a3e;
+        }
+        .phase-day {
+            background: var(--day-bg);
+            border: 2px solid #1e3a5f;
+        }
+
+        /* Grimoire View */
+        .grimoire-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .grimoire-token {
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #444;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .grimoire-token.dead {
+            opacity: 0.5;
+            border-color: #666;
+        }
+        .grimoire-token.townsfolk { border-left: 4px solid var(--townsfolk-color); }
+        .grimoire-token.outsider { border-left: 4px solid var(--outsider-color); }
+        .grimoire-token.minion { border-left: 4px solid var(--minion-color); }
+        .grimoire-token.demon { border-left: 4px solid var(--demon-color); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        /* Character Ability Info */
+        .ability-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        /* Log */
+        .log-entry {
+            font-size: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid #233554;
+            padding: 5px 0;
+            color: #8892b0;
+        }
+
+        /* Saved Players */
+        .saved-list-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .saved-list-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Cheat Sheet Styles */
+        .cheat-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+        .cheat-sheet-card {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+        .cs-icon { font-size: 2rem; margin-bottom: 5px; }
+        .cs-name { font-weight: bold; margin-bottom: 5px; color: var(--text-primary); font-size: 0.9rem; }
+        .cs-rebus { font-size: 0.75rem; color: #aaa; line-height: 1.3; }
+        
+        .role-townsfolk .cs-name { color: var(--townsfolk-color); }
+        .role-outsider .cs-name { color: var(--outsider-color); }
+        .role-minion .cs-name { color: var(--minion-color); }
+        .role-demon .cs-name { color: var(--demon-color); }
+
+        @media print {
+            body { background: white; color: black; }
+            .container, .modal-overlay { 
+                width: 100%; max-width: 100%; position: static; 
+                background: white; color: black; box-shadow: none; border: none;
+                display: block !important;
+                padding: 0; margin: 0;
+            }
+            /* Hide everything except the cheat sheet content */
+            body > * { display: none; }
+            #cheat-sheet-modal { display: block !important; }
+            
+            /* Hide buttons in cheat sheet */
+            .action-btn, .secondary-btn, #cheat-sheet-close-btn, #cheat-sheet-print-btn { display: none !important; }
+            
+            /* Grid adjustments for print */
+            .cheat-sheet-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                page-break-inside: auto;
+            }
+            .cheat-sheet-card {
+                border: 1px solid #ccc;
+                color: black;
+                background: transparent !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .cs-name { color: black !important; }
+            .cs-rebus { color: #333 !important; }
+            
+            /* Keep colored borders or markers if needed, or just black text */
+            .role-townsfolk .cs-name { color: #0277bd !important; }
+            .role-outsider .cs-name { color: #1976d2 !important; }
+            .role-minion .cs-name { color: #e65100 !important; }
+            .role-demon .cs-name { color: #d50000 !important; }
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 12px 32px rgba(156, 39, 176, 0.6), inset 0 2px 4px rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 12px 40px rgba(156, 39, 176, 0.9), inset 0 2px 4px rgba(255,255,255,0.2); }
+        }
+        .container, .modal-overlay > .container { 
+            animation: fadeIn 0.3s ease-out; 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>Blood on the Clocktower</h1>
+        <p>Storyteller App</p>
+
+        <div class="setup-info">
+            <strong>Game Overview:</strong><br>
+            • Social deduction game with hidden roles<br>
+            • Good team tries to execute the Demon<br>
+            • Evil team tries to survive until only 2 players remain<br>
+            • Storyteller manages Night and Day phases<br>
+            • Supports 5-15 players (Trouble Brewing edition)
+        </div>
+
+        <div class="input-group">
+            <label>Number of Players:</label>
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(-1)">-</button>
+                <span id="player-count-display" style="font-size:1.5rem; font-weight:bold;">7</span>
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(1)">+</button>
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold; color: var(--accent-color);">Script:</label>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <label style="cursor: pointer; padding: 5px 10px; background: rgba(0,0,0,0.2); border-radius: 5px; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="script-select" value="trouble" checked onchange="updateScriptSelection()"> 
+                    <span>Trouble Brewing</span>
+                </label>
+                <label style="cursor: pointer; padding: 5px 10px; background: rgba(0,0,0,0.2); border-radius: 5px; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="script-select" value="teensy" onchange="updateScriptSelection()"> 
+                    <span>Teensyville</span>
+                </label>
+                <label style="cursor: pointer; padding: 5px 10px; background: rgba(0,0,0,0.2); border-radius: 5px; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="script-select" value="teensy-no-baron" onchange="updateScriptSelection()"> 
+                    <span>Teensyville No Baron</span>
+                </label>
+            </div>
+            <div id="script-desc" style="margin-top: 10px; font-size: 0.9rem; color: #ccc; font-style: italic;">
+                Base edition characters. Recommended for 7+ players.
+            </div>
+        </div>
+        
+        <div class="input-group" id="teensy-roles-display" style="margin-top: 10px; padding: 10px; background: rgba(2, 119, 189, 0.1); border: 1px solid rgba(2, 119, 189, 0.3); border-radius: 8px; display:none;">
+            <div style="font-weight:bold; color:var(--townsfolk-color); margin-bottom:5px;">Teensyville Characters:</div>
+            <div style="font-size:0.85rem; line-height:1.4; margin-bottom:8px;">
+                <span style="color:var(--townsfolk-color);">Washerwoman, Chef, Fortune Teller, Undertaker, Monk, Slayer</span><br>
+                <span style="color:var(--outsider-color);">Drunk, Saint</span><br>
+                <span style="color:var(--minion-color);">Poisoner, Scarlet Woman, Baron</span><br>
+                <span style="color:var(--demon-color);">Imp</span>
+            </div>
+            <div id="teensy-distribution" style="font-size:0.85rem; font-weight:bold; color:var(--accent-color); border-top:1px solid rgba(2, 119, 189, 0.3); padding-top:8px; margin-top:8px;"></div>
+        </div>
+
+        <div class="input-group" id="teensy-no-baron-roles-display" style="margin-top: 10px; padding: 10px; background: rgba(2, 119, 189, 0.1); border: 1px solid rgba(2, 119, 189, 0.3); border-radius: 8px; display:none;">
+            <div style="font-weight:bold; color:var(--townsfolk-color); margin-bottom:5px;">Teensyville No Baron Characters:</div>
+            <div style="font-size:0.85rem; line-height:1.4; margin-bottom:8px;">
+                <span style="color:var(--townsfolk-color);">Washerwoman, Chef, Fortune Teller, Undertaker, Monk, Slayer</span><br>
+                <span style="color:var(--outsider-color);">Drunk, Saint</span><br>
+                <span style="color:var(--minion-color);">Poisoner, Scarlet Woman</span><br>
+                <span style="color:var(--demon-color);">Imp</span>
+            </div>
+            <div id="teensy-no-baron-distribution" style="font-size:0.85rem; font-weight:bold; color:var(--accent-color); border-top:1px solid rgba(2, 119, 189, 0.3); padding-top:8px; margin-top:8px;"></div>
+        </div>
+
+        <div id="player-inputs-container" style="margin-top:20px;"></div>
+        
+        <!-- Saved Players List -->
+        <div class="saved-list-container">
+            <div class="saved-list-label">Saved Names (tap to fill):</div>
+            <div id="saved-list" style="text-align: center;"></div>
+        </div>
+
+        <button class="action-btn" onclick="startRoleDistribution()">Start Game</button>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="secondary-btn" onclick="showPlayerGuide()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📖 Guide</button>
+            <button class="secondary-btn" onclick="showCheatSheet()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📜 Roles</button>
+        </div>
+    </div>
+
+    <!-- 2. Role Distribution Phase -->
+    <div id="distribution-screen" class="container hidden">
+        <div id="dist-pass-view">
+            <p>Pass device to:</p>
+            <h2 id="dist-player-name" style="font-size:2rem; color:var(--accent-color);">Player Name</h2>
+            <div style="font-size:4rem; margin:20px;">📱</div>
+            <p>Player <span id="dist-player-num">1</span> of <span id="dist-total-players">7</span></p>
+            <button class="action-btn" onclick="revealRole()">Reveal Role</button>
+        </div>
+
+        <div id="dist-reveal-view" class="hidden">
+            <h2 id="reveal-name-header">Player Name</h2>
+            <div class="role-card">
+                <div id="role-title" class="role-title">Role</div>
+                <div id="role-desc" style="font-size:0.95rem; margin-bottom:10px; color:#ddd;"></div>
+                <div id="role-extra" style="font-size:0.9rem; color:#ffd700;"></div>
+            </div>
+            
+            <!-- Night 1 Action/Info Area -->
+            <div id="dist-night-action" style="margin: 15px 0; padding: 10px; border: 1px solid #444; border-radius: 8px; background: rgba(0,0,0,0.2); display:none;"></div>
+            
+            <p style="font-size:0.8rem; color:#666;">Memorize your role and hide it.</p>
+            <button id="next-dist-btn" class="action-btn" onclick="nextDistribute()">Hide & Next</button>
+        </div>
+    </div>
+
+    <!-- 3. Main Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h1>Blood on the Clocktower</h1>
+        
+        <!-- Game Status -->
+        <div class="game-status">
+            <div class="status-item">
+                <div class="status-label">Living</div>
+                <div class="status-value" id="living-count">7</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Day</div>
+                <div class="status-value" id="current-day">1</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Executions</div>
+                <div class="status-value" id="execution-count">0</div>
+            </div>
+        </div>
+
+        <!-- Phase Display -->
+        <div id="phase-display" class="phase-display">
+            <div id="phase-title" class="phase-title"></div>
+            <div id="phase-content"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="action-buttons" style="margin-top: 20px;"></div>
+
+        <!-- Grimoire View (Storyteller Only) -->
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="secondary-btn" onclick="showPlayerGuide()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📖 Guide</button>
+            <button class="secondary-btn" onclick="showCheatSheet()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📜 Roles</button>
+        </div>
+        <div id="grimoire-view" class="grimoire-view hidden"></div>
+
+        <!-- Game Log -->
+        <button class="secondary-btn" onclick="toggleLog()" style="margin-top: 10px;">Toggle Game Log</button>
+        <div id="game-log" class="hidden" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+            <div id="log-content"></div>
+        </div>
+
+        <!-- End Game Modal -->
+        <div id="end-game-modal" class="modal-overlay hidden">
+            <div class="container" style="max-width:500px; border: 2px solid var(--accent-color);">
+                <h1 id="end-game-title" style="margin-bottom: 20px;">GAME OVER</h1>
+                <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
+                <button class="action-btn" onclick="location.reload()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Night Phase Modal -->
+    <div id="night-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <!-- Confirmation View -->
+            <div id="night-confirm-view">
+                <p>Pass device to:</p>
+                <h2 id="night-player-name" style="font-size:2rem; color:var(--accent-color);">Player Name</h2>
+                <div style="font-size:4rem; margin:20px;">📱</div>
+                <p id="night-character-hint" style="font-size:0.9rem; color:var(--text-secondary);"></p>
+                <button class="action-btn" onclick="confirmNightPlayer()">I am this player</button>
+            </div>
+            
+            <!-- Character Action View -->
+            <div id="night-action-view" class="hidden">
+                <h2 id="night-character-name"></h2>
+                <div id="night-character-info" class="ability-info"></div>
+                <div id="night-character-actions"></div>
+                <button class="secondary-btn" onclick="skipNightAbility()">Skip (Not in Game)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Guide Modal -->
+    <div id="guide-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:700px; max-height:90vh; overflow-y:auto;">
+            <h1 style="margin-bottom: 20px;">Player Guide</h1>
+            <div id="guide-content" style="text-align: left; line-height: 1.8;"></div>
+            <button class="action-btn" onclick="closePlayerGuide()" style="margin-top: 20px;">Close</button>
+        </div>
+    </div>
+
+    <!-- Day Phase - Execution Modal -->
+    <div id="nomination-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Execution</h2>
+            <p id="nomination-text" style="margin: 15px 0;"></p>
+            <div id="nomination-votes" style="margin: 20px 0;"></div>
+            <button class="secondary-btn" onclick="closeNomination()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Information Display Modal -->
+    <div id="info-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px; border: 2px solid var(--townsfolk-color);">
+            <h2 id="info-character-name" style="color: var(--townsfolk-color);"></h2>
+            <p style="margin: 15px 0; color: var(--text-secondary);">Pass device to this player:</p>
+            <h3 id="info-player-name" style="font-size: 1.5rem; color: var(--accent-color); margin: 20px 0;"></h3>
+            <div style="background: rgba(2, 119, 189, 0.2); border: 2px solid var(--townsfolk-color); border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">Your Information:</p>
+                <p id="info-text" style="font-size: 1.2rem; color: var(--text-primary); line-height: 1.6;"></p>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 15px;">Memorize this information and hide it.</p>
+            <button class="action-btn" onclick="closeInfoModal()">Hide & Continue</button>
+        </div>
+    </div>
+
+    <!-- Slayer Result Modal -->
+    <div id="slayer-result-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Slayer Ability Result</h2>
+            <div id="slayer-result-content" style="margin: 20px 0; padding: 20px; border-radius: 8px; text-align: center;"></div>
+            <button class="action-btn" onclick="closeSlayerResult()">Continue</button>
+        </div>
+    </div>
+
+    <!-- Spy Grimoire Modal -->
+    <div id="spy-grimoire-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:800px; max-height:90vh; overflow-y:auto;">
+            <div id="spy-grimoire-content"></div>
+        </div>
+    </div>
+
+    <!-- Cheat Sheet Modal -->
+    <div id="cheat-sheet-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:900px; max-height:95vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1 style="margin:0; font-size:1.5rem;">Role Reference</h1>
+                <div>
+                    <button id="cheat-sheet-print-btn" class="secondary-btn" style="width:auto; padding:5px 15px; margin:0; margin-right:10px;" onclick="window.print()">🖨️ Print</button>
+                    <button id="cheat-sheet-close-btn" class="secondary-btn" style="width:auto; padding:5px 15px; margin:0;" onclick="closeCheatSheet()">✕</button>
+                </div>
+            </div>
+            <div id="cheat-sheet-content" class="cheat-sheet-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Character Distribution by Player Count ---
+        var CHARACTER_DISTRIBUTION = {
+            5: { townsfolk: 3, outsiders: 0, minions: 1, demon: 1 },
+            6: { townsfolk: 3, outsiders: 1, minions: 1, demon: 1 },
+            7: { townsfolk: 5, outsiders: 0, minions: 1, demon: 1 },
+            8: { townsfolk: 5, outsiders: 1, minions: 1, demon: 1 },
+            9: { townsfolk: 5, outsiders: 2, minions: 1, demon: 1 },
+            10: { townsfolk: 7, outsiders: 0, minions: 2, demon: 1 },
+            11: { townsfolk: 7, outsiders: 1, minions: 2, demon: 1 },
+            12: { townsfolk: 7, outsiders: 2, minions: 2, demon: 1 },
+            13: { townsfolk: 9, outsiders: 0, minions: 3, demon: 1 },
+            14: { townsfolk: 9, outsiders: 1, minions: 3, demon: 1 },
+            15: { townsfolk: 9, outsiders: 2, minions: 3, demon: 1 }
+        };
+
+        // --- Character Definitions (Trouble Brewing) ---
+        var CHARACTERS = {
+            // Townsfolk
+            'Washerwoman': { name: 'Washerwoman', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Townsfolk character.', nightOrder: 1 },
+            'Librarian': { name: 'Librarian', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Outsider character.', nightOrder: 2 },
+            'Investigator': { name: 'Investigator', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Minion character.', nightOrder: 3 },
+            'Chef': { name: 'Chef', type: 'townsfolk', ability: 'Each night*, learn how many pairs of evil players are sitting next to each other.', nightOrder: 4 },
+            'Empath': { name: 'Empath', type: 'townsfolk', ability: 'Each night*, learn how many evil players are sitting next to you (one or both neighbors).', nightOrder: 5 },
+            'Fortune Teller': { name: 'Fortune Teller', type: 'townsfolk', ability: 'Each night*, choose two players: learn if one of them is the Demon (Yes/No). You start knowing a good player is the Demon (red herring).', nightOrder: 6 },
+            'Undertaker': { name: 'Undertaker', type: 'townsfolk', ability: 'Each day*, if someone was executed yesterday, learn their character.', nightOrder: 7 },
+            'Monk': { name: 'Monk', type: 'townsfolk', ability: 'Each night*, choose a player: they cannot die tonight.', nightOrder: 8 },
+            'Ravenkeeper': { name: 'Ravenkeeper', type: 'townsfolk', ability: 'If you die at night, choose a player: learn their character.', nightOrder: 9 },
+            'Virgin': { name: 'Virgin', type: 'townsfolk', ability: 'The first time you are nominated, if the nominator is a Townsfolk, they are executed instead.', nightOrder: 10 },
+            'Slayer': { name: 'Slayer', type: 'townsfolk', ability: 'Once per game, during the day, choose a player: if they are the Demon, they die.', nightOrder: 11 },
+            'Soldier': { name: 'Soldier', type: 'townsfolk', ability: 'You cannot die at night.', nightOrder: 12 },
+            'Mayor': { name: 'Mayor', type: 'townsfolk', ability: 'If only 3 players remain and you die, good wins instead of evil.', nightOrder: 13 },
+            
+            // Outsiders
+            'Butler': { name: 'Butler', type: 'outsider', ability: 'Each night*, choose a player: tomorrow, you must vote how they vote.', nightOrder: 14 },
+            'Drunk': { name: 'Drunk', type: 'outsider', ability: 'You think you are a Townsfolk, but you are not. Your ability does not work.', nightOrder: 15 },
+            'Recluse': { name: 'Recluse', type: 'outsider', ability: 'You may register as evil or as a Demon, even if dead.', nightOrder: 16 },
+            'Saint': { name: 'Saint', type: 'outsider', ability: 'If you are executed, evil wins.', nightOrder: 17 },
+            
+            // Minions
+            'Poisoner': { name: 'Poisoner', type: 'minion', ability: 'Each night*, choose a player: their ability malfunctions. Effect lasts until the next night.', nightOrder: 18 },
+            'Spy': { name: 'Spy', type: 'minion', ability: 'You appear as good to all abilities. You can look at the Grimoire. You know who the Demon is.', nightOrder: 19 },
+            'Scarlet Woman': { name: 'Scarlet Woman', type: 'minion', ability: 'If the Demon dies and 5 or more players are alive (before the Demon\'s death), you immediately become the Demon. This transformation happens right after the Demon dies.', nightOrder: 20 },
+            'Baron': { name: 'Baron', type: 'minion', ability: 'There are extra Outsiders in play. [+2 Outsiders]', nightOrder: null },
+            
+            // Demon
+            'Imp': { name: 'Imp', type: 'demon', ability: 'Each night*, choose a player: they die. You are the Demon.', nightOrder: 21 }
+        };
+
+        var ROLE_ICONS = {
+            'Washerwoman': '🧺', 'Librarian': '📚', 'Investigator': '🔍', 'Chef': '👨‍🍳',
+            'Empath': '🔮', 'Fortune Teller': '🃏', 'Undertaker': '⚰️', 'Monk': '🛡️',
+            'Ravenkeeper': '🦅', 'Virgin': '🕯️', 'Slayer': '🏹', 'Soldier': '💂',
+            'Mayor': '🗳️', 'Butler': '🛎️', 'Drunk': '🍺', 'Recluse': '👺',
+            'Saint': '😇', 'Poisoner': '☠️', 'Spy': '🕵️', 'Scarlet Woman': '💃',
+            'Baron': '👑', 'Imp': '👿'
+        };
+
+        var ROLE_REBUS = {
+            'Washerwoman': 'Start: 1 of 2 Players = [Townsfolk]',
+            'Librarian': 'Start: 1 of 2 Players = [Outsider]',
+            'Investigator': 'Start: 1 of 2 Players = [Minion]',
+            'Chef': 'Start: # of Evil pairs',
+            'Empath': 'Night: # of Evil neighbors',
+            'Fortune Teller': 'Night: Choose 1. Is Demon? (Red herring)',
+            'Undertaker': 'Night: Who died today? = [Role]',
+            'Monk': 'Night: Protect 1 player',
+            'Ravenkeeper': 'Death Night: Learn 1 player role',
+            'Virgin': 'Day: Nominated by Townsfolk? Nominator dies',
+            'Slayer': 'Day: Shot Demon? Demon dies',
+            'Soldier': 'Night: Cannot die',
+            'Mayor': 'Final 3: If I die, Good wins',
+            'Butler': 'Night: Choose Master. Vote with Master',
+            'Drunk': 'You are drunk. Ability fails/lies',
+            'Recluse': 'Passive: Register as Evil/Demon',
+            'Saint': 'Day: Executed? Evil wins',
+            'Poisoner': 'Night: Poison 1 player (Ability malfunctions)',
+            'Spy': 'Night: See Grimoire. Register as Good',
+            'Scarlet Woman': 'Passive: Imp dies? Become Imp',
+            'Baron': 'Start: +2 Outsiders in game',
+            'Imp': 'Night: Kill 1. Self-kill? New Imp'
+        };
+
+        // Character pools by type
+        var ALL_TOWNSFOLK = ['Washerwoman', 'Librarian', 'Investigator', 'Chef', 'Empath', 'Fortune Teller', 'Undertaker', 'Monk', 'Ravenkeeper', 'Virgin', 'Slayer', 'Soldier', 'Mayor'];
+        var ALL_OUTSIDERS = ['Butler', 'Drunk', 'Recluse', 'Saint'];
+        var ALL_MINIONS = ['Poisoner', 'Spy', 'Scarlet Woman', 'Baron'];
+        var ALL_DEMONS = ['Imp'];
+        
+        var TOWNSFOLK_POOL = ALL_TOWNSFOLK.slice();
+        var OUTSIDER_POOL = ALL_OUTSIDERS.slice();
+        var MINION_POOL = ALL_MINIONS.slice();
+        var DEMON_POOL = ALL_DEMONS.slice();
+        
+        // Teensyville subset (Custom)
+        var TEENSYVILLE_SCRIPT = {
+            townsfolk: ['Washerwoman', 'Chef', 'Slayer', 'Monk', 'Fortune Teller', 'Undertaker'],
+            outsiders: ['Drunk', 'Saint'],
+            minions: ['Scarlet Woman', 'Poisoner', 'Baron'],
+            demons: ['Imp']
+        };
+        
+        // Teensyville No Baron subset
+        var TEENSYVILLE_NO_BARON_SCRIPT = {
+            townsfolk: ['Washerwoman', 'Chef', 'Slayer', 'Monk', 'Fortune Teller', 'Undertaker'],
+            outsiders: ['Drunk', 'Saint'],
+            minions: ['Scarlet Woman', 'Poisoner'],
+            demons: ['Imp']
+        };
+
+        // --- Global State ---
+        var playerCount = 7;
+        var players = [];
+        var savedPlayers = [];
+        var currentDistIndex = 0;
+        
+        // Game State
+        var currentDay = 1;
+        var isNightPhase = true;
+        var currentNightOrder = [];
+        var nightIndex = 0;
+        var executions = 0;
+        var lastExecutionDay = 0; // Track which day the last execution happened
+        var lastExecutedPlayer = null; // Track which player was last executed (for Undertaker)
+        var gameLog = [];
+        var grimoireVisible = false;
+        var playerInfo = {}; // Track information given to each player
+        var poisonedPlayers = []; // Array of {playerIndex, poisonedNight, appliesNight}
+        var protectedPlayers = [];
+        var markedForDeath = null; // Player marked for death by Imp this night (resolved at end of night)
+        var butlerChoices = {}; // Track Butler's choices
+        var slayerUsed = false;
+        var virginTriggered = false;
+        var fortuneTellerRedHerrings = {}; // Track red herring player for each Fortune Teller {playerIndex: redHerringPlayerIndex}
+
+        // --- Initialization ---
+        window.onload = function() {
+            loadSavedPlayers();
+            renderPlayerInputs();
+            updateScriptSelection(); // Initialize script
+        };
+        
+        function updateScriptSelection() {
+            var radios = document.getElementsByName('script-select');
+            var selected = 'trouble';
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].checked) selected = radios[i].value;
+            }
+            
+            var desc = document.getElementById('script-desc');
+            var rolesDisplay = document.getElementById('teensy-roles-display');
+            var rolesDisplayNoBaron = document.getElementById('teensy-no-baron-roles-display');
+            
+            if (selected === 'trouble') {
+                TOWNSFOLK_POOL = ALL_TOWNSFOLK.slice();
+                OUTSIDER_POOL = ALL_OUTSIDERS.slice();
+                MINION_POOL = ALL_MINIONS.slice();
+                DEMON_POOL = ALL_DEMONS.slice();
+                desc.innerText = "Base edition characters. Recommended for 7+ players.";
+                rolesDisplay.style.display = 'none';
+                rolesDisplayNoBaron.style.display = 'none';
+            } else if (selected === 'teensy') {
+                TOWNSFOLK_POOL = TEENSYVILLE_SCRIPT.townsfolk.slice();
+                OUTSIDER_POOL = TEENSYVILLE_SCRIPT.outsiders.slice();
+                MINION_POOL = TEENSYVILLE_SCRIPT.minions.slice();
+                DEMON_POOL = TEENSYVILLE_SCRIPT.demons.slice();
+                desc.innerText = "Compact edition for 5-6 players.";
+                rolesDisplay.style.display = 'block';
+                rolesDisplayNoBaron.style.display = 'none';
+                updateTeensyDistribution();
+            } else if (selected === 'teensy-no-baron') {
+                TOWNSFOLK_POOL = TEENSYVILLE_NO_BARON_SCRIPT.townsfolk.slice();
+                OUTSIDER_POOL = TEENSYVILLE_NO_BARON_SCRIPT.outsiders.slice();
+                MINION_POOL = TEENSYVILLE_NO_BARON_SCRIPT.minions.slice();
+                DEMON_POOL = TEENSYVILLE_NO_BARON_SCRIPT.demons.slice();
+                desc.innerText = "Compact edition for 5-6 players (no Baron).";
+                rolesDisplay.style.display = 'none';
+                rolesDisplayNoBaron.style.display = 'block';
+                updateTeensyNoBaronDistribution();
+            }
+        }
+        
+        function updateTeensyDistribution() {
+            var distDisplay = document.getElementById('teensy-distribution');
+            if (!distDisplay) return;
+            
+            var currentCount = playerCount;
+            var dist = CHARACTER_DISTRIBUTION[currentCount];
+            
+            if (dist) {
+                var distText = 'Distribution for ' + currentCount + ' players: ';
+                distText += '<span style="color:var(--townsfolk-color);">' + dist.townsfolk + ' Townsfolk</span>, ';
+                distText += '<span style="color:var(--outsider-color);">' + dist.outsiders + ' Outsider' + (dist.outsiders !== 1 ? 's' : '') + '</span>, ';
+                distText += '<span style="color:var(--minion-color);">' + dist.minions + ' Minion</span>, ';
+                distText += '<span style="color:var(--demon-color);">' + dist.demon + ' Demon</span>';
+                distDisplay.innerHTML = distText;
+            } else {
+                distDisplay.innerHTML = 'Invalid player count for Teensyville (must be 5 or 6)';
+            }
+        }
+        
+        function updateTeensyNoBaronDistribution() {
+            var distDisplay = document.getElementById('teensy-no-baron-distribution');
+            if (!distDisplay) return;
+            
+            var currentCount = playerCount;
+            var dist = CHARACTER_DISTRIBUTION[currentCount];
+            
+            if (dist) {
+                var distText = 'Distribution for ' + currentCount + ' players: ';
+                distText += '<span style="color:var(--townsfolk-color);">' + dist.townsfolk + ' Townsfolk</span>, ';
+                distText += '<span style="color:var(--outsider-color);">' + dist.outsiders + ' Outsider' + (dist.outsiders !== 1 ? 's' : '') + '</span>, ';
+                distText += '<span style="color:var(--minion-color);">' + dist.minions + ' Minion</span>, ';
+                distText += '<span style="color:var(--demon-color);">' + dist.demon + ' Demon</span>';
+                distDisplay.innerHTML = distText;
+            } else {
+                distDisplay.innerHTML = 'Invalid player count for Teensyville (must be 5 or 6)';
+            }
+        }
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('botc_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">No saved names</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.style.display = 'inline-block';
+                chip.style.background = 'rgba(255,255,255,0.1)';
+                chip.style.border = '1px solid #555';
+                chip.style.borderRadius = '20px';
+                chip.style.padding = '6px 14px';
+                chip.style.fontSize = '0.85rem';
+                chip.style.cursor = 'pointer';
+                chip.style.margin = '3px';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function updatePlayerCount(delta) {
+            var newCount = playerCount + delta;
+            if (newCount >= 5 && newCount <= 15) {
+                playerCount = newCount;
+                document.getElementById('player-count-display').innerText = playerCount;
+                renderPlayerInputs();
+                // Update Teensyville distribution display if Teensyville is selected
+                var radios = document.getElementsByName('script-select');
+                var selected = 'trouble';
+                for (var i = 0; i < radios.length; i++) {
+                    if (radios[i].checked) selected = radios[i].value;
+                }
+                if (selected === 'teensy') {
+                    updateTeensyDistribution();
+                }
+            }
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            var currentValues = [];
+            var inputs = container.querySelectorAll('.player-input');
+            for(var i=0; i<inputs.length; i++) currentValues.push(inputs[i].value);
+
+            container.innerHTML = '';
+            for (var i = 0; i < playerCount; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "Player " + (i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+        }
+
+        // --- Role Distribution ---
+        function startRoleDistribution() {
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                names.push(val);
+                
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            localStorage.setItem('botc_players', JSON.stringify(savedPlayers));
+            renderSavedList();
+
+            // Get character distribution
+            var dist = CHARACTER_DISTRIBUTION[playerCount];
+            if (!dist) {
+                alert('Invalid player count: ' + playerCount);
+                return;
+            }
+
+            // Select characters
+            var selectedChars = [];
+            
+            // Select Minions first (to check for Baron)
+            var minionPool = MINION_POOL.slice();
+            shuffleArray(minionPool);
+            var selectedMinions = [];
+            for (var i = 0; i < dist.minions; i++) {
+                selectedMinions.push(minionPool[i]);
+            }
+            
+            // Check if Baron is in the game (adds +2 Outsiders)
+            var baronInPlay = selectedMinions.indexOf('Baron') !== -1;
+            var adjustedOutsiders = dist.outsiders;
+            var adjustedTownsfolk = dist.townsfolk;
+            
+            if (baronInPlay) {
+                // Baron adds 2 Outsiders, remove 2 Townsfolk
+                adjustedOutsiders += 2;
+                adjustedTownsfolk -= 2;
+            }
+            
+            // Select Townsfolk
+            var townsfolkPool = TOWNSFOLK_POOL.slice();
+            shuffleArray(townsfolkPool);
+            for (var i = 0; i < adjustedTownsfolk; i++) {
+                selectedChars.push(townsfolkPool[i]);
+            }
+            
+            // Select Outsiders - Drunk should have >90% chance
+            var outsiderPool = OUTSIDER_POOL.slice();
+            shuffleArray(outsiderPool);
+            for (var i = 0; i < adjustedOutsiders; i++) {
+                // If we need outsiders and Drunk is available, >90% chance to include it
+                if (i === 0 && adjustedOutsiders > 0 && Math.random() > 0.1) {
+                    // 90% chance to force Drunk
+                    var drunkIndex = outsiderPool.indexOf('Drunk');
+                    if (drunkIndex !== -1) {
+                        selectedChars.push('Drunk');
+                        outsiderPool.splice(drunkIndex, 1);
+                    } else {
+                        selectedChars.push(outsiderPool[i]);
+                    }
+                } else {
+                    selectedChars.push(outsiderPool[i]);
+                }
+            }
+            
+            // Add selected Minions
+            for (var i = 0; i < selectedMinions.length; i++) {
+                selectedChars.push(selectedMinions[i]);
+            }
+            
+            // Select Demon
+            selectedChars.push(DEMON_POOL[0]);
+
+            // Shuffle and assign to players
+            shuffleArray(selectedChars);
+            
+            players = [];
+            for (var i = 0; i < playerCount; i++) {
+                var charName = selectedChars[i];
+                var charDef = CHARACTERS[charName];
+                
+                // Drunk thinks they are a Townsfolk - assign them a fake Townsfolk role
+                var actualCharDef = charDef;
+                var fakeCharDef = null;
+                if (charName === 'Drunk') {
+                    // Give them a random Townsfolk role to think they are
+                    var availableTownsfolk = TOWNSFOLK_POOL.filter(t => selectedChars.indexOf(t) === -1);
+                    if (availableTownsfolk.length === 0) {
+                        // If all townsfolk are in game, pick a random one anyway
+                        availableTownsfolk = TOWNSFOLK_POOL.slice();
+                    }
+                    shuffleArray(availableTownsfolk);
+                    fakeCharDef = CHARACTERS[availableTownsfolk[0]];
+                }
+                
+                players.push({
+                    name: names[i],
+                    character: charName,
+                    characterDef: actualCharDef, // Real character
+                    fakeCharacterDef: fakeCharDef, // What Drunk thinks they are
+                    alive: true,
+                    index: i
+                });
+            }
+            
+            // Initialize player info tracking
+            for (var i = 0; i < players.length; i++) {
+                playerInfo[i] = [];
+            }
+            
+            // Reset game state variables for Distribution phase
+            poisonedPlayers = [];
+            protectedPlayers = [];
+            markedForDeath = null;
+            butlerChoices = {};
+            slayerUsed = false;
+            virginTriggered = false;
+            fortuneTellerRedHerrings = {};
+            executions = 0;
+            lastExecutionDay = 0;
+            gameLog = [];
+            
+            currentDistIndex = 0;
+            document.getElementById('dist-total-players').innerText = playerCount;
+            document.getElementById('setup-screen').classList.add('hidden');
+            showScreen('distribution-screen');
+            updateDistScreen();
+        }
+
+        function updateDistScreen() {
+            document.getElementById('dist-player-num').innerText = currentDistIndex + 1;
+            document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+        }
+
+        function revealRole() {
+            var player = players[currentDistIndex];
+            document.getElementById('reveal-name-header').innerText = player.name;
+            
+            var title = document.getElementById('role-title');
+            var desc = document.getElementById('role-desc');
+            var extra = document.getElementById('role-extra');
+            var nightActionDiv = document.getElementById('dist-night-action');
+            
+            // Drunk sees their fake Townsfolk role, not that they're Drunk
+            var charDef = player.fakeCharacterDef || player.characterDef;
+            
+            // Use original key to find icon
+            var charKey = Object.keys(CHARACTERS).find(key => CHARACTERS[key].name === charDef.name) || charDef.name;
+            
+            var icon = ROLE_ICONS[charKey] || '❓';
+            
+            title.innerHTML = '<div style="font-size: 4rem; margin-bottom: 10px;">' + icon + '</div>' + charDef.name;
+            title.className = 'role-title role-' + charDef.type;
+            
+            // Use updated description from ROLE_GUIDE_INFO if available, otherwise fall back to ability
+            var roleInfo = ROLE_GUIDE_INFO[charKey];
+            if (roleInfo && roleInfo.desc) {
+                var fullDesc = roleInfo.desc;
+                if (roleInfo.note) {
+                    fullDesc += '<br><br><em style="color: var(--text-secondary); font-size: 0.9em;">Note: ' + roleInfo.note + '</em>';
+                }
+                desc.innerHTML = fullDesc;
+            } else {
+            desc.innerText = charDef.ability;
+            }
+            
+            extra.innerHTML = '';
+            nightActionDiv.style.display = 'none';
+            nightActionDiv.innerHTML = '';
+            
+            // Show teammates for evil players
+            if (charDef.type === 'minion' || charDef.type === 'demon') {
+                var evilPlayers = players.filter(p => 
+                    (p.characterDef.type === 'minion' || p.characterDef.type === 'demon') && 
+                    p.name !== player.name
+                );
+                if (evilPlayers.length > 0) {
+                    var teamList = evilPlayers.map(p => p.name).join(', ');
+                    extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your evil teammates: ' + teamList + '</div>';
+                }
+            }
+            
+            // Handle Night 1 Actions/Info immediately
+            var nextBtn = document.getElementById('next-dist-btn');
+            nextBtn.disabled = false; // Default enabled
+            nextBtn.onclick = nextDistribute; // Default handler
+            
+            var charName = charDef.name;
+            
+            // 1. Information Roles (Washerwoman, Librarian, Investigator, Chef, Empath, Fortune Teller)
+            // AND Imp (First Night Info)
+            if (['Washerwoman', 'Librarian', 'Investigator', 'Chef', 'Empath', 'Fortune Teller'].indexOf(charName) !== -1 || charName === 'Imp') {
+                nightActionDiv.style.display = 'block';
+                var info = '';
+                
+                // Check for poisoning (if Poisoner acted earlier in distribution order)
+                var isPoisoned = poisonedPlayers.some(p => p.playerIndex === player.index);
+                
+                if (charName === 'Imp') {
+                    // Imp Info: 3 Roles not in game
+                    var allGoodRoles = TOWNSFOLK_POOL.concat(OUTSIDER_POOL);
+                    var rolesInGame = players.map(p => {
+                        for (var key in CHARACTERS) {
+                            if (CHARACTERS[key].name === p.characterDef.name) return key;
+                        }
+                        return null;
+                    }).filter(r => r !== null);
+                    var rolesNotInGame = allGoodRoles.filter(r => rolesInGame.indexOf(r) === -1);
+                    shuffleArray(rolesNotInGame);
+                    info = '<strong style="color: var(--demon-color);">First Night Info (Not in play):</strong><br>' + 
+                           rolesNotInGame.slice(0, 3).join(', ');
+                } else {
+                    // Townsfolk Info
+                    info = generateNightInfoTextEN(player, charDef, isPoisoned);
+                    info = '<strong style="color: var(--townsfolk-color);">Your Information:</strong><br>' + info;
+                }
+                
+                nightActionDiv.innerHTML = info;
+            }
+            
+            // 2. Choice Roles (Poisoner, Monk, Butler)
+            if (['Poisoner', 'Monk', 'Butler'].indexOf(charName) !== -1) {
+                nightActionDiv.style.display = 'block';
+                nextBtn.disabled = true;
+                nextBtn.innerText = 'Choose...';
+                
+                renderDistChoiceEN(player, charName, nightActionDiv, function() {
+                    nextBtn.disabled = false;
+            if (currentDistIndex === playerCount - 1) {
+                        nextBtn.innerText = "Finish & Start Day";
+                    } else {
+                        nextBtn.innerText = "Hide & Next";
+                    }
+                });
+            }
+            
+            // 3. Spy (Grimoire)
+            if (charName === 'Spy') {
+                nightActionDiv.style.display = 'block';
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'View Grimoire';
+                btn.onclick = function() {
+                    alert('Grimoire:\n\n' + players.map(p => p.name + ': ' + p.characterDef.name).join('\n'));
+                };
+                nightActionDiv.appendChild(btn);
+            }
+
+            if (currentDistIndex === playerCount - 1) {
+                nextBtn.innerText = "Finish & Start Day";
+                nextBtn.style.backgroundColor = "#4CAF50";
+            } else {
+                if (!nextBtn.disabled) {
+                nextBtn.innerText = "Hide & Next";
+                nextBtn.style.backgroundColor = "#b71c1c";
+                }
+            }
+            
+            document.getElementById('dist-pass-view').classList.add('hidden');
+            document.getElementById('dist-reveal-view').classList.remove('hidden');
+        }
+
+        function generateNightInfoTextEN(player, charDef, isPoisoned) {
+            var info = '';
+            var charName = charDef.name;
+            
+            if (charName === 'Washerwoman') {
+                // Washerwoman: 1 of 2 players is a Townsfolk
+                var townsfolk = players.filter(p => p.characterDef.type === 'townsfolk' && p.name !== player.name);
+                if (townsfolk.length > 0) {
+                    var target = townsfolk[Math.floor(Math.random() * townsfolk.length)];
+                    var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    while (randomPlayer.name === player.name || randomPlayer.name === target.name) {
+                        randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    }
+                    var pair = [target, randomPlayer];
+                    shuffleArray(pair);
+                    info = 'One of these is a ' + target.characterDef.name + ': ' + pair[0].name + ', ' + pair[1].name;
+                    if (isPoisoned) {
+                        info += ' (False info - poisoned)';
+                    }
+                } else {
+                    info = 'No Townsfolk in game';
+                }
+            } else if (charName === 'Librarian') {
+                // Librarian: 1 of 2 players is an Outsider
+                var outsiders = players.filter(p => p.characterDef.type === 'outsider');
+                if (outsiders.length > 0) {
+                    var target = outsiders[Math.floor(Math.random() * outsiders.length)];
+                    var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    while (randomPlayer.name === player.name || randomPlayer.name === target.name) {
+                        randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    }
+                    var pair = [target, randomPlayer];
+                    shuffleArray(pair);
+                    info = 'One of these is an ' + target.characterDef.name + ': ' + pair[0].name + ', ' + pair[1].name;
+                    if (isPoisoned) {
+                        info += ' (False info - poisoned)';
+                    }
+                } else {
+                    info = 'No Outsiders in game';
+                }
+            } else if (charName === 'Investigator') {
+                // Investigator: 1 of 2 players is a SPECIFIC Minion (must name the minion role)
+                // Spy appears as good, so exclude them from Minion detection
+                var minions = players.filter(p => p.characterDef.type === 'minion' && p.characterDef.name !== 'Spy');
+                if (minions.length > 0) {
+                    var target = minions[Math.floor(Math.random() * minions.length)];
+                    var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    while (randomPlayer.name === player.name || randomPlayer.name === target.name) {
+                        randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    }
+                    var pair = [target, randomPlayer];
+                    shuffleArray(pair);
+                    info = 'One of these is a ' + target.characterDef.name + ': ' + pair[0].name + ', ' + pair[1].name;
+                    if (isPoisoned) {
+                        info += ' (False info - poisoned)';
+                    }
+                } else {
+                    info = 'No Minions in game';
+                }
+            } else if (charName === 'Chef') {
+                // Chef: Number of pairs of evil players
+                var evilPlayers = players.filter(p => p.characterDef.type === 'minion' || p.characterDef.type === 'demon');
+                var pairs = 0;
+                for (var i = 0; i < evilPlayers.length; i++) {
+                    var nextIndex = (evilPlayers[i].index + 1) % players.length;
+                    var nextPlayer = players[nextIndex];
+                    if (nextPlayer.characterDef.type === 'minion' || nextPlayer.characterDef.type === 'demon') {
+                        pairs++;
+                    }
+                }
+                info = 'Number of evil pairs: ' + pairs;
+                if (isPoisoned) {
+                    info = 'Number of evil pairs: ' + Math.floor(Math.random() * 3) + ' (False info - poisoned)';
+                }
+            } else if (charName === 'Empath') {
+                // Empath: Number of evil neighbors
+                var leftIndex = (player.index - 1 + players.length) % players.length;
+                var rightIndex = (player.index + 1) % players.length;
+                var leftPlayer = players[leftIndex];
+                var rightPlayer = players[rightIndex];
+                var evilCount = 0;
+                if (leftPlayer.alive && (leftPlayer.characterDef.type === 'minion' || leftPlayer.characterDef.type === 'demon')) {
+                    evilCount++;
+                }
+                if (rightPlayer.alive && (rightPlayer.characterDef.type === 'minion' || rightPlayer.characterDef.type === 'demon')) {
+                    evilCount++;
+                }
+                info = 'Number of evil neighbors: ' + evilCount;
+                if (isPoisoned) {
+                    info = 'Number of evil neighbors: ' + Math.floor(Math.random() * 3) + ' (False info - poisoned)';
+                }
+            } else if (charName === 'Fortune Teller') {
+                // Fortune Teller: Will need to choose 2 players - for now show instruction
+                info = 'Each night, choose 2 players. If one is the Demon, you hear YES.';
+            }
+            
+            return info;
+        }
+
+        function renderDistChoiceEN(player, charName, container, onComplete) {
+            container.innerHTML = '';
+            
+            if (charName === 'Poisoner') {
+                // Poisoner: Choose a player to poison
+                var title = document.createElement('div');
+                title.innerHTML = '<strong>Choose who to poison:</strong>';
+                title.style.marginBottom = '10px';
+                container.appendChild(title);
+                
+                players.forEach(function(p) {
+                    if (p.name !== player.name) {
+                        var btn = document.createElement('button');
+                        btn.className = 'player-select-btn';
+                        btn.style.margin = '5px';
+                        btn.innerText = p.name;
+                        btn.onclick = function() {
+                            poisonedPlayers.push({ playerIndex: p.index, day: 1 });
+                            container.innerHTML = '<div style="color: var(--minion-color); font-weight: bold;">Poisoned: ' + p.name + '</div>';
+                            if (onComplete) onComplete();
+                        };
+                        container.appendChild(btn);
+                    }
+                });
+            } else if (charName === 'Monk') {
+                // Monk: Choose a player to protect
+                var title = document.createElement('div');
+                title.innerHTML = '<strong>Choose who to protect:</strong>';
+                title.style.marginBottom = '10px';
+                container.appendChild(title);
+                
+                players.forEach(function(p) {
+                    if (p.name !== player.name) {
+                        var btn = document.createElement('button');
+                        btn.className = 'player-select-btn';
+                        btn.style.margin = '5px';
+                        btn.innerText = p.name;
+                        btn.onclick = function() {
+                            protectedPlayers = [p.index];
+                            container.innerHTML = '<div style="color: var(--townsfolk-color); font-weight: bold;">Protected: ' + p.name + '</div>';
+                            if (onComplete) onComplete();
+                        };
+                        container.appendChild(btn);
+                    }
+                });
+            } else if (charName === 'Butler') {
+                // Butler: Choose a master
+                var title = document.createElement('div');
+                title.innerHTML = '<strong>Choose your master:</strong>';
+                title.style.marginBottom = '10px';
+                container.appendChild(title);
+                
+                players.forEach(function(p) {
+                    if (p.name !== player.name) {
+                        var btn = document.createElement('button');
+                        btn.className = 'player-select-btn';
+                        btn.style.margin = '5px';
+                        btn.innerText = p.name;
+                        btn.onclick = function() {
+                            butlerChoices[player.index] = p.index;
+                            container.innerHTML = '<div style="color: var(--townsfolk-color); font-weight: bold;">Your master: ' + p.name + '</div>';
+                            if (onComplete) onComplete();
+                        };
+                        container.appendChild(btn);
+                    }
+                });
+            }
+        }
+
+        function nextDistribute() {
+            currentDistIndex++;
+            if (currentDistIndex >= playerCount) {
+                startGame();
+            } else {
+                document.getElementById('dist-pass-view').classList.remove('hidden');
+                document.getElementById('dist-reveal-view').classList.add('hidden');
+                updateDistScreen();
+            }
+        }
+
+        // --- Game Logic ---
+        function startGame() {
+            currentDay = 1;
+            isNightPhase = false; // Start at day since first night was handled during distribution
+            // Don't reset these - they were set during distribution
+            // executions, lastExecutionDay already set
+            // gameLog already initialized
+            // playerInfo already initialized
+            // poisonedPlayers, protectedPlayers, butlerChoices already set during distribution
+            // slayerUsed, virginTriggered already initialized
+            
+            addLog("Game started with " + playerCount + " players.");
+            addLog("First night was handled during role distribution.");
+            addLog("Day 1 begins.");
+            
+            showScreen('game-screen');
+            updateGameDisplay();
+            startDayPhase(); // Skip first night, go directly to Day 1
+        }
+
+        function updateGameDisplay() {
+            var living = players.filter(p => p.alive).length;
+            document.getElementById('living-count').innerText = living;
+            document.getElementById('current-day').innerText = currentDay;
+            document.getElementById('execution-count').innerText = executions;
+            
+            renderGrimoire();
+        }
+
+        function startFirstNight() {
+            isNightPhase = true;
+            document.getElementById('phase-display').className = 'phase-display phase-night';
+            document.getElementById('phase-title').innerText = 'First Night';
+            document.getElementById('phase-content').innerHTML = 
+                '<p>All players close their eyes.</p>' +
+                '<p>The Storyteller will wake characters in order.</p>';
+            
+            // Build night order based on characters in play
+            buildNightOrder();
+            nightIndex = 0;
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="processNightPhase()">Start First Night</button>';
+        }
+
+        function buildNightOrder() {
+            currentNightOrder = [];
+            
+            // Order by seating position (player index) instead of character night order
+            // This prevents players from knowing who the Imp is based on order
+            players.forEach(function(player) {
+                if (player.alive) {
+                    var charDef = player.characterDef;
+                    // Drunk uses their fake character for night order
+                    var displayCharDef = player.fakeCharacterDef || charDef;
+                    // Only include players with night abilities (check real character, but use fake for display)
+                    if (charDef.nightOrder) {
+                        currentNightOrder.push({
+                            order: charDef.nightOrder, // Keep for game mechanics (poisoning timing, etc.)
+                            player: player,
+                            character: displayCharDef // Use fake character for Drunk
+                        });
+                    }
+                }
+            });
+            
+            // Sort by player index (seating order) to pass device sequentially
+            currentNightOrder.sort(function(a, b) {
+                return a.player.index - b.player.index;
+            });
+        }
+
+        function processNightPhase() {
+            if (nightIndex >= currentNightOrder.length) {
+                // Night phase complete - now close modal and show day phase
+                document.getElementById('night-modal').classList.add('hidden');
+                endNightPhase();
+                return;
+            }
+            
+            var nightAction = currentNightOrder[nightIndex];
+            var player = nightAction.player;
+            var charDef = nightAction.character;
+            
+            // Drunk sees their fake Townsfolk role, not that they're Drunk
+            var displayCharDef = player.fakeCharacterDef || charDef;
+            
+            // Show confirmation screen first
+            document.getElementById('night-player-name').innerText = player.name;
+            // Don't show character name - keep it hidden until player confirms
+            document.getElementById('night-character-hint').innerText = '';
+            
+            // Hide action view, show confirm view
+            document.getElementById('night-confirm-view').classList.remove('hidden');
+            document.getElementById('night-action-view').classList.add('hidden');
+            
+            // Ensure modal is visible
+            document.getElementById('night-modal').classList.remove('hidden');
+        }
+
+        function confirmNightPlayer() {
+            // Hide confirmation, show action
+            document.getElementById('night-confirm-view').classList.add('hidden');
+            document.getElementById('night-action-view').classList.remove('hidden');
+            
+            var nightAction = currentNightOrder[nightIndex];
+            var player = nightAction.player;
+            var charDef = nightAction.character;
+            
+            // Drunk sees their fake Townsfolk role, not that they're Drunk
+            var displayCharDef = player.fakeCharacterDef || charDef;
+            
+            // Check if character is poisoned for THIS activation
+            var poisonEntry = poisonedPlayers.find(p => p.playerIndex === player.index);
+            var isPoisoned = false;
+            if (poisonEntry) {
+                // Check if poison should apply this night
+                if (poisonEntry.appliesNight === currentDay) {
+                    isPoisoned = true;
+                }
+            }
+            
+            // Drunk sees their fake Townsfolk role, not that they're Drunk
+            var displayCharDef = player.fakeCharacterDef || charDef;
+            
+            // Update modal content
+            document.getElementById('night-character-name').innerText = displayCharDef.name + ' (' + player.name + ')';
+            var info = document.getElementById('night-character-info');
+            info.innerHTML = '<strong>Ability:</strong> ' + displayCharDef.ability;
+            
+            // Don't show poisoned message to player - they shouldn't know
+            
+            var actions = document.getElementById('night-character-actions');
+            actions.innerHTML = '';
+            
+            // Handle specific character abilities
+            // For Drunk, use their fake character for display/ability, but their ability won't work
+            var charDefForAbility = displayCharDef;
+            if (player.character === 'Drunk') {
+                // Drunk's ability doesn't work - they think they have the fake ability but it fails
+                // They'll see the button but get no info
+            }
+            handleNightAbility(player, charDefForAbility, isPoisoned, actions);
+        }
+
+        function handleNightAbility(player, charDef, isPoisoned, actionsContainer) {
+            var charName = charDef.name;
+            var isDrunk = player.character === 'Drunk';
+            
+            // Information roles - first night only (Washerwoman, Librarian, Investigator, Chef)
+            var firstNightOnlyRoles = ['Washerwoman', 'Librarian', 'Investigator', 'Chef'];
+            if (firstNightOnlyRoles.indexOf(charName) !== -1) {
+                if (currentDay === 1) {
+                    var btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.innerText = 'Give Information (First Night Only)';
+                    btn.onclick = function() {
+                        giveInformation(player, charDef, isPoisoned);
+                    };
+                    actionsContainer.appendChild(btn);
+                } else {
+                    // Not first night - no action for these roles
+                    var btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.innerText = 'Continue (First Night Only - No Action)';
+                    btn.onclick = function() {
+                        addLog(charName + ' (' + player.name + ') - No action (first night only ability)');
+                        skipNightAbility();
+                    };
+                    actionsContainer.appendChild(btn);
+                }
+            }
+            
+            // Empath - works every night
+            if (charName === 'Empath') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Give Information';
+                btn.onclick = function() {
+                    giveInformation(player, charDef, isPoisoned);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Fortune Teller - chooses a player first
+            if (charName === 'Fortune Teller') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Choose Player to Check';
+                btn.onclick = function() {
+                    chooseFortuneTellerTarget(player, isPoisoned);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Undertaker (day ability, but included in night order)
+            if (charName === 'Undertaker') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Give Information (if execution yesterday)';
+                btn.onclick = function() {
+                    giveUndertakerInfo(player, isPoisoned);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Monk - protection
+            if (charName === 'Monk') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Choose Player to Protect';
+                btn.onclick = function() {
+                    chooseProtection(player);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Butler - vote choice
+            if (charName === 'Butler') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Choose Player to Follow';
+                btn.onclick = function() {
+                    chooseButlerTarget(player);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Poisoner - poison choice
+            if (charName === 'Poisoner') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Choose Player to Poison';
+                btn.onclick = function() {
+                    choosePoisonTarget(player);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            // Imp - kill choice
+            if (charName === 'Imp') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Choose Player to Kill';
+                btn.onclick = function() {
+                    chooseKillTarget(player);
+                };
+                actionsContainer.appendChild(btn);
+            }
+            
+            
+            // Spy - can look at Grimoire
+            if (charName === 'Spy') {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'View Grimoire';
+                btn.onclick = function() {
+                    showSpyGrimoire(player);
+                };
+                actionsContainer.appendChild(btn);
+                
+                var continueBtn = document.createElement('button');
+                continueBtn.className = 'secondary-btn';
+                continueBtn.style.marginTop = '10px';
+                continueBtn.innerText = 'Continue (No Action Needed)';
+                continueBtn.onclick = function() {
+                    addLog('Spy (' + player.name + ') - No night action');
+                    skipNightAbility();
+                };
+                actionsContainer.appendChild(continueBtn);
+            }
+            
+            // Characters with no active night ability (passive abilities)
+            // Drunk is handled separately - they see their fake character's ability but it doesn't work
+            // Ravenkeeper's ability only triggers on death, so no night action needed
+            var passiveCharacters = ['Scarlet Woman', 'Soldier', 'Mayor', 'Virgin', 'Slayer', 'Ravenkeeper', 'Recluse', 'Saint', 'Baron'];
+            if (passiveCharacters.indexOf(charName) !== -1) {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                if (charName === 'Scarlet Woman') {
+                    btn.innerText = 'Continue (Passive: Becomes Demon if Imp dies)';
+                } else {
+                    btn.innerText = 'Continue (No Night Action)';
+                }
+                btn.onclick = function() {
+                    addLog(charName + ' (' + player.name + ') - No night action (passive ability)');
+                    skipNightAbility();
+                };
+                actionsContainer.appendChild(btn);
+            }
+        }
+
+        // Helper function to check if a player appears as evil to abilities
+        // Recluse may appear as evil (Storyteller discretion)
+        // Spy always appears as good
+        function appearsAsEvil(targetPlayer) {
+            // Spy always appears as good, even though they are a Minion
+            if (targetPlayer.characterDef.name === 'Spy') {
+                return false;
+            }
+            if (targetPlayer.characterDef.type === 'minion' || targetPlayer.characterDef.type === 'demon') {
+                return true;
+            }
+            // Recluse always registers as evil (Imp)
+            if (targetPlayer.characterDef.name === 'Recluse') {
+                return true; // 100% chance to appear as evil (Imp)
+            }
+            return false;
+        }
+        
+        // Helper function to check if a player appears as the Demon to Fortune Teller
+        function appearsAsDemon(targetPlayer) {
+            if (targetPlayer.characterDef.type === 'demon') {
+                return true;
+            }
+            // Recluse can register as the Demon
+            if (targetPlayer.characterDef.name === 'Recluse') {
+                return true;
+            }
+            return false;
+        }
+
+        function giveInformation(player, charDef, isPoisoned) {
+            var charName = charDef.name;
+            var info = '';
+            
+            // Drunk's ability "malfunctions" - they think they are a Townsfolk but get false/arbitrary info
+            // We treat them as poisoned for the purpose of generating info
+            if (player.character === 'Drunk') {
+                isPoisoned = true;
+                // Don't return early - let the code generate info for their fake role (charName)
+                // The isPoisoned flag will ensure the info is randomized/false where applicable
+            }
+            
+            // Storyteller discretion - simplified version
+            if (charName === 'Washerwoman') {
+                var townsfolk = players.filter(p => p.characterDef.type === 'townsfolk' && p.name !== player.name);
+                if (townsfolk.length > 0) {
+                    shuffleArray(townsfolk);
+                    var target1 = townsfolk[0];
+                    var target2 = townsfolk.length > 1 ? townsfolk[1] : players[Math.floor(Math.random() * players.length)];
+                    while (target2.name === target1.name) {
+                        target2 = players[Math.floor(Math.random() * players.length)];
+                    }
+                    info = target1.name + ' or ' + target2.name + ' is the ' + target1.characterDef.name;
+                } else {
+                    info = 'No other Townsfolk in game';
+                }
+            } else if (charName === 'Librarian') {
+                var outsiders = players.filter(p => p.characterDef.type === 'outsider');
+                if (outsiders.length > 0) {
+                    shuffleArray(outsiders);
+                    var target1 = outsiders[0];
+                    var target2 = outsiders.length > 1 ? outsiders[1] : players[Math.floor(Math.random() * players.length)];
+                    while (target2.name === target1.name) {
+                        target2 = players[Math.floor(Math.random() * players.length)];
+                    }
+                    info = target1.name + ' or ' + target2.name + ' is the ' + target1.characterDef.name;
+                } else {
+                    info = 'No Outsiders in game';
+                }
+            } else if (charName === 'Investigator') {
+                // Spy appears as good, so exclude them from Minion detection
+                var minions = players.filter(p => p.characterDef.type === 'minion' && p.characterDef.name !== 'Spy');
+                if (minions.length > 0) {
+                    shuffleArray(minions);
+                    var target1 = minions[0];
+                    var target2 = minions.length > 1 ? minions[1] : players[Math.floor(Math.random() * players.length)];
+                    while (target2.name === target1.name) {
+                        target2 = players[Math.floor(Math.random() * players.length)];
+                    }
+                    info = target1.name + ' or ' + target2.name + ' is the ' + target1.characterDef.name;
+                } else {
+                    info = 'No Minions in game';
+                }
+            } else if (charName === 'Chef') {
+                // Count pairs of evil players sitting next to each other
+                // Recluse may appear as evil
+                var evilCount = 0;
+                for (var i = 0; i < players.length; i++) {
+                    var p1 = players[i];
+                    var p2 = players[(i + 1) % players.length];
+                    if (p1.alive && p2.alive && appearsAsEvil(p1) && appearsAsEvil(p2)) {
+                        evilCount++;
+                    }
+                }
+                info = 'There are ' + evilCount + ' pair(s) of evil players sitting next to each other';
+            } else if (charName === 'Empath') {
+                // If Empath is dead, they learn 0
+                if (!player.alive) {
+                    info = 'There are 0 evil player(s) sitting next to you';
+                } else {
+                    var playerIndex = player.index;
+                    
+                    // Find the two closest living neighbors (skip dead players)
+                    var leftNeighbor = null;
+                    var rightNeighbor = null;
+                    
+                    // Find left neighbor (going backwards, skipping dead players)
+                    for (var i = 1; i < players.length; i++) {
+                        var leftIndex = (playerIndex - i + players.length) % players.length;
+                        if (players[leftIndex].alive) {
+                            leftNeighbor = players[leftIndex];
+                            break;
+                        }
+                    }
+                    
+                    // Find right neighbor (going forwards, skipping dead players)
+                    for (var i = 1; i < players.length; i++) {
+                        var rightIndex = (playerIndex + i) % players.length;
+                        if (players[rightIndex].alive) {
+                            rightNeighbor = players[rightIndex];
+                            break;
+                        }
+                    }
+                    
+                    var evilCount = 0;
+                    // Recluse may appear as evil
+                    if (leftNeighbor && appearsAsEvil(leftNeighbor)) {
+                        evilCount++;
+                    }
+                    if (rightNeighbor && appearsAsEvil(rightNeighbor)) {
+                        evilCount++;
+                    }
+                    
+                    info = 'There ' + (evilCount === 1 ? 'is' : 'are') + ' ' + evilCount + ' evil player(s) sitting next to you';
+                }
+            }
+            
+            if (isPoisoned && info !== '') {
+                // Give false information (but don't tell player it's false)
+                var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                while (!randomPlayer.alive || randomPlayer.name === player.name) {
+                    randomPlayer = players[Math.floor(Math.random() * players.length)];
+                }
+                if (charName === 'Chef') {
+                    var fakeCount = Math.floor(Math.random() * 3);
+                    info = 'There are ' + fakeCount + ' pair(s) of evil players sitting next to each other';
+                } else if (charName === 'Empath') {
+                    // Empath should get wrong info when poisoned, not "no info"
+                    var fakeCount = Math.floor(Math.random() * 3);
+                    info = 'There ' + (fakeCount === 1 ? 'is' : 'are') + ' ' + fakeCount + ' evil player(s) sitting next to you';
+                } else {
+                    info = randomPlayer.name;
+                }
+            }
+            
+            // Ensure info is set (but if Empath is poisoned, we already set fake info above)
+            if (!info || info === '') {
+                info = 'No information available';
+            }
+            
+            // Initialize playerInfo array if needed
+            if (!playerInfo[player.index]) {
+                playerInfo[player.index] = [];
+            }
+            
+            playerInfo[player.index].push({
+                night: currentDay,
+                info: info,
+                character: charName
+            });
+            
+            addLog(charName + ' (' + player.name + ') received information: ' + info);
+            
+            // Show information to player
+            showInformationToPlayer(player, charName, info);
+        }
+
+        function showInformationToPlayer(player, charName, info) {
+            // Hide night modal content but keep modal open to hide game screen
+            // Show information modal on top
+            document.getElementById('info-character-name').innerText = charName;
+            document.getElementById('info-player-name').innerText = player.name;
+            document.getElementById('info-text').innerText = info;
+            document.getElementById('info-modal').classList.remove('hidden');
+            // Keep night modal open but hidden behind info modal
+        }
+
+        function closeInfoModal() {
+            document.getElementById('info-modal').classList.add('hidden');
+            // If Ravenkeeper just used their ability (they're dead), update display and continue
+            var currentPlayer = currentNightOrder[nightIndex] ? currentNightOrder[nightIndex].player : null;
+            if (currentPlayer && !currentPlayer.alive && currentPlayer.characterDef.name === 'Ravenkeeper') {
+                updateGameDisplay();
+            }
+            // Move to next character - night modal should still be open to hide game screen
+            nightIndex++;
+            processNightPhase();
+        }
+
+        function giveUndertakerInfo(player, isPoisoned) {
+            // Only works if someone was executed yesterday (the previous day)
+            // Check if someone was executed on the previous day
+            if (currentDay > 1 && lastExecutionDay === currentDay - 1 && lastExecutedPlayer) {
+                var info = lastExecutedPlayer.name + ' was the ' + lastExecutedPlayer.characterDef.name;
+                    if (isPoisoned) {
+                    // Give false information - random wrong character
+                    var allCharacters = Object.keys(CHARACTERS);
+                    var randomChar = allCharacters[Math.floor(Math.random() * allCharacters.length)];
+                    while (randomChar === lastExecutedPlayer.character) {
+                        randomChar = allCharacters[Math.floor(Math.random() * allCharacters.length)];
+                    }
+                    info = lastExecutedPlayer.name + ' was the ' + CHARACTERS[randomChar].name + ' (false information due to poisoning)';
+                    }
+                    
+                    if (!playerInfo[player.index]) {
+                        playerInfo[player.index] = [];
+                    }
+                    playerInfo[player.index].push({
+                        day: currentDay,
+                        info: info,
+                        character: 'Undertaker'
+                    });
+                    
+                    addLog('Undertaker (' + player.name + ') received information: ' + info);
+                    showInformationToPlayer(player, 'Undertaker', info);
+                    return;
+            }
+            // No execution yesterday or first night
+            showInformationToPlayer(player, 'Undertaker', 'No one was executed yesterday');
+        }
+
+        function chooseProtection(monkPlayer) {
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            players.forEach(function(p) {
+                if (p.alive && p.name !== monkPlayer.name) {
+                    var btn = document.createElement('button');
+                    btn.className = 'player-select-btn';
+                    btn.style.marginTop = '10px';
+                    btn.innerText = p.name;
+                    btn.onclick = function() {
+                        protectedPlayers = [p.index];
+                        addLog('Monk (' + monkPlayer.name + ') protected ' + p.name);
+                        nextNightAction();
+                    };
+                    list.appendChild(btn);
+                }
+            });
+            
+            document.getElementById('night-character-actions').innerHTML = '';
+            document.getElementById('night-character-actions').appendChild(list);
+        }
+
+        function chooseButlerTarget(butlerPlayer) {
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            players.forEach(function(p) {
+                if (p.alive && p.name !== butlerPlayer.name) {
+                    var btn = document.createElement('button');
+                    btn.className = 'player-select-btn';
+                    btn.style.marginTop = '10px';
+                    btn.innerText = p.name;
+                    btn.onclick = function() {
+                        butlerChoices[butlerPlayer.index] = p.index;
+                        addLog('Butler (' + butlerPlayer.name + ') will follow ' + p.name + '\'s vote');
+                        nextNightAction();
+                    };
+                    list.appendChild(btn);
+                }
+            });
+            
+            document.getElementById('night-character-actions').innerHTML = '';
+            document.getElementById('night-character-actions').appendChild(list);
+        }
+
+        function triggerRavenkeeperAbility(ravenkeeperPlayer) {
+            // Ravenkeeper died at night - show their ability
+            var container = document.getElementById('night-character-actions');
+            container.innerHTML = '';
+            
+            var instructionDiv = document.createElement('div');
+            instructionDiv.style.marginBottom = '15px';
+            instructionDiv.innerHTML = '<p style="margin-bottom:15px; font-weight: bold; color: var(--accent-color);">Ravenkeeper (' + ravenkeeperPlayer.name + ') died at night. Choose a player to learn their character:</p>';
+            container.appendChild(instructionDiv);
+            
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            players.forEach(function(p) {
+                if (p.name !== ravenkeeperPlayer.name) {
+                    var btn = document.createElement('button');
+                    btn.className = 'player-select-btn';
+                    btn.style.marginTop = '10px';
+                    btn.innerText = p.name;
+                    btn.onclick = function() {
+                        var info = p.name + ' is the ' + p.characterDef.name;
+                        
+                        if (!playerInfo[ravenkeeperPlayer.index]) {
+                            playerInfo[ravenkeeperPlayer.index] = [];
+                        }
+                        playerInfo[ravenkeeperPlayer.index].push({
+                            night: currentDay,
+                            info: info,
+                            character: 'Ravenkeeper'
+                        });
+                        
+                        addLog('Ravenkeeper (' + ravenkeeperPlayer.name + ') learned: ' + info);
+                        // Update game display to show Ravenkeeper is dead
+                        updateGameDisplay();
+                        showInformationToPlayer(ravenkeeperPlayer, 'Ravenkeeper', info);
+                        // After showing info, continue night phase
+                        // The info modal will handle continuing
+                    };
+                    list.appendChild(btn);
+                }
+            });
+            
+            container.appendChild(list);
+            
+            // Update night character display
+            document.getElementById('night-character-name').innerText = 'Ravenkeeper';
+            document.getElementById('night-player-name').innerText = ravenkeeperPlayer.name;
+            document.getElementById('night-character-info').innerText = 'If you die at night, choose a player: learn their character.';
+        }
+
+        function chooseFortuneTellerTarget(fortuneTellerPlayer, isPoisoned) {
+            var container = document.getElementById('night-character-actions');
+            container.innerHTML = '';
+            
+            var instructionDiv = document.createElement('div');
+            instructionDiv.style.marginBottom = '15px';
+            instructionDiv.id = 'fortune-teller-instruction';
+            instructionDiv.innerHTML = '<p style="margin-bottom:15px; font-weight: bold;">Fortune Teller: Choose TWO players to check:</p>';
+            container.appendChild(instructionDiv);
+            
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            var selectedPlayers = [];
+            
+            players.forEach(function(p) {
+                if (p.alive && p.name !== fortuneTellerPlayer.name) {
+                    var btn = document.createElement('button');
+                    btn.className = 'player-select-btn';
+                    btn.style.marginTop = '10px';
+                    btn.innerText = p.name;
+                    btn.dataset.playerIndex = p.index;
+                    
+                    btn.onclick = function() {
+                        if (selectedPlayers.indexOf(p.index) === -1 && selectedPlayers.length < 2) {
+                            selectedPlayers.push(p.index);
+                            btn.style.background = 'rgba(183, 28, 28, 0.4)';
+                            btn.style.border = '3px solid var(--accent-color)';
+                            btn.innerText = p.name + ' ✓';
+                            btn.disabled = true;
+                            
+                            if (selectedPlayers.length === 1) {
+                                instructionDiv.innerHTML = '<p style="margin-bottom:15px; font-weight: bold;">Fortune Teller: Choose ONE more player:</p>';
+                            } else if (selectedPlayers.length === 2) {
+                                giveFortuneTellerInfo(fortuneTellerPlayer, selectedPlayers, isPoisoned);
+                            }
+                        }
+                    };
+                    
+                    list.appendChild(btn);
+                }
+            });
+            
+            container.appendChild(list);
+        }
+
+        function giveFortuneTellerInfo(fortuneTellerPlayer, selectedPlayerIndices, isPoisoned) {
+            var player1 = players.find(p => p.index === selectedPlayerIndices[0]);
+            var player2 = players.find(p => p.index === selectedPlayerIndices[1]);
+            
+            // First night: Designate a red herring if not already set
+            if (currentDay === 1 && !fortuneTellerRedHerrings[fortuneTellerPlayer.index]) {
+                // Select a random good player (not the Demon or Minions) as the red herring
+                var goodPlayers = players.filter(p => 
+                    p.alive && 
+                    p.index !== fortuneTellerPlayer.index && 
+                    p.characterDef.type !== 'demon' && 
+                    p.characterDef.type !== 'minion'
+                );
+                if (goodPlayers.length > 0) {
+                    var redHerring = goodPlayers[Math.floor(Math.random() * goodPlayers.length)];
+                    fortuneTellerRedHerrings[fortuneTellerPlayer.index] = redHerring.index;
+                    addLog('Fortune Teller (' + fortuneTellerPlayer.name + ') red herring designated: ' + redHerring.name);
+                }
+            }
+            
+            var info = '';
+            var isDemon1 = appearsAsDemon(player1);
+            var isDemon2 = appearsAsDemon(player2);
+            var isRedHerring1 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player1.index;
+            var isRedHerring2 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player2.index;
+            
+                if (isPoisoned) {
+                // Poisoned - give random false information
+                info = Math.random() > 0.5 ? 'YES' : 'NO';
+            } else if (isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2) {
+                // One of them is the Demon (or Recluse) OR the red herring
+                info = 'YES';
+                    } else {
+                // Neither is the Demon nor the red herring
+                info = 'NO';
+            }
+            
+            if (!playerInfo[fortuneTellerPlayer.index]) {
+                playerInfo[fortuneTellerPlayer.index] = [];
+            }
+            
+            playerInfo[fortuneTellerPlayer.index].push({
+                night: currentDay,
+                info: 'Is one of ' + player1.name + ' or ' + player2.name + ' the Demon? ' + info,
+                character: 'Fortune Teller',
+                targets: player1.name + ' and ' + player2.name
+            });
+            
+            addLog('Fortune Teller (' + fortuneTellerPlayer.name + ') checked ' + player1.name + ' and ' + player2.name + ' - received: ' + info);
+            showInformationToPlayer(fortuneTellerPlayer, 'Fortune Teller', 'Is one of ' + player1.name + ' or ' + player2.name + ' the Demon? ' + info);
+        }
+
+        function choosePoisonTarget(poisonerPlayer) {
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            // Find Poisoner's position in the actual night sequence
+            var poisonerSequenceIndex = -1;
+            for (var i = 0; i < currentNightOrder.length; i++) {
+                if (currentNightOrder[i].player.index === poisonerPlayer.index) {
+                    poisonerSequenceIndex = i;
+                    break;
+                }
+            }
+            
+            players.forEach(function(p) {
+                if (p.alive && p.name !== poisonerPlayer.name) {
+                    var btn = document.createElement('button');
+                    btn.className = 'player-select-btn';
+                    btn.style.marginTop = '10px';
+                    btn.innerText = p.name;
+                    
+                    // Find target's position in the actual night sequence
+                    var targetSequenceIndex = -1;
+                    for (var j = 0; j < currentNightOrder.length; j++) {
+                        if (currentNightOrder[j].player.index === p.index) {
+                            targetSequenceIndex = j;
+                            break;
+                        }
+                    }
+                    
+                    var appliesThisNight = false;
+                    var appliesNextNight = false;
+                    
+                    // Determine when poison applies based on actual sequence position
+                    if (targetSequenceIndex === -1) {
+                        // Character not in night sequence (day ability only) - poisoned for day phase
+                        appliesThisNight = true;
+                        btn.innerText += ' (poisoned for day)';
+                    } else if (targetSequenceIndex < poisonerSequenceIndex) {
+                        // Target comes BEFORE Poisoner in sequence - poisoned for NEXT night
+                        appliesNextNight = true;
+                        btn.innerText += ' (poisoned for next night)';
+                    } else if (targetSequenceIndex > poisonerSequenceIndex) {
+                        // Target comes AFTER Poisoner in sequence - poisoned for THIS night
+                        appliesThisNight = true;
+                        btn.innerText += ' (poisoned for this night)';
+                    } else {
+                        // Same position (shouldn't happen, but handle it)
+                        appliesThisNight = true;
+                        btn.innerText += ' (poisoned for this night)';
+                    }
+                    
+                    btn.onclick = function() {
+                        // Remove any existing poison for this player
+                        poisonedPlayers = poisonedPlayers.filter(poison => poison.playerIndex !== p.index);
+                        
+                        // Add new poison entry
+                        var appliesNight = appliesNextNight ? currentDay + 1 : currentDay;
+                        poisonedPlayers.push({
+                            playerIndex: p.index,
+                            poisonedNight: currentDay,
+                            appliesNight: appliesNight
+                        });
+                        
+                        var whenText = appliesNextNight ? 'next night' : (appliesThisNight ? 'this night/day' : 'next activation');
+                        addLog('Poisoner (' + poisonerPlayer.name + ') poisoned ' + p.name + ' (effect applies ' + whenText + ')');
+                        nextNightAction();
+                    };
+                    list.appendChild(btn);
+                }
+            });
+            
+            document.getElementById('night-character-actions').innerHTML = '';
+            document.getElementById('night-character-actions').appendChild(list);
+        }
+
+        function chooseKillTarget(impPlayer) {
+            // First night: Imp doesn't kill, but learns 3 roles not in the game
+            if (currentDay === 1 && isNightPhase) {
+                addLog('First Night: Imp does not kill');
+                
+                // Get all possible GOOD roles (Townsfolk and Outsiders only - not Minions/Demons)
+                var allGoodRoles = TOWNSFOLK_POOL.concat(OUTSIDER_POOL);
+                // Get roles in the game
+                var rolesInGame = players.map(p => {
+                    // Find the character key from the characterDef
+                    for (var key in CHARACTERS) {
+                        if (CHARACTERS[key].name === p.characterDef.name) {
+                            return key;
+                        }
+                    }
+                    return null;
+                }).filter(r => r !== null);
+                
+                // Find GOOD roles NOT in the game (Imp learns about good characters they can claim to be)
+                var rolesNotInGame = allGoodRoles.filter(r => rolesInGame.indexOf(r) === -1);
+                shuffleArray(rolesNotInGame);
+                
+                // Show message with 3 roles not in game
+                var actions = document.getElementById('night-character-actions');
+                var infoText = '<div style="padding: 15px; background: rgba(213, 0, 0, 0.2); border: 2px solid var(--demon-color); border-radius: 8px; margin: 15px 0;">';
+                infoText += '<p style="color: var(--text-primary); font-weight: bold; margin-bottom: 10px;">First Night: Imp does not kill anyone.</p>';
+                infoText += '<p style="color: var(--text-primary); margin-top: 15px; font-weight: bold;">Three roles NOT in this game:</p>';
+                infoText += '<ul style="margin: 10px 0; padding-left: 20px;">';
+                for (var i = 0; i < 3 && i < rolesNotInGame.length; i++) {
+                    infoText += '<li style="margin: 5px 0;">' + CHARACTERS[rolesNotInGame[i]].name + '</li>';
+                }
+                infoText += '</ul></div>';
+                actions.innerHTML = infoText;
+                
+                // Store this info for the Imp
+                if (!playerInfo[impPlayer.index]) {
+                    playerInfo[impPlayer.index] = [];
+                }
+                var rolesList = rolesNotInGame.slice(0, 3).map(r => CHARACTERS[r].name).join(', ');
+                playerInfo[impPlayer.index].push({
+                    night: currentDay,
+                    info: 'Three roles NOT in this game: ' + rolesList,
+                    character: 'Imp'
+                });
+                
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Continue';
+                btn.onclick = function() {
+                    nextNightAction();
+                };
+                actions.appendChild(btn);
+                return;
+            }
+            
+            var list = document.createElement('div');
+            list.style.marginTop = '15px';
+            
+            var livingPlayers = players.filter(p => p.alive && p.name !== impPlayer.name);
+            
+            if (livingPlayers.length === 0) {
+                var actions = document.getElementById('night-character-actions');
+                actions.innerHTML = '<p style="color: var(--text-secondary);">No other living players to kill.</p>';
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'Continue';
+                btn.onclick = function() {
+                    nextNightAction();
+                };
+                actions.appendChild(btn);
+                return;
+            }
+            
+            list.innerHTML = '<p style="margin-bottom: 15px; font-weight: bold;">Select a player to kill:</p>';
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                // Don't show protection status to Imp - they shouldn't know who is protected
+                
+                btn.onclick = function() {
+                    // Mark player for death (will be resolved at end of night)
+                    // This allows Monk to protect them even if Monk acts after Imp
+                    markedForDeath = p;
+                    addLog('Imp targeted ' + p.name);
+                    // Move to next character without closing modal (to hide game screen)
+                    nightIndex++;
+                    processNightPhase();
+                };
+                list.appendChild(btn);
+            });
+            
+            // Add self-kill (Starpass) option
+            var selfKillBtn = document.createElement('button');
+            selfKillBtn.className = 'player-select-btn';
+            selfKillBtn.style.marginTop = '15px';
+            selfKillBtn.style.background = 'linear-gradient(135deg, rgba(139, 0, 0, 0.5), rgba(178, 34, 34, 0.5))';
+            selfKillBtn.style.border = '2px solid rgba(255, 0, 0, 0.6)';
+            selfKillBtn.innerText = 'YOURSELF - Starpass';
+            selfKillBtn.onclick = function() {
+                // Find living Minions
+                var livingMinions = players.filter(p => p.alive && p.characterDef.type === 'minion' && p.name !== impPlayer.name);
+                
+                if (livingMinions.length === 0) {
+                    alert('No living Minions available to pass the Demon role to.');
+                    return;
+                }
+                
+                // Imp kills itself and passes role to a random Minion
+                markedForDeath = impPlayer;
+                
+                // Randomly select a living Minion to become the new Imp
+                var newImp = livingMinions[Math.floor(Math.random() * livingMinions.length)];
+                newImp.characterDef = CHARACTERS['Imp'];
+                
+                addLog('Imp (' + impPlayer.name + ') killed themselves and ' + newImp.name + ' became the new Imp!');
+                
+                nightIndex++;
+                processNightPhase();
+            };
+            list.appendChild(selfKillBtn);
+            
+            document.getElementById('night-character-actions').innerHTML = '';
+            document.getElementById('night-character-actions').appendChild(list);
+        }
+
+        function skipNightAbility() {
+            nextNightAction();
+        }
+
+        function nextNightAction() {
+            // Don't close modal yet - keep it open to hide the game screen
+            nightIndex++;
+            // Process next phase immediately without closing modal
+            processNightPhase();
+        }
+
+        function startDayPhase() {
+            // Clear protection (lasts until next day)
+            protectedPlayers = [];
+            // Clear poisoning that was applied this night (one-time effect)
+            poisonedPlayers = poisonedPlayers.filter(poison => {
+                // Keep poisons that apply next night, remove ones that applied this night
+                return poison.appliesNight > currentDay;
+            });
+            
+            // Update game display to reflect any deaths that occurred during the night
+            updateGameDisplay();
+            
+            isNightPhase = false;
+            document.getElementById('phase-display').className = 'phase-display phase-day';
+            document.getElementById('phase-title').innerText = 'Day ' + currentDay;
+            
+            // Calculate important day phase info
+            var livingPlayers = players.filter(p => p.alive);
+            var livingCount = livingPlayers.length;
+            var deadCount = players.length - livingCount;
+            var votesNeeded = Math.floor(livingCount / 2) + 1; // Majority = more than half
+            
+            // Check for special conditions
+            var specialConditions = '';
+            if (livingCount === 2) {
+                specialConditions += '<div style="background: rgba(244, 67, 54, 0.2); padding: 10px; border-radius: 5px; margin-top: 10px; border: 2px solid var(--evil-color);">' +
+                    '<strong style="color: var(--evil-color);">⚠️ FINAL TWO:</strong> <strong>EVIL WINS</strong> - Game is over!' +
+                    '</div>';
+            }
+            
+            // Check for deaths during the night
+            var nightDeathsHTML = '';
+            var deadPlayers = players.filter(p => !p.alive && p.diedAtNight === currentDay);
+            if (deadPlayers.length > 0) {
+                var deathNames = deadPlayers.map(p => p.name).join(', ');
+                nightDeathsHTML = 
+                    '<div id="night-death-announcement" onclick="this.remove()" style="background: linear-gradient(135deg, rgba(156, 39, 176, 0.4) 0%, rgba(123, 31, 162, 0.25) 100%); padding: 40px 30px; border-radius: 20px; text-align: center; margin-bottom: 35px; border: 4px solid #9c27b0; box-shadow: 0 12px 32px rgba(156, 39, 176, 0.6), inset 0 2px 4px rgba(255,255,255,0.1); animation: pulseGlow 2s ease-in-out infinite; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(0.98)\'" onmouseout="this.style.transform=\'scale(1)\'">' +
+                    '<div style="font-size: 5rem; margin-bottom: 15px; animation: fadeIn 1s;">☠️</div>' +
+                    '<h2 style="font-size: 2.2rem; font-weight: bold; color: #fff; text-shadow: 0 4px 8px rgba(0,0,0,0.8), 0 0 30px rgba(156, 39, 176, 0.8); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 3px;">DEATH IN THE NIGHT</h2>' +
+                    '<p style="font-size: 1.8rem; font-weight: 700; color: #e1bee7; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin: 0;">' + deathNames + '</p>' +
+                    '<p style="font-size: 1.2rem; color: rgba(255,255,255,0.7); margin-top: 10px; font-style: italic;">was found dead</p>' +
+                    '<p style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-top: 15px; font-style: italic;">Click to dismiss</p>' +
+                    '</div>';
+            } else if (currentDay > 1) {
+                nightDeathsHTML = 
+                    '<div id="night-death-announcement" onclick="this.remove()" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.15) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 30px; border: 3px solid var(--good-color); box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(0.98)\'" onmouseout="this.style.transform=\'scale(1)\'">' +
+                    '<div style="font-size: 3.5rem; margin-bottom: 10px;">✨</div>' +
+                    '<h3 style="font-size: 1.6rem; font-weight: bold; color: var(--good-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin: 0;">No Deaths This Night</h3>' +
+                    '<p style="font-size: 1rem; color: var(--text-secondary); margin-top: 8px;">The village survived another night</p>' +
+                    '<p style="font-size: 0.9rem; color: rgba(255,255,255,0.4); margin-top: 10px; font-style: italic;">Click to dismiss</p>' +
+                    '</div>';
+            }
+            
+            document.getElementById('phase-content').innerHTML = 
+                nightDeathsHTML +
+                '<!-- Critical Stats Cards -->' +
+                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">' +
+                
+                '<!-- Living Players Card -->' +
+                '<div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.15) 100%); padding: 30px 20px; border-radius: 16px; text-align: center; border: 3px solid var(--good-color); box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4), inset 0 1px 0 rgba(255,255,255,0.1); position: relative; overflow: hidden; transition: transform 0.2s;">' +
+                '<div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);"></div>' +
+                '<div style="position: relative; z-index: 1;">' +
+                '<div style="font-size: 4.5rem; font-weight: 900; color: var(--good-color); text-shadow: 0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(76, 175, 80, 0.3); margin-bottom: 12px; line-height: 1;">' + livingCount + '</div>' +
+                '<div style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">Living Players</div>' +
+                '</div>' +
+                '</div>' +
+                
+                '<!-- Votes Needed Card -->' +
+                '<div style="background: linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(244, 67, 54, 0.15) 100%); padding: 30px 20px; border-radius: 16px; text-align: center; border: 3px solid var(--accent-color); box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4), inset 0 1px 0 rgba(255,255,255,0.1); position: relative; overflow: hidden; transition: transform 0.2s;">' +
+                '<div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(244, 67, 54, 0.1) 0%, transparent 70%);"></div>' +
+                '<div style="position: relative; z-index: 1;">' +
+                '<div style="font-size: 4.5rem; font-weight: 900; color: var(--accent-color); text-shadow: 0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(244, 67, 54, 0.3); margin-bottom: 12px; line-height: 1;">' + votesNeeded + '</div>' +
+                '<div style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">Votes to Execute</div>' +
+                '</div>' +
+                '</div>' +
+                
+                '</div>' +
+                
+                specialConditions;
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<!-- Action Buttons -->' +
+                '<div style="display: grid; gap: 15px; margin-bottom: 30px;">' +
+                '<button class="action-btn" onclick="openExecutionSelection()" style="font-size: 1.1rem; padding: 18px; background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%); box-shadow: 0 6px 20px rgba(198, 40, 40, 0.6); border: none; color: #fff; font-weight: 700;">🪓 Record Execution</button>' +
+                '<button class="secondary-btn" onclick="openSlayerAbility()" style="font-size: 1rem; padding: 15px; background: linear-gradient(135deg, #f57c00 0%, #e65100 100%); border: 2px solid #ff9800; color: #fff; font-weight: 600; box-shadow: 0 4px 16px rgba(245, 124, 0, 0.5);"><span style="font-size: 1.5rem;">⚔️</span> Slayer</button>' +
+                '<button class="secondary-btn" onclick="endDay()" style="font-size: 1rem; padding: 15px; background: linear-gradient(135deg, #5e35b1 0%, #4527a0 100%); border: 2px solid #7e57c2; color: #fff; font-weight: 600; box-shadow: 0 4px 16px rgba(94, 53, 177, 0.5);">🌙 No Execution - End Day</button>' +
+                '</div>' +
+                '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">' +
+                '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">' +
+                '<span style="font-size: 1.2rem;">📋</span><span>Detailed Execution Rules</span>' +
+                '</summary>' +
+                '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
+                '<ul style="margin: 0; padding-left: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
+                '<li><strong style="color: var(--text-primary);">Nominations:</strong> Any living player can nominate another living player</li>' +
+                '<li><strong style="color: var(--text-primary);">One Nomination Per Player:</strong> Each player nominates once per day</li>' +
+                '<li><strong style="color: var(--text-primary);">Voting:</strong> After nomination, all players may vote</li>' +
+                '<li><strong style="color: var(--text-primary);">Dead Vote Limit:</strong> Dead players have ONE vote for entire game</li>' +
+                '<li><strong style="color: var(--text-primary);">Execution Threshold:</strong> ' + votesNeeded + '+ votes required</li>' +
+                '<li><strong style="color: var(--text-primary);">One Per Day:</strong> Maximum one execution per day (highest votes)</li>' +
+                '<li><strong style="color: var(--text-primary);">No Reveal:</strong> Executed characters NOT revealed</li>' +
+                '<li><strong style="color: var(--text-primary);">Dead Can Talk:</strong> Dead players participate in discussions</li>' +
+                '<li><strong style="color: var(--text-primary);">Slayer:</strong> Can be used during day (once per game)</li>' +
+                '</ul>' +
+                '</div>' +
+                '</details>' +
+                '<div style="text-align: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">' +
+                '<button class="secondary-btn" onclick="toggleGrimoire()" style="font-size: 0.9rem; padding: 12px 20px; background: rgba(96, 125, 139, 0.2); border: 1px solid #607d8b; color: var(--text-secondary); font-weight: 500;">📖 View Grimoire (Storyteller)</button>' +
+                '</div>';
+            
+            addLog('Day ' + currentDay + ' begins.');
+        }
+
+        function endNightPhase() {
+            // Resolve death marked by Imp (after all night actions including Monk protection)
+            if (markedForDeath) {
+                var target = markedForDeath;
+                var isProtected = protectedPlayers.indexOf(target.index) !== -1;
+                var isSoldier = target.characterDef.name === 'Soldier';
+                
+                if (isProtected) {
+                    addLog('Imp tried to kill ' + target.name + ' (Protected by Monk)');
+                } else if (isSoldier) {
+                    addLog('Imp tried to kill ' + target.name + ' (Soldier - cannot die at night)');
+                } else {
+                    target.alive = false;
+                    target.diedAtNight = currentDay;
+                    addLog('Imp killed ' + target.name);
+                    // Check if killed player is Ravenkeeper - trigger their ability
+                    if (target.characterDef.name === 'Ravenkeeper') {
+                        // Ravenkeeper died - they get to use their ability
+                        // We need to handle this before day starts
+                        triggerRavenkeeperAbility(target);
+                        // Return early - the Ravenkeeper modal will handle continuing to day
+                        return;
+                    }
+                }
+                markedForDeath = null; // Clear the marked target
+            }
+            
+            // Clear protection (lasts until next day)
+            protectedPlayers = [];
+            // Clear poisoning that was applied this night (one-time effect)
+            poisonedPlayers = poisonedPlayers.filter(poison => {
+                // Keep poisons that apply next night, remove ones that applied this night
+                return poison.appliesNight > currentDay;
+            });
+            
+            // Update game display to reflect any deaths that occurred during the night
+            updateGameDisplay();
+            
+            // Check win conditions after night deaths
+            checkWinConditions();
+            
+            // Start the day phase
+            startDayPhase();
+        }
+
+        function openSlayerAbility() {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            var livingPlayers = players.filter(p => p.alive);
+            
+            list.innerHTML = '<p style="margin-bottom:15px;"><strong>Slayer:</strong> Once per game, choose a player. If they are the Demon, they die.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px; color: var(--text-secondary); font-size: 0.9rem;">Any player can claim to be the Slayer and attempt this ability. Only the real Slayer can kill the Demon.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px;"><strong>Select the player claiming to be Slayer:</strong></p>';
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    selectSlayerTarget(p);
+                };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('nomination-text').innerText = 'A player claims to be the Slayer. Select who is claiming, then select their target.';
+            document.getElementById('nomination-modal').classList.remove('hidden');
+        }
+
+        function selectSlayerTarget(slayerClaimant) {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            list.innerHTML = '<div style="margin-bottom:15px;"><strong>Slayer Claimant:</strong> ' + slayerClaimant.name + '</div>';
+            list.innerHTML += '<div style="margin-bottom:15px;"><strong>Select Target:</strong></div>';
+            
+            var livingPlayers = players.filter(p => p.alive && p.name !== slayerClaimant.name);
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    processSlayerAbility(slayerClaimant, p);
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function processSlayerAbility(slayerClaimant, target) {
+            document.getElementById('nomination-modal').classList.add('hidden');
+            
+            var isRealSlayer = slayerClaimant.characterDef.name === 'Slayer';
+            var isTargetDemon = target.characterDef.type === 'demon';
+            var slayerHasUsed = slayerUsed;
+            var targetWasAlive = target.alive;
+            
+            // Slayer ability only works if:
+            // 1. The claimant is the real Slayer
+            // 2. The target is the Demon
+            // 3. The Slayer hasn't used it before
+            
+            var resultContent = document.getElementById('slayer-result-content');
+            var targetDied = false;
+            
+            if (isRealSlayer && isTargetDemon && !slayerHasUsed) {
+                // Real Slayer targets Demon - it works!
+                target.alive = false;
+                targetDied = true;
+                slayerUsed = true;
+                addLog('Slayer (' + slayerClaimant.name + ') killed ' + target.name + ' (the Demon)!');
+                
+                // Check for Scarlet Woman (only becomes Demon if 5+ players alive)
+                var livingCount = players.filter(p => p.alive).length;
+                var scarletWoman = players.find(p => p.alive && p.characterDef.name === 'Scarlet Woman');
+                if (scarletWoman && livingCount >= 4) {
+                    scarletWoman.characterDef = CHARACTERS['Imp'];
+                    addLog('Scarlet Woman (' + scarletWoman.name + ') became the Imp!');
+                } else {
+                    endGame('good', 'Demon was killed by Slayer! Good wins!');
+                    return;
+                }
+                
+                updateGameDisplay();
+                checkWinConditions();
+                
+                // Show result: Target died
+                resultContent.innerHTML = 
+                    '<div style="font-size: 2rem; margin-bottom: 15px;">⚔️</div>' +
+                    '<div style="font-size: 1.5rem; font-weight: bold; color: var(--demon-color); margin-bottom: 10px;">' + target.name + ' DIED!</div>' +
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">The Slayer ability succeeded. ' + target.name + ' was the Demon and has been killed.</p>';
+                resultContent.style.background = 'rgba(213, 0, 0, 0.2)';
+                resultContent.style.border = '2px solid var(--demon-color)';
+            } else {
+                // Either not the real Slayer, or wrong target, or already used
+                // Show result: Target survived (don't reveal why)
+                resultContent.innerHTML = 
+                    '<div style="font-size: 2rem; margin-bottom: 15px;">🛡️</div>' +
+                    '<div style="font-size: 1.5rem; font-weight: bold; color: var(--good-color); margin-bottom: 10px;">' + target.name + ' SURVIVED</div>' +
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">The Slayer ability had no effect. ' + target.name + ' is still alive.</p>';
+                resultContent.style.background = 'rgba(76, 175, 80, 0.2)';
+                resultContent.style.border = '2px solid var(--good-color)';
+                
+                addLog(slayerClaimant.name + ' attempted Slayer ability on ' + target.name + ' (no effect)');
+            }
+            
+            // Show result modal
+            document.getElementById('slayer-result-modal').classList.remove('hidden');
+        }
+
+        function closeSlayerResult() {
+            document.getElementById('slayer-result-modal').classList.add('hidden');
+            
+            // Return to day phase - restore the proper day phase layout
+            var livingPlayers = players.filter(p => p.alive);
+            var livingCount = livingPlayers.length;
+            var votesNeeded = Math.floor(livingCount / 2) + 1;
+            
+            // Check for special conditions
+            var specialConditions = '';
+            if (livingCount === 2) {
+                specialConditions += '<div style="background: rgba(244, 67, 54, 0.2); padding: 10px; border-radius: 5px; margin-top: 10px; border: 2px solid var(--evil-color);">' +
+                    '<strong style="color: var(--evil-color);">⚠️ FINAL TWO:</strong> <strong>EVIL WINS</strong> - Game is over!' +
+                    '</div>';
+            }
+            
+            // Remove night death announcement if still present
+            var nightDeathEl = document.getElementById('night-death-announcement');
+            if (nightDeathEl) {
+                nightDeathEl.remove();
+            }
+            
+            document.getElementById('phase-title').innerText = 'Day ' + currentDay;
+            document.getElementById('phase-content').innerHTML = 
+                '<!-- Critical Stats Cards -->' +
+                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">' +
+                
+                '<!-- Living Players Card -->' +
+                '<div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.15) 100%); padding: 30px 20px; border-radius: 16px; text-align: center; border: 3px solid var(--good-color); box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4), inset 0 1px 0 rgba(255,255,255,0.1); position: relative; overflow: hidden; transition: transform 0.2s;">' +
+                '<div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);"></div>' +
+                '<div style="position: relative; z-index: 1;">' +
+                '<div style="font-size: 4.5rem; font-weight: 900; color: var(--good-color); text-shadow: 0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(76, 175, 80, 0.3); margin-bottom: 12px; line-height: 1;">' + livingCount + '</div>' +
+                '<div style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">Living Players</div>' +
+                '</div>' +
+                '</div>' +
+                
+                '<!-- Votes Needed Card -->' +
+                '<div style="background: linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(244, 67, 54, 0.15) 100%); padding: 30px 20px; border-radius: 16px; text-align: center; border: 3px solid var(--accent-color); box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4), inset 0 1px 0 rgba(255,255,255,0.1); position: relative; overflow: hidden; transition: transform 0.2s;">' +
+                '<div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(244, 67, 54, 0.1) 0%, transparent 70%);"></div>' +
+                '<div style="position: relative; z-index: 1;">' +
+                '<div style="font-size: 4.5rem; font-weight: 900; color: var(--accent-color); text-shadow: 0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(244, 67, 54, 0.3); margin-bottom: 12px; line-height: 1;">' + votesNeeded + '</div>' +
+                '<div style="font-size: 1.1rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">Votes to Execute</div>' +
+                '</div>' +
+                '</div>' +
+                
+                '</div>' +
+                
+                specialConditions;
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<!-- Action Buttons -->' +
+                '<div style="display: grid; gap: 15px; margin-bottom: 30px;">' +
+                '<button class="action-btn" onclick="openExecutionSelection()" style="font-size: 1.1rem; padding: 18px; background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%); box-shadow: 0 6px 20px rgba(198, 40, 40, 0.6); border: none; color: #fff; font-weight: 700;">🪓 Record Execution</button>' +
+                '<button class="secondary-btn" onclick="openSlayerAbility()" style="font-size: 1rem; padding: 15px; background: linear-gradient(135deg, #f57c00 0%, #e65100 100%); border: 2px solid #ff9800; color: #fff; font-weight: 600; box-shadow: 0 4px 16px rgba(245, 124, 0, 0.5);"><span style="font-size: 1.5rem;">⚔️</span> Slayer</button>' +
+                '<button class="secondary-btn" onclick="endDay()" style="font-size: 1rem; padding: 15px; background: linear-gradient(135deg, #5e35b1 0%, #4527a0 100%); border: 2px solid #7e57c2; color: #fff; font-weight: 600; box-shadow: 0 4px 16px rgba(94, 53, 177, 0.5);">🌙 No Execution - End Day</button>' +
+                '</div>' +
+                '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">' +
+                '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">' +
+                '<span style="font-size: 1.2rem;">📋</span><span>Detailed Execution Rules</span>' +
+                '</summary>' +
+                '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
+                '<ul style="margin: 0; padding-left: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
+                '<li><strong style="color: var(--text-primary);">Nominations:</strong> Any living player can nominate another living player</li>' +
+                '<li><strong style="color: var(--text-primary);">One Nomination Per Player:</strong> Each player nominates once per day</li>' +
+                '<li><strong style="color: var(--text-primary);">Voting:</strong> After nomination, all players may vote</li>' +
+                '<li><strong style="color: var(--text-primary);">Dead Vote Limit:</strong> Dead players have ONE vote for entire game</li>' +
+                '<li><strong style="color: var(--text-primary);">Execution Threshold:</strong> ' + votesNeeded + '+ votes required</li>' +
+                '<li><strong style="color: var(--text-primary);">One Per Day:</strong> Maximum one execution per day (highest votes)</li>' +
+                '<li><strong style="color: var(--text-primary);">No Reveal:</strong> Executed characters NOT revealed</li>' +
+                '<li><strong style="color: var(--text-primary);">Dead Can Talk:</strong> Dead players participate in discussions</li>' +
+                '<li><strong style="color: var(--text-primary);">Slayer:</strong> Can be used during day (once per game)</li>' +
+                '</ul>' +
+                '</div>' +
+                '</details>' +
+                '<div style="text-align: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">' +
+                '<button class="secondary-btn" onclick="toggleGrimoire()" style="font-size: 0.9rem; padding: 12px 20px; background: rgba(96, 125, 139, 0.2); border: 1px solid #607d8b; color: var(--text-secondary); font-weight: 500;">📖 View Grimoire (Storyteller)</button>' +
+                '</div>';
+        }
+
+        function openExecutionSelection() {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            var livingPlayers = players.filter(p => p.alive);
+            
+            if (livingPlayers.length === 0) {
+                alert('No living players to execute.');
+                return;
+            }
+            
+            list.innerHTML = '<p style="margin-bottom:15px;">Select the player who was executed:</p>';
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    processExecution(p);
+                };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('nomination-text').innerText = 'A player was executed during the day. Select who was executed.';
+            document.getElementById('nomination-modal').classList.remove('hidden');
+        }
+
+        function processExecution(target) {
+            document.getElementById('nomination-modal').classList.add('hidden');
+            
+            // Check for Virgin ability (if nominated by Townsfolk, nominator dies instead)
+            if (target.characterDef.name === 'Virgin' && !virginTriggered) {
+                var confirmMsg = target.name + ' is the Virgin. If nominated by a Townsfolk, the nominator is executed instead. Was the nominator a Townsfolk?';
+                if (confirm(confirmMsg)) {
+                    // Show selection for who the nominator was
+                    showVirginExecution(target);
+                    return;
+                }
+            }
+            
+            // Check for Saint
+            if (target.characterDef.name === 'Saint') {
+                if (confirm('WARNING: ' + target.name + ' is the Saint. If executed, Evil wins! Continue with execution?')) {
+                    executePlayer(target);
+                    endGame('evil', 'Saint was executed! Evil wins!');
+                    return;
+                } else {
+                    return;
+                }
+            }
+            
+            // Normal execution
+            executePlayer(target);
+        }
+
+        function showVirginExecution(virgin) {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            var livingPlayers = players.filter(p => p.alive && p.name !== virgin.name && p.characterDef.type === 'townsfolk');
+            
+            if (livingPlayers.length === 0) {
+                // No Townsfolk to execute, so Virgin is executed normally
+                executePlayer(virgin);
+                return;
+            }
+            
+            list.innerHTML = '<p style="margin-bottom:15px;">Virgin triggered! Select which Townsfolk nominated the Virgin (they are executed instead):</p>';
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    addLog('Virgin triggered! ' + p.name + ' is executed instead of ' + virgin.name);
+                    virginTriggered = true;
+                    // Close the modal first
+                    document.getElementById('nomination-modal').classList.add('hidden');
+                    executePlayer(p);
+                };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('nomination-text').innerText = 'Virgin ability activated - nominator is executed instead.';
+            document.getElementById('nomination-modal').classList.remove('hidden');
+        }
+
+        function executePlayer(player) {
+            player.alive = false;
+            executions++;
+            lastExecutionDay = currentDay; // Track which day this execution happened
+            lastExecutedPlayer = player; // Track who was executed for Undertaker
+            addLog(player.name + ' was executed.'); // Character NOT revealed - rule of the game
+            
+            // Check if Demon was executed
+            if (player.characterDef.type === 'demon') {
+                // Check for Scarlet Woman
+                // Scarlet Woman only becomes Demon if there are 5 or more living players (including the Demon who just died)
+                // Actually, "5 or more players alive" usually means BEFORE the death or INCLUDING the Demon?
+                // The rule says "If there are 5 or more players alive & the Demon dies".
+                // This usually implies the count includes the Demon at the moment of death (or check remaining > 4).
+                // Standard ruling: Count living players immediately before death.
+                // If execution happens, the player is dead.
+                // So if we check `players.filter(p => p.alive).length`, that's the count of survivors.
+                // If Survivors >= 4 (meaning there were 5+ before death), Scarlet Woman triggers.
+                
+                // Let's verify the "5 or more players alive" interpretation.
+                // If 5 players: Demon + 4 others. Demon dies. 4 alive. Game continues? Yes.
+                // If 4 players: Demon + 3 others. Demon dies. 3 alive. Game over? Yes.
+                // So we need Survivors >= 4.
+                
+                // Let's count living players *including* the just-executed player (who is technically dead now but we want the count from "when the demon dies")
+                // Or just count current living. If current living >= 4, then there were >= 5.
+                
+                var livingCount = players.filter(p => p.alive).length;
+                
+                var scarletWoman = players.find(p => p.alive && p.characterDef.name === 'Scarlet Woman');
+                if (scarletWoman && livingCount >= 4) {
+                    scarletWoman.characterDef = CHARACTERS['Imp'];
+                    addLog('Scarlet Woman (' + scarletWoman.name + ') became the Imp!');
+                } else {
+                    endGame('good', 'Demon was executed! Good wins!');
+                    return;
+                }
+            }
+            
+            updateGameDisplay();
+            checkWinConditions();
+            
+            // Return to day phase - execution happened, can end day or continue discussion
+            document.getElementById('phase-title').innerText = 'Day ' + currentDay;
+            document.getElementById('phase-content').innerHTML = 
+                '<p><strong>' + player.name + '</strong> was executed.</p>' +
+                '<p style="font-size: 0.9rem; color: var(--text-secondary);">Character and alignment are NOT revealed to other players.</p>' +
+                '<p>Discussion may continue, but only one execution per day.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="endDay()">End Day</button>';
+        }
+
+        function closeNomination() {
+            document.getElementById('nomination-modal').classList.add('hidden');
+        }
+
+        function endDay() {
+            var living = players.filter(p => p.alive).length;
+            if (living <= 2) {
+                endGame('evil', 'Only ' + living + ' players remain! Evil wins!');
+                return;
+            }
+            
+            currentDay++;
+            isNightPhase = true;
+            buildNightOrder();
+            nightIndex = 0;
+            
+            document.getElementById('phase-display').className = 'phase-display phase-night';
+            document.getElementById('phase-title').innerText = 'Night ' + currentDay;
+            document.getElementById('phase-content').innerHTML = 
+                '<p>All players close their eyes.</p>' +
+                '<p>The Storyteller will wake characters in order.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="processNightPhase()">Start Night Phase</button>';
+            
+            addLog('Night ' + currentDay + ' begins.');
+        }
+
+        function checkWinConditions() {
+            var living = players.filter(p => p.alive).length;
+            var demon = players.find(p => p.alive && p.characterDef.type === 'demon');
+            
+            if (!demon) {
+                endGame('good', 'Demon was executed! Good wins!');
+                return;
+            }
+            
+            // Check for Mayor's special win condition: if only 3 players remain and Mayor dies, good wins
+            if (living === 3) {
+                var mayor = players.find(p => p.characterDef.name === 'Mayor');
+                if (mayor && !mayor.alive) {
+                    // Mayor died with exactly 3 players remaining - good wins
+                    endGame('good', 'Mayor died with only 3 players remaining! Good wins!');
+                    return;
+                }
+            }
+            
+            if (living <= 2) {
+                endGame('evil', 'Only ' + living + ' players remain! Evil wins!');
+                return;
+            }
+        }
+
+        function endGame(winner, message) {
+            var titleEl = document.getElementById('end-game-title');
+            titleEl.innerText = winner.toUpperCase() + ' WINS!';
+            titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
+            document.getElementById('end-game-message').innerText = message;
+            document.getElementById('end-game-modal').classList.remove('hidden');
+            addLog('GAME OVER: ' + message);
+        }
+
+        function renderGrimoire() {
+            var container = document.getElementById('grimoire-view');
+            container.innerHTML = '';
+            
+            players.forEach(function(player) {
+                var token = document.createElement('div');
+                token.className = 'grimoire-token ' + player.characterDef.type;
+                if (!player.alive) token.classList.add('dead');
+                
+                var extraInfo = '';
+                // Show Butler's master choice
+                if (player.characterDef.name === 'Butler' && butlerChoices[player.index] !== undefined) {
+                    var master = players.find(p => p.index === butlerChoices[player.index]);
+                    if (master) {
+                        extraInfo = '<div style="font-size:0.65rem; color:#FFB74D; margin-top:3px;">Master: ' + master.name + '</div>';
+                    }
+                }
+                
+                token.innerHTML = 
+                    '<div style="font-weight:bold; margin-bottom:5px;">' + player.name + '</div>' +
+                    '<div style="font-size:0.75rem; color:var(--text-secondary);">' + player.characterDef.name + '</div>' +
+                    extraInfo;
+                
+                container.appendChild(token);
+            });
+        }
+
+        function toggleGrimoire() {
+            var grimoire = document.getElementById('grimoire-view');
+            grimoire.classList.toggle('hidden');
+            grimoireVisible = !grimoireVisible;
+        }
+
+        function showSpyGrimoire(spyPlayer) {
+            // Render Grimoire for Spy to see
+            var container = document.getElementById('night-character-actions');
+            container.innerHTML = '';
+            
+            var grimoireDiv = document.createElement('div');
+            grimoireDiv.style.marginTop = '15px';
+            grimoireDiv.style.padding = '25px';
+            grimoireDiv.style.background = 'linear-gradient(135deg, rgba(230, 81, 0, 0.25) 0%, rgba(245, 124, 0, 0.15) 100%)';
+            grimoireDiv.style.borderRadius = '16px';
+            grimoireDiv.style.border = '3px solid var(--minion-color)';
+            grimoireDiv.style.boxShadow = '0 8px 24px rgba(230, 81, 0, 0.5), inset 0 2px 4px rgba(255,255,255,0.1)';
+            
+            var header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '25px';
+            header.innerHTML = 
+                '<div style="font-size: 2.5rem; margin-bottom: 10px;">📖</div>' +
+                '<h2 style="color: var(--minion-color); margin: 0; font-size: 1.8rem; text-shadow: 0 2px 8px rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 2px;">Spy\'s Grimoire</h2>' +
+                '<p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 0.9rem; font-style: italic;">All Secrets Revealed</p>';
+            grimoireDiv.appendChild(header);
+            
+            // Organize players by type
+            var townsfolk = players.filter(p => p.characterDef.type === 'townsfolk');
+            var outsiders = players.filter(p => p.characterDef.type === 'outsider');
+            var minions = players.filter(p => p.characterDef.type === 'minion');
+            var demons = players.filter(p => p.characterDef.type === 'demon');
+            
+            function renderCategory(title, playerList, categoryColor, emoji) {
+                if (playerList.length === 0) return;
+                
+                var categoryDiv = document.createElement('div');
+                categoryDiv.style.marginBottom = '20px';
+                
+                var categoryTitle = document.createElement('div');
+                categoryTitle.style.fontSize = '1.1rem';
+                categoryTitle.style.fontWeight = 'bold';
+                categoryTitle.style.color = categoryColor;
+                categoryTitle.style.marginBottom = '10px';
+                categoryTitle.style.textTransform = 'uppercase';
+                categoryTitle.style.letterSpacing = '1.5px';
+                categoryTitle.innerHTML = emoji + ' ' + title;
+                categoryDiv.appendChild(categoryTitle);
+                
+                playerList.forEach(function(player) {
+                var token = document.createElement('div');
+                    token.style.padding = '14px 16px';
+                    token.style.margin = '8px 0';
+                    token.style.background = 'rgba(0,0,0,0.4)';
+                    token.style.borderLeft = '5px solid ' + categoryColor;
+                    token.style.borderRadius = '10px';
+                token.style.textAlign = 'left';
+                    token.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                    token.style.transition = 'transform 0.2s';
+                
+                if (!player.alive) {
+                    token.style.opacity = '0.5';
+                        token.style.background = 'rgba(0,0,0,0.6)';
+                }
+                
+                token.innerHTML = 
+                        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                        '<div>' +
+                        '<div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 4px; color: #fff;">' + 
+                        player.name + 
+                        (player.alive ? '' : ' <span style="color: #999; font-size: 0.9rem;">☠️ Dead</span>') + 
+                        '</div>' +
+                        '<div style="font-size: 0.9rem; color: ' + categoryColor + '; font-weight: 600;">' + 
+                        player.characterDef.name + 
+                        '</div>' +
+                        '</div>' +
+                        '<div style="font-size: 1.5rem; opacity: 0.7;">' + 
+                        (player.characterDef.type === 'townsfolk' ? '👤' : 
+                         player.characterDef.type === 'outsider' ? '🔷' : 
+                         player.characterDef.type === 'minion' ? '⚡' : '☠️') + 
+                        '</div>' +
+                        '</div>';
+                    
+                    categoryDiv.appendChild(token);
+                });
+                
+                grimoireDiv.appendChild(categoryDiv);
+            }
+            
+            renderCategory('Townsfolk', townsfolk, 'var(--townsfolk-color)', '👥');
+            renderCategory('Outsiders', outsiders, 'var(--outsider-color)', '🔷');
+            renderCategory('Minions', minions, 'var(--minion-color)', '⚡');
+            renderCategory('Demon', demons, 'var(--demon-color)', '☠️');
+            
+            container.appendChild(grimoireDiv);
+            
+            var closeBtn = document.createElement('button');
+            closeBtn.className = 'action-btn';
+            closeBtn.style.marginTop = '20px';
+            closeBtn.style.fontSize = '1.1rem';
+            closeBtn.style.padding = '15px';
+            closeBtn.style.background = 'linear-gradient(135deg, #e65100 0%, #bf360c 100%)';
+            closeBtn.style.boxShadow = '0 4px 16px rgba(230, 81, 0, 0.5)';
+            closeBtn.innerText = '✓ Close Grimoire & Continue';
+            closeBtn.onclick = function() {
+                addLog('Spy (' + spyPlayer.name + ') viewed the Grimoire');
+                skipNightAbility();
+            };
+            container.appendChild(closeBtn);
+        }
+
+        function toggleLog() {
+            var log = document.getElementById('game-log');
+            log.classList.toggle('hidden');
+        }
+
+        function addLog(message) {
+            var timestamp = new Date().toLocaleTimeString();
+            gameLog.push('[' + timestamp + '] ' + message);
+            
+            var content = document.getElementById('log-content');
+            content.innerHTML = '';
+            gameLog.slice().reverse().forEach(function(entry) {
+                var div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerText = entry;
+                content.appendChild(div);
+            });
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'distribution-screen', 'game-screen'];
+            screens.forEach(s => {
+                var el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+            var target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
+        }
+
+        var ROLE_GUIDE_INFO = {
+            'Washerwoman': { desc: 'Each night, learn one of two players is a specific Townsfolk.', note: 'Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
+            'Librarian': { desc: 'Each night, learn one of two players is a specific Outsider.', note: 'Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
+            'Investigator': { desc: 'Each night, learn one of two players is a specific Minion.', note: 'Storyteller chooses which information to give. Recluse may register as Minion.' },
+            'Chef': { desc: 'Each night, learn how many pairs of evil players are sitting next to each other.', note: 'Counts pairs, not individuals. Recluse may register as evil.' },
+            'Empath': { desc: 'Each night, learn how many evil players are sitting next to you.', note: 'Neighbors must be alive. If you are dead, you learn 0. Recluse may register as evil.' },
+            'Fortune Teller': { desc: 'Each night, choose two players; learn if one of them is the Demon.', note: 'One good player is a "red herring" (registers as Demon). Info may be false if poisoned.' },
+            'Undertaker': { desc: 'Each day, if someone was executed yesterday, learn their character.', note: 'Only works if someone was executed the previous day.' },
+            'Monk': { desc: 'Each night, choose a player; they cannot die tonight.', note: 'Protection lasts until the next day. Does not prevent execution.' },
+            'Ravenkeeper': { desc: 'If you die at night, you wake up and learn one player\'s character.', note: 'Only triggers on night death, not execution.' },
+            'Virgin': { desc: 'The first time you are nominated, if the nominator is a Townsfolk, they are executed instead.', note: 'Only works once per game. Does not work if drunk.' },
+            'Slayer': { desc: 'Once per game, during the day, choose a player; if they are the Demon, they die.', note: 'Can be used during any day phase. Wasted if target is not Demon.' },
+            'Soldier': { desc: 'You cannot die at night.', note: 'Still vulnerable to execution.' },
+            'Mayor': { desc: 'If only 3 players remain and no execution occurs, good wins.', note: 'If attacked at night, another player may die instead.' },
+            'Butler': { desc: 'Each night, choose a player; tomorrow, you must vote how they vote.', note: 'You are an Outsider. You cannot vote differently from your chosen master. If they don\'t vote, you can\'t.' },
+            'Drunk': { desc: 'You think you are a Townsfolk, but you are not. You are actually an Outsider.', note: 'Your ability does not work. Storyteller may give false info.' },
+            'Recluse': { desc: 'You may register as evil or as a Demon, even if dead.', note: 'Storyteller may show you as evil to other abilities. You are still good.' },
+            'Saint': { desc: 'If you are executed, evil wins.', note: 'Good team must avoid executing you. Death at night is fine.' },
+            'Poisoner': { desc: 'Each night, choose a player; their ability malfunctions.', note: 'They receive false information or their ability fails. Effect lasts until next night.' },
+            'Spy': { desc: 'You appear as good to all abilities. You can look at the Grimoire.', note: 'You know who the Demon is and all roles.' },
+            'Scarlet Woman': { desc: 'If the Demon dies and 5 or more players are alive (before the Demon\'s death), you immediately become the Demon.', note: 'The 5+ players condition is checked before the Demon dies. If fewer than 5 players are alive when the Demon dies, the game ends and evil wins.' },
+            'Baron': { desc: 'There are extra Outsiders in play. [+2 Outsiders]', note: 'This is a passive ability applied at game setup. 2 fewer Townsfolk and 2 more Outsiders are distributed.' },
+            'Imp': { desc: 'Each night, choose a player; they die. You can kill yourself.', note: 'If you kill yourself, a Minion becomes the new Imp.' }
+        };
+
+        function showPlayerGuide() {
+            var content = document.getElementById('guide-content');
+            var playerCount = document.getElementById('player-count-display') ? parseInt(document.getElementById('player-count-display').innerText) : 7;
+            var dist = CHARACTER_DISTRIBUTION[playerCount] || CHARACTER_DISTRIBUTION[7];
+            
+            var html = '<div style="margin-bottom: 30px;">';
+            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">Character Distribution</h2>';
+            html += '<p><strong>For ' + playerCount + ' players:</strong></p>';
+            html += '<ul style="margin: 10px 0; padding-left: 25px;">';
+            html += '<li><strong>' + dist.townsfolk + ' Townsfolk</strong></li>';
+            html += '<li><strong>' + dist.outsiders + ' Outsider' + (dist.outsiders !== 1 ? 's' : '') + '</strong></li>';
+            html += '<li><strong>' + dist.minions + ' Minion</strong></li>';
+            html += '<li><strong>' + dist.demon + ' Demon</strong></li>';
+            html += '</ul>';
+            html += '</div>';
+
+            var pools = [
+                { name: 'Townsfolk (Good Team) [' + dist.townsfolk + ']', color: 'var(--townsfolk-color)', bg: 'rgba(2, 119, 189, 0.1)', list: TOWNSFOLK_POOL },
+                { name: 'Outsiders (Good Team, but with drawbacks) [' + dist.outsiders + ']', color: 'var(--outsider-color)', bg: 'rgba(25, 118, 210, 0.1)', list: OUTSIDER_POOL },
+                { name: 'Minions (Evil Team) [' + dist.minions + ']', color: 'var(--minion-color)', bg: 'rgba(230, 81, 0, 0.1)', list: MINION_POOL },
+                { name: 'Demon (Evil Team) [' + dist.demon + ']', color: 'var(--demon-color)', bg: 'rgba(213, 0, 0, 0.1)', list: DEMON_POOL }
+            ];
+
+            pools.forEach(pool => {
+            html += '<div style="margin-bottom: 30px;">';
+                html += '<h2 style="color: ' + pool.color + '; margin-top: 20px; margin-bottom: 10px;">' + pool.name + '</h2>';
+                
+                pool.list.forEach(roleKey => {
+                    var char = CHARACTERS[roleKey];
+                    var info = ROLE_GUIDE_INFO[roleKey] || {desc: char.ability, note: ''};
+                    
+                    html += '<div style="background: ' + pool.bg + '; padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+                    html += '<strong>' + char.name + '</strong><br>';
+                    html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">' + info.desc + '<br><br><em>Note: ' + info.note + '</em></span>';
+            html += '</div>';
+                });
+            html += '</div>';
+            });
+
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">Winning Conditions</h2>';
+            html += '<div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+            html += '<strong>Good Team Wins If:</strong><br>';
+            html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">The Demon is executed.</span>';
+            html += '</div>';
+            html += '<div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+            html += '<strong>Evil Team Wins If:</strong><br>';
+            html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">Only two players remain alive (the Demon and one other).</span>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">Important Notes</h2>';
+            html += '<ul style="margin: 10px 0; padding-left: 25px; font-size: 0.9rem; line-height: 1.8;">';
+            html += '<li>Dead players can still talk and participate in discussions</li>';
+            html += '<li>Dead players have one vote total for the remainder of the game</li>';
+            html += '<li>Each player can only nominate once per day</li>';
+            html += '<li>Majority vote required to execute (more than half of living players)</li>';
+            html += '<li>Characters are not revealed when players die</li>';
+            html += '<li>Information given by the Storyteller may be false (especially for poisoned players)</li>';
+            html += '</ul>';
+            html += '</div>';
+
+            content.innerHTML = html;
+            document.getElementById('guide-modal').classList.remove('hidden');
+        }
+
+        function closePlayerGuide() {
+            document.getElementById('guide-modal').classList.add('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function showCheatSheet() {
+            var container = document.getElementById('cheat-sheet-content');
+            container.innerHTML = '';
+            
+            var playerCount = document.getElementById('player-count-display') ? parseInt(document.getElementById('player-count-display').innerText) : 7;
+            var dist = CHARACTER_DISTRIBUTION[playerCount] || CHARACTER_DISTRIBUTION[7];
+
+            // Create container wrapper
+            container.className = 'cheat-sheet-container';
+            
+            // Define sections
+            var sections = [
+                { type: 'townsfolk', header: 'Townsfolk (Good) [' + dist.townsfolk + ']', headerClass: 'cs-townsfolk-header', pool: TOWNSFOLK_POOL },
+                { type: 'outsider', header: 'Outsider (Good) [' + dist.outsiders + ']', headerClass: 'cs-outsider-header', pool: OUTSIDER_POOL },
+                { type: 'minion', header: 'Minion (Evil) [' + dist.minions + ']', headerClass: 'cs-minion-header', pool: MINION_POOL },
+                { type: 'demon', header: 'Demon (Evil) [' + dist.demon + ']', headerClass: 'cs-demon-header', pool: DEMON_POOL }
+            ];
+            
+            sections.forEach(function(section) {
+                // Create section container
+                var sectionDiv = document.createElement('div');
+                sectionDiv.className = 'cheat-sheet-section';
+                
+                // Add header
+                var header = document.createElement('div');
+                header.className = 'cheat-sheet-header ' + section.headerClass;
+                header.innerText = section.header;
+                sectionDiv.appendChild(header);
+                
+                // Create grid for this section
+                var grid = document.createElement('div');
+                grid.className = 'cheat-sheet-grid';
+                
+                section.pool.forEach(function(key) {
+                    var char = CHARACTERS[key];
+                    var card = document.createElement('div');
+                    card.className = 'cheat-sheet-card role-' + section.type;
+                    
+                    var rebus = ROLE_REBUS[key] || char.ability;
+                    
+                    card.innerHTML = 
+                        '<div class="cs-icon">' + (ROLE_ICONS[key] || '❓') + '</div>' +
+                        '<div class="cs-name">' + char.name + '</div>' +
+                        '<div class="cs-rebus">' + rebus + '</div>';
+                        
+                    grid.appendChild(card);
+                });
+                
+                sectionDiv.appendChild(grid);
+                container.appendChild(sectionDiv);
+            });
+            
+            // Add Winning Conditions
+            var winDiv = document.createElement('div');
+            winDiv.className = 'win-conditions';
+            winDiv.innerHTML = 
+                '<div class="win-card win-good">' +
+                    '<h3 style="color:var(--good-color); margin:0 0 10px 0;">Good Team Wins</h3>' +
+                    '<p style="margin:0; font-size:0.9rem;">Execute the Demon</p>' +
+                '</div>' +
+                '<div class="win-card win-evil">' +
+                    '<h3 style="color:var(--evil-color); margin:0 0 10px 0;">Evil Team Wins</h3>' +
+                    '<p style="margin:0; font-size:0.9rem;">Only 2 players remain</p>' +
+                '</div>';
+            container.appendChild(winDiv);
+            
+            document.getElementById('cheat-sheet-modal').classList.remove('hidden');
+        }
+
+        function closeCheatSheet() {
+            document.getElementById('cheat-sheet-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+
+

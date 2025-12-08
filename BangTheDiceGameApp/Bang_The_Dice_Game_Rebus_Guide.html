@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bang! The Dice Game - Rebus Guide</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #ff6b35;
+            --sheriff-color: #FFD700;
+            --deputy-color: #4CAF50;
+            --outlaw-color: #F44336;
+            --renegade-color: #9C27B0;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 10px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .rebus-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .rebus-symbol {
+            font-size: 3rem;
+            margin-right: 20px;
+            min-width: 80px;
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .rebus-content {
+            flex: 1;
+        }
+
+        .rebus-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .rebus-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .role-card {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+            font-size: 1.1rem;
+        }
+
+        .role-sheriff {
+            background: var(--sheriff-color);
+            color: #000;
+        }
+
+        .role-deputy {
+            background: var(--deputy-color);
+            color: white;
+        }
+
+        .role-outlaw {
+            background: var(--outlaw-color);
+            color: white;
+        }
+
+        .role-renegade {
+            background: var(--renegade-color);
+            color: white;
+        }
+
+        .dice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .dice-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--accent-color);
+        }
+
+        .dice-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .dice-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .dice-effect {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-diagram {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+        }
+
+        .flow-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .flow-text {
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin: 5px 0;
+        }
+
+        .quick-ref {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .ref-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-top: 3px solid var(--accent-color);
+        }
+
+        .ref-title {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .ref-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .warning-box {
+            background: rgba(244, 67, 54, 0.2);
+            border-left: 4px solid var(--outlaw-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .info-box {
+            background: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .symbol-combo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-size: 2rem;
+        }
+
+        .combo-text {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-left: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .container {
+                background: white;
+                box-shadow: none;
+            }
+            .section {
+                background: #f5f5f5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔫 Bang! The Dice Game</h1>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">Rebus Style Quick Reference Guide</p>
+
+        <!-- Roles Section -->
+        <h2>👥 Roles & Objectives</h2>
+        
+        <div class="section">
+            <div class="rebus-item">
+                <div class="rebus-symbol">⭐</div>
+                <div class="rebus-content">
+                    <div class="rebus-title"><span class="role-card role-sheriff">SHERIFF</span></div>
+                    <div class="rebus-description">
+                        <strong>Revealed to all</strong> • Starts with +1 health<br>
+                        <strong>Win:</strong> Eliminate all Outlaws and Renegade
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">🛡️</div>
+                <div class="rebus-content">
+                    <div class="rebus-title"><span class="role-card role-deputy">DEPUTY</span></div>
+                    <div class="rebus-description">
+                        <strong>Hidden role</strong> • Works with Sheriff<br>
+                        <strong>Win:</strong> Same as Sheriff (eliminate Outlaws and Renegade)
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">🔴</div>
+                <div class="rebus-content">
+                    <div class="rebus-title"><span class="role-card role-outlaw">OUTLAW</span></div>
+                    <div class="rebus-description">
+                        <strong>Hidden role</strong> • Works together<br>
+                        <strong>Win:</strong> Eliminate the Sheriff
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">💜</div>
+                <div class="rebus-content">
+                    <div class="rebus-title"><span class="role-card role-renegade">RENEGADE</span></div>
+                    <div class="rebus-description">
+                        <strong>Hidden role</strong> • Works alone<br>
+                        <strong>Win:</strong> Be the last player standing (after Sheriff and Outlaws eliminated)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dice Symbols Section -->
+        <h2>🎲 Dice Symbols</h2>
+        
+        <div class="dice-grid">
+            <div class="dice-card">
+                <div class="dice-icon">🔫</div>
+                <div class="dice-name">BANG!</div>
+                <div class="dice-effect">Attack player<br>1 space away</div>
+            </div>
+
+            <div class="dice-card">
+                <div class="dice-icon">💥</div>
+                <div class="dice-name">DOUBLE BANG!</div>
+                <div class="dice-effect">Attack player<br>2 spaces away</div>
+            </div>
+
+            <div class="dice-card">
+                <div class="dice-icon">🍺</div>
+                <div class="dice-name">BEER</div>
+                <div class="dice-effect">Heal 1 health<br>(you or another)</div>
+            </div>
+
+            <div class="dice-card">
+                <div class="dice-icon">⚙️</div>
+                <div class="dice-name">GATLING</div>
+                <div class="dice-effect">3+ = Attack all<br>opponents</div>
+            </div>
+
+            <div class="dice-card">
+                <div class="dice-icon">🏹</div>
+                <div class="dice-name">ARROW</div>
+                <div class="dice-effect">Take arrow token<br>⚠️ Last arrow = Attack!</div>
+            </div>
+
+            <div class="dice-card">
+                <div class="dice-icon">💣</div>
+                <div class="dice-name">DYNAMITE</div>
+                <div class="dice-effect">Cannot hold<br>3+ = Lose 1 health & turn</div>
+            </div>
+        </div>
+
+        <!-- Turn Flow -->
+        <h2>🔄 Turn Flow</h2>
+        
+        <div class="flow-diagram">
+            <div class="flow-step">
+                <div class="flow-number">1</div>
+                <div class="flow-text"><strong>Roll Dice</strong> - Roll all 5 dice (up to 3 times per turn)</div>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="flow-step">
+                <div class="flow-number">2</div>
+                <div class="flow-text"><strong>Hold Dice</strong> - Tap dice to hold (except Dynamite 💣)</div>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="flow-step">
+                <div class="flow-number">3</div>
+                <div class="flow-text"><strong>Re-roll</strong> - Roll again or resolve (max 3 rolls total)</div>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="flow-step">
+                <div class="flow-number">4</div>
+                <div class="flow-text"><strong>Resolve Actions</strong> - Attacks, Beer, Arrows, Gatling, etc.</div>
+            </div>
+            <div class="arrow">↓</div>
+            <div class="flow-step">
+                <div class="flow-number">5</div>
+                <div class="flow-text"><strong>Next Player</strong> - Turn passes clockwise</div>
+            </div>
+        </div>
+
+        <!-- Special Rules -->
+        <h2>⚠️ Special Rules</h2>
+        
+        <div class="section">
+            <div class="warning-box">
+                <h3>💣 3+ Dynamite</h3>
+                <p>If you roll 3 or more Dynamite symbols:</p>
+                <ul>
+                    <li>Lose 1 health immediately</li>
+                    <li>Your turn ends (no actions)</li>
+                    <li>Cannot be prevented</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>🏹 Arrow Attack</h3>
+                <p>When the last arrow token is taken:</p>
+                <ul>
+                    <li>All players lose health equal to their arrow count</li>
+                    <li>All arrows are returned (9 arrows reset)</li>
+                    <li>Happens immediately when last arrow is taken</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>⚙️ Gatling Gun</h3>
+                <p>If you roll 3 or more Gatling symbols:</p>
+                <ul>
+                    <li>All other players lose 1 health</li>
+                    <li>You discard all your arrow tokens</li>
+                    <li>Arrows return to center (9 total)</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>🍺 Beer Healing</h3>
+                <p>Beer can heal:</p>
+                <ul>
+                    <li>Yourself (if not at max health)</li>
+                    <li>Any other player (if not at max health)</li>
+                    <li>Cannot exceed maximum health</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Symbol Combinations -->
+        <h2>🔀 Symbol Combinations</h2>
+        
+        <div class="section">
+            <div class="rebus-item">
+                <div class="rebus-symbol">
+                    <div class="symbol-combo">
+                        🔫 + 🔫 + 🔫
+                    </div>
+                </div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Multiple Bang!</div>
+                    <div class="rebus-description">Each Bang! symbol is a separate attack. You can attack the same player multiple times or different players.</div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">
+                    <div class="symbol-combo">
+                        🍺 + 🍺
+                    </div>
+                </div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Multiple Beer</div>
+                    <div class="rebus-description">Each Beer symbol heals 1 health. You can heal yourself or others, or split healing between players.</div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">
+                    <div class="symbol-combo">
+                        🏹 + 🏹 + 🏹
+                    </div>
+                </div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Multiple Arrows</div>
+                    <div class="rebus-description">Each Arrow symbol takes 1 arrow token. You accumulate arrows - be careful of the Indian attack!</div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">
+                    <div class="symbol-combo">
+                        ⚙️ + ⚙️ + ⚙️
+                    </div>
+                </div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Gatling Gun (3+)</div>
+                    <div class="rebus-description">Need 3 or more Gatling symbols to activate. Attacks all opponents and clears your arrows.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <h2>📋 Quick Reference</h2>
+        
+        <div class="quick-ref">
+            <div class="ref-card">
+                <div class="ref-title">🎯 Attack Range</div>
+                <div class="ref-content">
+                    🔫 Bang! = 1 space<br>
+                    💥 Double Bang! = 2 spaces<br>
+                    ⚙️ Gatling = All players
+                </div>
+            </div>
+
+            <div class="ref-card">
+                <div class="ref-title">💚 Health Rules</div>
+                <div class="ref-content">
+                    Start: Character health<br>
+                    Sheriff: +1 health<br>
+                    Max: Cannot exceed starting health
+                </div>
+            </div>
+
+            <div class="ref-card">
+                <div class="ref-title">🎲 Dice Rules</div>
+                <div class="ref-content">
+                    Roll: Up to 3 times<br>
+                    Hold: Tap to hold<br>
+                    💣 Dynamite: Cannot hold
+                </div>
+            </div>
+
+            <div class="ref-card">
+                <div class="ref-title">🏆 Win Conditions</div>
+                <div class="ref-content">
+                    ⭐ Sheriff: Eliminate Outlaws & Renegade<br>
+                    🔴 Outlaws: Eliminate Sheriff<br>
+                    💜 Renegade: Last player standing
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Count Guide -->
+        <h2>👥 Player Count Guide</h2>
+        
+        <div class="section">
+            <table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">
+                <tr style="background: rgba(255,255,255,0.1);">
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid var(--accent-color);">Players</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid var(--accent-color);">Roles</th>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;"><strong>3</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 1 🔴 Outlaw, 1 💜 Renegade</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;"><strong>4</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 1 🛡️ Deputy, 1 🔴 Outlaw, 1 💜 Renegade</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;"><strong>5</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 1 🛡️ Deputy, 2 🔴 Outlaws, 1 💜 Renegade</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;"><strong>6</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 2 🛡️ Deputies, 2 🔴 Outlaws, 1 💜 Renegade</td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <td style="padding: 10px;"><strong>7</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 2 🛡️ Deputies, 3 🔴 Outlaws, 1 💜 Renegade</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;"><strong>8</strong></td>
+                    <td style="padding: 10px;">1 ⭐ Sheriff, 3 🛡️ Deputies, 3 🔴 Outlaws, 1 💜 Renegade</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Tips & Strategy -->
+        <h2>💡 Tips & Strategy</h2>
+        
+        <div class="section">
+            <div class="rebus-item">
+                <div class="rebus-symbol">🎯</div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Target Selection</div>
+                    <div class="rebus-description">
+                        Outlaws should focus on the Sheriff. Deputies should protect the Sheriff. Renegade should balance both sides.
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">🏹</div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Arrow Management</div>
+                    <div class="rebus-description">
+                        Keep track of arrows! The Indian attack can eliminate multiple players. Use Gatling Gun to clear your arrows.
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">💣</div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Dynamite Risk</div>
+                    <div class="rebus-description">
+                        Dynamite cannot be held. If you have 2 Dynamite, be careful on your final roll - you might get a third!
+                    </div>
+                </div>
+            </div>
+
+            <div class="rebus-item">
+                <div class="rebus-symbol">🍺</div>
+                <div class="rebus-content">
+                    <div class="rebus-title">Healing Strategy</div>
+                    <div class="rebus-description">
+                        Save Beer for critical moments. Healing the Sheriff is often more valuable than healing yourself (if you're a Deputy).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid var(--accent-color); color: var(--text-secondary);">
+            <p>Use this guide during gameplay for quick reference!</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">🔫 Bang! The Dice Game - Rebus Style Guide</p>
+        </div>
+    </div>
+</body>
+</html>

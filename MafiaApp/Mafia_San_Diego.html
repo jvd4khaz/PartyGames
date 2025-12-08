@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>پخش کننده نقش مافیا</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --accent-color: #FF5722;
+            --mafia-color: #F44336;
+            --citizen-color: #4CAF50;
+            --btn-color: #2196F3;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #reveal-screen.container {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #252525 100%);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 1rem 0; font-weight: 900; }
+        h2 { font-size: 1.4rem; margin: 0 0 1rem 0; }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background-color: #2C2C2C;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--btn-color);
+            color: white;
+            border: none;
+            padding: 16px 0;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        button:active { transform: scale(0.98); }
+        button.start-btn { background-color: var(--accent-color); box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3); }
+        button.restart-btn { background-color: #F44336; margin-top: 10px; }
+
+        .role-emoji {
+            font-size: 8rem;
+            line-height: 1;
+            margin: 20px 0;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .role-reveal {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 15px 0 10px 0;
+            color: white;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .role-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        .team-reveal { 
+            font-size: 1.4rem; 
+            margin-bottom: 20px; 
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden { display: none !important; }
+
+        .player-counter {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            color: #AAA;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Role Info List (Optional for validation) */
+        .role-list {
+            text-align: right;
+            width: 100%;
+            font-size: 0.9rem;
+            color: #DDD;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Selection Screen -->
+    <div id="select-screen" class="container">
+        <h1>انتخاب سناریو</h1>
+        <p>لطفاً سناریو و تعداد بازیکنان را انتخاب کنید:</p>
+        
+        <select id="scenario-select" onchange="updateRolePreview()">
+            <option value="takavar_9">تکاور (۹ نفر)</option>
+            <option value="takavar_10">تکاور (۱۰ نفر)</option>
+            <option value="takavar_11">تکاور (۱۱ نفر)</option>
+            <option value="takavar_12">تکاور (۱۲ نفر)</option>
+            <option value="takavar_13">تکاور (۱۳ نفر)</option>
+            <option value="takavar_14">تکاور (۱۴ نفر)</option>
+            <option value="takavar_15">تکاور (۱۵ نفر)</option>
+            <option value="capo_10">کاپو (۱۰ نفر)</option>
+            <option value="capo_13">کاپو (۱۳ نفر)</option>
+        </select>
+
+        <button class="start-btn" onclick="startGame()">شروع بازی</button>
+
+        <div id="role-preview" class="role-list">
+            <!-- Roles will be listed here -->
+        </div>
+    </div>
+
+    <!-- 2. Pass Phone Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div class="player-counter" id="counter-pass"></div>
+        <div style="font-size: 4rem; margin: 20px;">📱</div>
+        <h2>نوبت بازیکن <span id="player-num-pass" style="color: var(--accent-color);">1</span></h2>
+        <p>گوشی را به این بازیکن بدهید.</p>
+        <button onclick="confirmIdentity()">مشاهده نقش</button>
+    </div>
+
+    <!-- 3. Reveal Role Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <div class="player-counter" id="counter-reveal"></div>
+        <div id="role-emoji" class="role-emoji">🎭</div>
+        <div id="role-display" class="role-reveal">...</div>
+        <div id="role-subtitle" class="role-subtitle"></div>
+        <div id="team-display" class="team-reveal">...</div>
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">به خاطر بسپارید و پنهان کنید.</p>
+        <button id="next-btn" onclick="nextPlayer()">پنهان کردن و نفر بعدی</button>
+    </div>
+
+    <!-- 4. End Screen -->
+    <div id="end-screen" class="container hidden">
+        <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
+        <h1>پایان توزیع</h1>
+        <p>تمام نقش‌ها توزیع شدند.<br>گوشی را به راوی (گاد) برگردانید.</p>
+        <button class="start-btn" onclick="location.reload()">شروع بازی جدید</button>
+    </div>
+
+    <script>
+        // --- Scenario Configurations ---
+        var SCENARIOS = {
+            takavar_9: {
+                name: "تکاور (۹ نفر)",
+                roles: [
+                    // Mafia (3)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    // Citizen (6)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "🦾 زره‌پوش<br><small>Armored</small>", team: "CITIZEN" }
+                ]
+            },
+            takavar_10: {
+                name: "تکاور (۱۰ نفر)",
+                roles: [
+                    // Mafia (3)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    // Citizen (7)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" }
+                ]
+            },
+            takavar_11: {
+                name: "تکاور (۱۱ نفر)",
+                roles: [
+                    // Mafia (3)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    // Citizen (8)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" }
+                ]
+            },
+            takavar_12: {
+                name: "تکاور (۱۲ نفر)",
+                roles: [
+                    // Mafia (4)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    { name: "😈 مافیا ساده<br><small>Simple Mafia</small>", team: "MAFIA" },
+                    // Citizen (8)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" }
+                ]
+            },
+            takavar_13: {
+                name: "تکاور (۱۳ نفر)",
+                roles: [
+                    // Mafia (4)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    { name: "😈 مافیا ساده<br><small>Simple Mafia</small>", team: "MAFIA" },
+                    // Citizen (9)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" }
+                ]
+            },
+            takavar_14: {
+                name: "تکاور (۱۴ نفر)",
+                roles: [
+                    // Mafia (4)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    { name: "😈 مافیا ساده<br><small>Simple Mafia</small>", team: "MAFIA" },
+                    // Citizen (9)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    // Independent (1)
+                    { name: "🗡️ جانی<br><small>Killer</small>", team: "INDEPENDENT" }
+                ]
+            },
+            takavar_15: {
+                name: "تکاور (۱۵ نفر)",
+                roles: [
+                    // Mafia (4)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🎯 ناتو<br><small>Nato</small>", team: "MAFIA" },
+                    { name: "🔒 گروگان‌گیر<br><small>Hostage Taker</small>", team: "MAFIA" },
+                    { name: "💣 بمب‌گذار<br><small>Bomber</small>", team: "MAFIA" },
+                    // Citizen (10)
+                    { name: "🛡️ نگهبان<br><small>Guard</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "⚕️ پزشک<br><small>Doctor</small>", team: "CITIZEN" },
+                    { name: "🔫 تفنگدار<br><small>Rifleman</small>", team: "CITIZEN" },
+                    { name: "🪖 تکاور<br><small>Commando</small>", team: "CITIZEN" },
+                    { name: "💔 فدایی<br><small>Martyr</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    // Independent (1)
+                    { name: "🗡️ جانی<br><small>Killer</small>", team: "INDEPENDENT" }
+                ]
+            },
+            capo_10: {
+                name: "کاپو (۱۰ نفر)",
+                roles: [
+                    // Mafia (3)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🧙‍♀️ جادوگر<br><small>Witch</small>", team: "MAFIA" },
+                    { name: "⚔️ جلاد / ناتو<br><small>Executioner / Nato</small>", team: "MAFIA" },
+                    // Citizen (7)
+                    { name: "💎 وارث<br><small>Heir</small>", team: "CITIZEN" },
+                    { name: "🔨 زره‌ساز<br><small>Armorsmith</small>", team: "CITIZEN" },
+                    { name: "🌿 عطار<br><small>Herbalist</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "❓ مظنون<br><small>Suspect</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" }
+                ]
+            },
+            capo_13: {
+                name: "کاپو (۱۳ نفر)",
+                roles: [
+                    // Mafia (4)
+                    { name: "👑 رئیس مافیا<br><small>Boss</small>", team: "MAFIA" },
+                    { name: "🧙‍♀️ جادوگر<br><small>Witch</small>", team: "MAFIA" },
+                    { name: "⚔️ جلاد / ناتو<br><small>Executioner / Nato</small>", team: "MAFIA" },
+                    { name: "📢 خبرچین<br><small>Informant</small>", team: "MAFIA" },
+                    // Citizen (9)
+                    { name: "💎 وارث<br><small>Heir</small>", team: "CITIZEN" },
+                    { name: "🔨 زره‌ساز<br><small>Armorsmith</small>", team: "CITIZEN" },
+                    { name: "🌿 عطار<br><small>Herbalist</small>", team: "CITIZEN" },
+                    { name: "🔍 کارآگاه<br><small>Detective</small>", team: "CITIZEN" },
+                    { name: "❓ مظنون<br><small>Suspect</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "👤 شهروند ساده<br><small>Citizen</small>", team: "CITIZEN" },
+                    { name: "🏛️ کدخدا<br><small>Village Head</small>", team: "CITIZEN" }
+                ]
+            }
+        };
+
+        // --- Game State ---
+        var currentGameRoles = [];
+        var currentPlayerIndex = 0;
+        var totalPlayers = 0;
+
+        // --- Init ---
+        window.onload = updateRolePreview;
+
+        function updateRolePreview() {
+            var key = document.getElementById('scenario-select').value;
+            var scenario = SCENARIOS[key];
+            var previewEl = document.getElementById('role-preview');
+            
+            var mafiaCount = 0;
+            var citizenCount = 0;
+            var independentCount = 0;
+            
+            // Count roles manually for compatibility
+            for (var i = 0; i < scenario.roles.length; i++) {
+                if (scenario.roles[i].team === 'MAFIA') mafiaCount++;
+                else if (scenario.roles[i].team === 'CITIZEN') citizenCount++;
+                else if (scenario.roles[i].team === 'INDEPENDENT') independentCount++;
+            }
+            
+            // Strip HTML tags for preview
+            var roleNames = [];
+            for (var j = 0; j < scenario.roles.length; j++) {
+                var role = scenario.roles[j];
+                var teamColor;
+                if (role.team === 'MAFIA') teamColor = '#FF5252';
+                else if (role.team === 'INDEPENDENT') teamColor = '#FFA726';
+                else teamColor = '#69F0AE';
+                var roleName = role.name.split('<')[0];
+                roleNames.push('<span style="color:' + teamColor + '; display:inline-block; margin: 2px 5px;">• ' + roleName + '</span>');
+            }
+            
+            var summaryText = mafiaCount + ' مافیا | ' + citizenCount + ' شهروند';
+            if (independentCount > 0) {
+                summaryText += ' | ' + independentCount + ' مستقل';
+            }
+            
+            previewEl.innerHTML = 
+                '<div style="margin-bottom:10px; font-weight:bold; border-bottom:1px solid #444; padding-bottom:5px;">' + summaryText + '</div>' +
+                '<div style="line-height:1.8;">' + roleNames.join('') + '</div>';
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function startGame() {
+            var key = document.getElementById('scenario-select').value;
+            var scenario = SCENARIOS[key];
+            
+            // Deep copy roles
+            currentGameRoles = JSON.parse(JSON.stringify(scenario.roles));
+            shuffleArray(currentGameRoles);
+            
+            currentPlayerIndex = 0;
+            totalPlayers = currentGameRoles.length;
+            
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function updatePassScreen() {
+            document.getElementById('player-num-pass').innerText = currentPlayerIndex + 1;
+            document.getElementById('counter-pass').innerText = 'بازیکن ' + (currentPlayerIndex + 1) + ' از ' + totalPlayers;
+        }
+
+        function confirmIdentity() {
+            var roleObj = currentGameRoles[currentPlayerIndex];
+            var roleEl = document.getElementById('role-display');
+            var roleEmojiEl = document.getElementById('role-emoji');
+            var roleSubtitleEl = document.getElementById('role-subtitle');
+            var teamEl = document.getElementById('team-display');
+            
+            // Extract emoji and text from role name
+            var fullName = roleObj.name;
+            // Match first emoji (comprehensive emoji ranges including helmet 🪖)
+            var emojiRegex = /([\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}])/u;
+            var emojiMatch = fullName.match(emojiRegex);
+            var emoji = emojiMatch ? emojiMatch[1] : '🎭';
+            
+            // Extract text without emoji and HTML tags - remove ALL emojis
+            var textOnly = fullName.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}]/gu, '').trim();
+            var roleName = textOnly.split('<')[0].trim();
+            
+            // Double-check: remove any remaining emoji-like characters
+            roleName = roleName.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FAFF}]/gu, '').trim();
+            var subtitleMatch = fullName.match(/<small>(.*?)<\/small>/);
+            var subtitle = subtitleMatch ? subtitleMatch[1] : '';
+            
+            // Display large emoji
+            roleEmojiEl.innerText = emoji;
+            roleEmojiEl.style.animation = 'none';
+            roleEmojiEl.offsetHeight; // trigger reflow
+            roleEmojiEl.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            
+            // Display role name
+            roleEl.innerText = roleName;
+            roleEl.style.animation = 'none';
+            roleEl.offsetHeight;
+            roleEl.style.animation = 'fadeInUp 0.6s ease-out 0.2s both';
+            
+            // Display subtitle
+            if (subtitle) {
+                roleSubtitleEl.innerText = subtitle;
+            } else {
+                roleSubtitleEl.innerText = '';
+            }
+            
+            // Set colors based on team
+            if (roleObj.team === 'MAFIA') {
+                roleEl.style.color = '#FF5252';
+                roleEmojiEl.style.filter = 'drop-shadow(0 4px 12px rgba(255, 82, 82, 0.5))';
+                teamEl.innerText = "تیم مافیا";
+                teamEl.style.color = '#FFFFFF';
+                teamEl.style.backgroundColor = '#FF5252';
+                teamEl.style.boxShadow = '0 4px 12px rgba(255, 82, 82, 0.4)';
+            } else if (roleObj.team === 'INDEPENDENT') {
+                roleEl.style.color = '#FFA726';
+                roleEmojiEl.style.filter = 'drop-shadow(0 4px 12px rgba(255, 167, 38, 0.5))';
+                teamEl.innerText = "تیم مستقل";
+                teamEl.style.color = '#FFFFFF';
+                teamEl.style.backgroundColor = '#FFA726';
+                teamEl.style.boxShadow = '0 4px 12px rgba(255, 167, 38, 0.4)';
+            } else {
+                roleEl.style.color = '#69F0AE';
+                roleEmojiEl.style.filter = 'drop-shadow(0 4px 12px rgba(105, 240, 174, 0.5))';
+                teamEl.innerText = "تیم شهروند";
+                teamEl.style.color = '#FFFFFF';
+                teamEl.style.backgroundColor = '#4CAF50';
+                teamEl.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.4)';
+            }
+
+            document.getElementById('counter-reveal').innerText = 'بازیکن ' + (currentPlayerIndex + 1) + ' از ' + totalPlayers;
+            
+            var nextBtn = document.getElementById('next-btn');
+            if (currentPlayerIndex === totalPlayers - 1) {
+                nextBtn.innerText = "پایان توزیع";
+                nextBtn.style.backgroundColor = "#4CAF50";
+            } else {
+                nextBtn.innerText = "پنهان کردن و نفر بعدی";
+                nextBtn.style.backgroundColor = "#2196F3";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= totalPlayers) {
+                showScreen('end-screen');
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function showScreen(screenId) {
+            var containers = document.querySelectorAll('.container');
+            for (var i = 0; i < containers.length; i++) {
+                containers[i].classList.add('hidden');
+            }
+            var target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+            
+            // Reset animation for reveal
+            if (screenId === 'reveal-screen') {
+                var roleEl = document.getElementById('role-display');
+                var roleEmojiEl = document.getElementById('role-emoji');
+                if (roleEl) {
+                    roleEl.style.animation = 'none';
+                    roleEl.offsetHeight; /* trigger reflow */
+                }
+                if (roleEmojiEl) {
+                    roleEmojiEl.style.animation = 'none';
+                    roleEmojiEl.offsetHeight; /* trigger reflow */
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

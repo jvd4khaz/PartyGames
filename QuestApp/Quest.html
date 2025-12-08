@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quest - Director's Cut</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #00ff88;
+            --good-color: #00ff88;
+            --evil-color: #ff3366;
+            --quest-color: #FF9800;
+            --amulet-color: #9C27B0;
+            --btn-color: #00ff88;
+            --btn-text: #0a192f;
+            --border-radius: 8px;
+            --success-glow: rgba(0, 255, 136, 0.8);
+            --fail-glow: rgba(255, 51, 102, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* Player Selection Buttons */
+        .player-select-btn {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.2) 0%, rgba(100, 255, 218, 0.1) 100%);
+            color: var(--accent-color);
+            border: 3px solid var(--accent-color);
+            padding: 18px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin: 12px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.2);
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-select-btn:hover {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.3) 0%, rgba(100, 255, 218, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
+            border-color: var(--accent-color);
+        }
+        .player-select-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(100, 255, 218, 0.3);
+        }
+
+        .hidden { display: none !important; }
+
+        /* Role Card */
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            margin-bottom: 10px; 
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .role-good { 
+            color: var(--good-color); 
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            font-weight: 900;
+        }
+        .role-evil { 
+            color: var(--evil-color); 
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+            font-weight: 900;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Quest Board Visualization */
+        .quest-board-visual {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.1) 0%, rgba(255,152,0,0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(255,152,0,0.3);
+        }
+        .quest-marker {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .quest-marker.active {
+            border-color: #ff9800;
+            background: radial-gradient(circle, rgba(255,152,0,0.35) 0%, rgba(255,152,0,0.15) 70%, rgba(0,0,0,0.15) 100%);
+            box-shadow: 0 0 12px rgba(255,152,0,0.45);
+            animation: questPulse 1.8s ease-in-out infinite;
+            transform: scale(1.07);
+        }
+        .quest-marker.completed {
+            border-color: var(--good-color);
+            background: rgba(76, 175, 80, 0.3);
+        }
+        @keyframes questPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.45);
+            }
+            60% {
+                box-shadow: 0 0 0 16px rgba(255, 152, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+            }
+        }
+        .quest-marker.failed {
+            border-color: var(--evil-color);
+            background: rgba(244, 67, 54, 0.3);
+        }
+        .quest-number {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .quest-size {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--quest-color);
+        }
+        .quest-status {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .quest-status.success { color: var(--good-color); }
+        .quest-status.failure { color: var(--evil-color); }
+        .quest-fail-note {
+            font-size: 0.65rem;
+            color: var(--evil-color);
+            margin-top: 3px;
+            font-style: italic;
+        }
+        .quest-amulet-marker {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(156, 39, 176, 0.3);
+            border: 2px solid var(--amulet-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 10;
+            animation: amuletPulse 2s ease-in-out infinite;
+        }
+        .quest-amulet-marker.amulet-available {
+            background: rgba(156, 39, 176, 0.6);
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.8);
+            animation: amuletPulse 1s ease-in-out infinite;
+        }
+        .quest-amulet-marker.amulet-given {
+            background: rgba(156, 39, 176, 0.4);
+            opacity: 0.7;
+            animation: none;
+        }
+        @keyframes amuletPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Game Status */
+        .game-status {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .status-item {
+            text-align: center;
+        }
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Leader Display */
+        .leader-display {
+            padding: 15px;
+            background: rgba(100, 255, 218, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .leader-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+
+        /* Amulet Display */
+        .amulet-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(156, 39, 176, 0.1);
+            border: 2px solid var(--amulet-color);
+            border-radius: 8px;
+        }
+        .amulet-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--amulet-color);
+            margin-bottom: 10px;
+        }
+        .amulet-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .amulet-item {
+            padding: 8px 12px;
+            background: rgba(156, 39, 176, 0.2);
+            border: 1px solid var(--amulet-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .amulet-item.used {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        /* Saved Players */
+        .saved-list-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .saved-list-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: auto;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        /* Log */
+        .log-entry {
+            font-size: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid #233554;
+            padding: 5px 0;
+            color: #8892b0;
+        }
+
+        /* Card Animations */
+        .quest-card-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 200px;
+            border-radius: 12px;
+            margin: 10px;
+            font-size: 2rem;
+            font-weight: 900;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: auto;
+        }
+        .quest-card-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            border: 3px solid #81C784;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+        .quest-card-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.6);
+            border-color: #A5D6A7;
+        }
+        .quest-card-fail {
+            background: linear-gradient(135deg, #F44336 0%, #E57373 100%);
+            color: white;
+            border: 3px solid #EF5350;
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+        }
+        .quest-card-fail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(244, 67, 54, 0.6);
+            border-color: #EF9A9A;
+        }
+        .quest-card-animate {
+            animation: cardFlip 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .quest-card-glow {
+            animation: cardGlow 1s ease-in-out infinite alternate;
+        }
+        @keyframes cardFlip {
+            0% { transform: rotateY(0deg) scale(0.8); opacity: 0; }
+            50% { transform: rotateY(90deg) scale(1.1); }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+        @keyframes cardGlow {
+            from { box-shadow: 0 0 20px var(--success-glow); }
+            to { box-shadow: 0 0 40px var(--success-glow), 0 0 60px var(--success-glow); }
+        }
+        .card-reveal-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        /* Role Selection */
+        .role-select-item {
+            background: rgba(255,255,255,0.05);
+            border: 3px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .role-select-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .role-select-item.selected {
+            border-width: 3px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            transform: translateX(5px);
+        }
+        .role-select-item[data-alignment="good"] {
+            border-left: 5px solid var(--good-color);
+        }
+        .role-select-item[data-alignment="good"]:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--good-color);
+        }
+        .role-select-item[data-alignment="good"].selected {
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0.1) 100%);
+            border-color: var(--good-color);
+        }
+        .role-select-item[data-alignment="evil"] {
+            border-left: 5px solid var(--evil-color);
+        }
+        .role-select-item[data-alignment="evil"]:hover {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--evil-color);
+        }
+        .role-select-item[data-alignment="evil"].selected {
+            background: linear-gradient(90deg, rgba(255, 51, 102, 0.25) 0%, rgba(255, 51, 102, 0.1) 100%);
+            border-color: var(--evil-color);
+        }
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .badge-good { 
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%); 
+            color: #0a192f;
+            font-weight: 900;
+        }
+        .badge-evil { 
+            background: linear-gradient(135deg, #ff3366 0%, #cc1a4d 100%); 
+            color: white;
+            font-weight: 900;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .container, .modal-overlay > .container { 
+            animation: fadeIn 0.3s ease-out; 
+        }
+        .card-reveal-container > div {
+            animation: slideIn 0.4s ease-out backwards;
+        }
+        .card-reveal-container > div:nth-child(1) { animation-delay: 0.1s; }
+        .card-reveal-container > div:nth-child(2) { animation-delay: 0.2s; }
+        .card-reveal-container > div:nth-child(3) { animation-delay: 0.3s; }
+        .card-reveal-container > div:nth-child(4) { animation-delay: 0.4s; }
+        .card-reveal-container > div:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>Quest - Director's Cut</h1>
+        <p>Social Deduction Game</p>
+
+        <div class="setup-info">
+            <strong>Game Overview:</strong><br>
+            • Players are secretly assigned Good or Evil roles (Minions of Mordred)<br>
+            • Leader selects team members for each quest<br>
+            • Team executes quest by voting Success or Failure<br>
+            • Good wins by completing 3 successful quests<br>
+            • Evil wins by failing 3 quests<br>
+            • Supports 4-10 players
+        </div>
+
+        <div class="input-group">
+            <label>Number of Players:</label>
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(-1)">-</button>
+                <span id="player-count-display" style="font-size:1.5rem; font-weight:bold;">7</span>
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(1)">+</button>
+            </div>
+        </div>
+
+        <div id="player-inputs-container" style="margin-top:20px;"></div>
+        
+        <!-- Saved Players List -->
+        <div class="saved-list-container">
+            <div class="saved-list-label">Saved Names (tap to fill):</div>
+            <div id="saved-list" style="text-align: center;"></div>
+        </div>
+
+        <button class="action-btn" onclick="showRoleSelection()">Configure Roles</button>
+    </div>
+
+    <!-- Role Selection Screen -->
+    <div id="role-selection-screen" class="container hidden">
+        <h1>Select Roles</h1>
+        <p id="role-selection-info" style="color: var(--text-secondary); margin-bottom: 20px;"></p>
+        <div id="role-selection-list"></div>
+        <button class="action-btn" onclick="confirmRoleSelection()">Confirm Roles</button>
+        <button class="secondary-btn" onclick="useRecommendedRoles()">Use Recommended</button>
+    </div>
+
+    <!-- 2. Role Distribution Phase -->
+    <div id="distribution-screen" class="container hidden">
+        <div id="dist-pass-view">
+            <p>Pass device to:</p>
+            <h2 id="dist-player-name" style="font-size:2rem; color:var(--accent-color);">Player Name</h2>
+            <div style="font-size:4rem; margin:20px;">📱</div>
+            <p>Player <span id="dist-player-num">1</span> of <span id="dist-total-players">7</span></p>
+            <button class="action-btn" onclick="revealRole()">Reveal Role</button>
+        </div>
+
+        <div id="dist-reveal-view" class="hidden">
+            <h2 id="reveal-name-header">Player Name</h2>
+            <div class="role-card">
+                <div id="role-title" class="role-title">Role</div>
+                <div id="role-desc" style="font-size:0.95rem; margin-bottom:10px; color:#ddd;"></div>
+                <div id="role-extra" style="font-size:0.9rem; color:#ffd700;"></div>
+            </div>
+            <p style="font-size:0.8rem; color:#666;">Memorize your role and hide it.</p>
+            <button id="next-dist-btn" class="action-btn" onclick="nextDistribute()">Hide & Next</button>
+        </div>
+    </div>
+
+    <!-- 3. Leader Announcement -->
+    <div id="leader-announce-screen" class="container hidden">
+        <h1>First Leader</h1>
+        <div class="leader-display">
+            <p style="color: var(--text-secondary);">The first leader is:</p>
+            <div class="leader-name" id="first-leader-name">Player Name</div>
+        </div>
+        <p style="color: var(--text-secondary);">The leader will select team members for Quest 1.</p>
+        <button class="action-btn" onclick="startGame()">Begin Quest 1</button>
+    </div>
+
+    <!-- 4. Main Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h1>Quest Game</h1>
+        
+        <!-- Compact Team Layout -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <!-- Evil Team (Left) -->
+            <div style="flex: 1; background: rgba(244, 67, 54, 0.05); border: 1px solid var(--evil-color); border-radius: 8px; padding: 8px; min-height: 60px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: var(--evil-color); font-weight: bold;">
+                    <span>Minions of Mordred</span>
+                    <span>Wins: <strong id="evil-wins-display" style="color: var(--evil-color); font-size: 0.95rem;">0</strong></span>
+                </div>
+                <div id="evil-team-list" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-content: flex-start;">
+                    <!-- Evil roles will be listed here -->
+                </div>
+            </div>
+            
+            <!-- Good Team (Right) -->
+            <div style="flex: 1; background: rgba(76, 175, 80, 0.05); border: 1px solid var(--good-color); border-radius: 8px; padding: 8px; min-height: 60px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: var(--good-color); font-weight: bold;">
+                    <span>Loyal Servants</span>
+                    <span>Wins: <strong id="good-wins-display" style="color: var(--good-color); font-size: 0.95rem;">0</strong></span>
+                </div>
+                <div id="good-team-list" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-content: flex-start;">
+                    <!-- Good roles will be listed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quest Board Visualization -->
+        <div class="quest-board-visual" id="quest-board-visual">
+            <!-- Quest markers will be generated here -->
+        </div>
+
+        <!-- Current Leader -->
+        <div class="leader-display">
+            <div class="status-label">Current Leader</div>
+            <div class="leader-name" id="current-leader-name">Player Name</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="action-buttons" style="margin-top: 20px;"></div>
+
+        <!-- Current Phase Display -->
+        <div id="phase-display" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <div id="phase-title" style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); margin-bottom: 10px;"></div>
+            <div id="phase-content"></div>
+        </div>
+
+        <!-- Amulets Section -->
+        <div class="amulet-section" id="amulet-section">
+            <div class="amulet-title">🔮 Amulets</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 10px 0;" id="amulet-explanation">
+                These are given to others by the leader of the last quest and allow a player to check the loyalty of another player.
+            </p>
+            <div class="amulet-list" id="amulet-list">
+                <!-- Amulets will be generated here -->
+            </div>
+        </div>
+        <!-- Game Log -->
+        <button class="secondary-btn" onclick="toggleLog()">Toggle Game Log</button>
+        <div id="game-log" class="hidden" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+            <div id="log-content"></div>
+        </div>
+
+        <!-- End Game Modal -->
+        <div id="end-game-modal" class="modal-overlay hidden">
+            <div class="container" style="max-width:500px; border: 2px solid var(--accent-color);">
+                <h1 id="end-game-title" style="margin-bottom: 20px;">GAME OVER</h1>
+                <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
+                <button class="action-btn" onclick="location.reload()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Magic Token Modal -->
+    <div id="magic-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Magic Token</h2>
+            <p style="margin: 15px 0;">Leader: Select a player to receive the Magic token.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">The player with the Magic token cannot play a Fail card (unless their role allows it).</p>
+            <div id="magic-player-list" style="margin: 20px 0;"></div>
+            <button class="secondary-btn" onclick="document.getElementById('magic-modal').classList.add('hidden')">Skip (Place on Leader)</button>
+        </div>
+    </div>
+
+    <!-- Quest Card Selection Modal -->
+    <div id="quest-card-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Select Quest Card</h2>
+            <p id="quest-card-player" style="margin: 15px 0; font-size: 1.1rem; color: var(--accent-color); font-weight: bold;"></p>
+            <p id="quest-card-magic-note" style="color: var(--amulet-color); font-weight: bold; margin: 10px 0; padding: 10px; background: rgba(156, 39, 176, 0.2); border-radius: 8px;"></p>
+            <p style="color: var(--text-secondary); margin: 20px 0;">Select a Quest card to play:</p>
+            <div style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
+                <button class="quest-card-display quest-card-success" onclick="selectQuestCard('success'); return false;" id="success-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✓</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">SUCCESS</div>
+                </button>
+                <button class="quest-card-display quest-card-fail" onclick="selectQuestCard('fail'); return false;" id="fail-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✗</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">FAIL</div>
+                </button>
+            </div>
+            <p id="quest-card-progress" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;"></p>
+        </div>
+    </div>
+
+    <!-- Quest Cards Reveal Modal -->
+    <div id="quest-cards-reveal-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:90vh; overflow-y: auto; padding: 15px;">
+            <h2 style="color: var(--accent-color); font-size: 1.2rem; margin-bottom: 8px;">Quest Cards Revealed</h2>
+            <div class="card-reveal-container" id="revealed-cards-container" style="margin: 10px 0;"></div>
+            <div id="quest-result-summary" style="margin: 10px 0; padding: 10px; border-radius: 8px; font-size: 0.95rem; font-weight: bold;"></div>
+            <button class="action-btn" onclick="closeQuestReveal()" style="margin-top: 8px; padding: 10px 20px; font-size: 0.95rem;">Continue</button>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.8rem;">Leader collected and shuffled the cards.</p>
+        </div>
+    </div>
+
+
+    <!-- Leader Selection Modal -->
+    <div id="leader-select-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Select Next Leader</h2>
+            <p style="margin: 15px 0;">Current Leader: <strong id="current-leader-select-name"></strong></p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player who has not been a Leader and does not have an Amulet.</p>
+            <div id="leader-select-list" style="margin: 20px 0;"></div>
+        </div>
+    </div>
+
+    <!-- Amulet Selection Modal -->
+    <div id="amulet-select-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Amulet Available</h2>
+            <p style="margin: 15px 0;">An Amulet is available after Quest <span id="amulet-quest-num"></span>.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player to receive the Amulet (cannot be the new Leader, and cannot have Veteran/Amulet token).</p>
+            <div id="amulet-select-list" style="margin: 20px 0;"></div>
+            <button class="secondary-btn" onclick="skipAmulet()">Skip Amulet</button>
+        </div>
+    </div>
+
+    <!-- Amulet Check Modal -->
+    <div id="amulet-check-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2>Amulet Check</h2>
+            <div id="amulet-check-list" style="margin: 15px 0;"></div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p id="amulet-holder-name" style="margin: 10px 0; color: var(--amulet-color); font-weight: bold;"></p>
+                <p style="margin: 10px 0; color: var(--text-secondary); font-size: 0.9rem;">Select a player to check their loyalty.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amulet Result Modal -->
+    <div id="amulet-result-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto; padding: 20px;">
+            <h2 style="color: var(--amulet-color); margin-bottom: 15px;">Amulet Check Result</h2>
+            <p style="margin: 15px 0; font-size: 1.1rem;">You checked:</p>
+            <p id="amulet-checked-name" style="margin: 10px 0; font-size: 1.3rem; font-weight: bold; color: var(--accent-color);"></p>
+            <div id="amulet-result-text" style="margin: 20px 0; padding: 20px; border-radius: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 3px solid;"></div>
+            <button class="action-btn" onclick="closeAmuletResult()" style="margin-top: 15px;">Continue</button>
+        </div>
+    </div>
+
+    <!-- Final Quest Modal -->
+    <div id="final-quest-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>Final Quest</h2>
+            <p style="margin: 15px 0; font-size: 1.1rem;">Three quests have failed!</p>
+            <div id="final-quest-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration (Director's Cut) ---
+        // Quest 3 for 4 players can be 2 or 3 (handled dynamically)
+        var QUEST_CONFIG = {
+            4: { quests: [3, 2, 3, 2], fails: [1, 1, 1, 1], evil: 2, quest3Options: [2, 3] },
+            5: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 3 },
+            6: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 3 },
+            7: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 4 },
+            8: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 4 },
+            9: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 5 },
+            10: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 5 }
+        };
+        
+        // Amulet placement: [quest after which amulet appears]
+        var AMULET_CONFIG = {
+            6: [4],  // 1 amulet after Quest 4
+            7: [4, 3],  // 2 amulets: after Quest 4 and Quest 3
+            8: [4, 3, 2],  // 3 amulets: after Quest 4, 3, and 2
+            9: [4, 3, 2],
+            10: [4, 3, 2]
+        };
+
+        // --- Role Definitions ---
+        // Role strength ranking (higher number = stronger/more important)
+        var ROLE_STRENGTH = {
+            // Evil: Morgan > Blind Hunter > Minion
+            'Morgan': 30,      // Morgan le Fay - strongest evil
+            'Blind Hunter': 20, // Blind Hunter
+            'Minion': 10,      // Minion of Mordred - weakest evil
+            
+            // Good: Cleric > Duke > Archduke > Troublemaker > Youth > Loyal Servant
+            'Cleric': 60,      // Cleric - strongest good
+            'Duke': 50,        // Duke
+            'Archduke': 40,    // Archduke
+            'Troublemaker': 30, // Troublemaker
+            'Youth': 20,       // Youth
+            'Loyal Servant': 10 // Loyal Servant - weakest good
+        };
+        
+        var ROLE_DEFINITIONS = {
+            'Loyal Servant': { name: 'Loyal Servant of Arthur', symbol: '🛡️', rebus: '🛡️', alignment: 'good', description: 'A loyal servant fighting for Good.' },
+            'Cleric': { name: 'Cleric', symbol: '🔮', rebus: '🔮', alignment: 'good', description: 'Knows if the first Leader is Good or Evil.', required: false },
+            'Youth': { name: 'Youth', symbol: '🌱', rebus: '🌱', alignment: 'good', description: 'If Magic token is placed on you, you must play Fail.', required: false },
+            'Troublemaker': { name: 'Troublemaker', symbol: '⚔️', rebus: '⚔️', alignment: 'good', description: 'If checked for loyalty, you must lie and show Evil.', required: false },
+            'Duke': { name: 'Duke', symbol: '🔨', rebus: '🔨', alignment: 'good', description: 'May drop one hand during Good\'s Last Chance.', required: false },
+            'Archduke': { name: 'Archduke', symbol: '💪', rebus: '💪', alignment: 'good', description: 'May switch one hand during Good\'s Last Chance.', required: false },
+            'Minion': { name: 'Minion of Mordred', symbol: '🗡️', rebus: '🗡️', alignment: 'evil', description: 'A minion fighting for Evil.', required: false },
+            'Morgan': { name: 'Morgan le Fay', symbol: '🐉', rebus: '🐉', alignment: 'evil', description: 'May ignore Magic token and play Fail or Success.', required: false },
+            'Blind Hunter': { name: 'Blind Hunter', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: 'Does not know other Minions. Can Hunt in Final Quest.', required: false }
+        };
+
+        // Recommended roles by player count
+        var RECOMMENDED_ROLES = {
+            4: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'],
+            5: ['Loyal Servant', 'Loyal Servant', 'Minion', 'Morgan', 'Blind Hunter'],
+            6: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion'],
+            7: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            8: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            9: ['Cleric', 'Troublemaker', 'Archduke', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            10: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion']
+        };
+
+        var SCENARIOS = {
+            4: [
+                { name: 'Classic Battle', description: '2 Loyal Servants vs Morgan and Blind Hunter', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'] },
+                { name: 'Ambiguous Battle', description: '2 from (Cleric, Youth, Servant) + Morgan & Blind Hunter (5 roles, 1 removed)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter'] }
+            ],
+            5: [
+                { name: 'Classic Battle', description: '2 Loyal Servants vs Morgan, Blind Hunter, and Minion', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] },
+                { name: 'Ambiguous Battle', description: '2 from (Cleric, Youth, Servant) + Morgan, Hunter, Minion (6 roles, 1 removed)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+            ],
+            6: [
+                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker vs Morgan, Hunter, Minion', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion'] },
+                { name: 'Classic Battle', description: '3 Loyal Servants vs Morgan, Hunter, Minion', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+            ],
+            7: [
+                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker vs Morgan, Hunter, 2 Minions', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '3 Loyal Servants vs Morgan, Hunter, 2 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+            ],
+            8: [
+                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker, Servant vs Morgan, Hunter, 2 Minions', roles: ['Cleric', 'Duke', 'Troublemaker', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '4 Loyal Servants vs Morgan, Hunter, 2 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+            ],
+            9: [
+                { name: 'Director\'s Cut', description: 'Cleric, Archduke, Troublemaker, 2 Servants vs Morgan, Hunter, 3 Minions', roles: ['Cleric', 'Archduke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '4 Loyal Servants vs Morgan, Hunter, 3 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+            ],
+            10: [
+                { name: 'Director\'s Cut', description: 'Cleric, Archduke, Duke, Troublemaker, 2 Servants vs Morgan, Hunter, 3 Minions', roles: ['Cleric', 'Archduke', 'Duke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '5 Loyal Servants vs Morgan, Hunter, 3 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+            ]
+        };
+
+        // --- Global State ---
+        var playerCount = 7;
+        var players = [];
+        
+        // Handle page visibility to prevent freezing on mobile
+        var audioContext = null;
+        function getAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    // Audio not supported
+                }
+            }
+            // Resume audio context if suspended (common on mobile when returning to app)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().catch(function() {});
+            }
+            return audioContext;
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Page is now visible - resume audio context
+                getAudioContext();
+                // Force a small repaint to wake up the page
+                if (document.body) {
+                    document.body.style.display = 'none';
+                    document.body.offsetHeight; // Trigger reflow
+                    document.body.style.display = '';
+                }
+            }
+        });
+        
+        // Handle page focus to prevent freezing
+        window.addEventListener('focus', function() {
+            getAudioContext();
+        });
+        
+        // Auto-save game state periodically to prevent data loss
+        function saveGameState() {
+            try {
+                // Only save if game is in progress
+                if (players.length > 0 && !isGameEnded) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentQuest: currentQuest,
+                        currentLeader: currentLeader,
+                        goodWins: goodWins,
+                        evilWins: evilWins,
+                        questHistory: questHistory,
+                        veterans: veterans,
+                        amuletHolders: amuletHolders,
+                        checkedByAmulet: checkedByAmulet,
+                        quest3Size: quest3Size,
+                        amulets: amulets,
+                        questCards: questCards,
+                        magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
+                        selectedRoles: selectedRoles,
+                        currentDistIndex: currentDistIndex
+                    };
+                    localStorage.setItem('quest_game_state', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Keep page alive with minimal activity
+        setInterval(function() {
+            if (!document.hidden) {
+                // Small periodic activity to prevent page from being suspended
+                getAudioContext();
+            }
+        }, 10000);
+        var savedPlayers = [];
+        var currentDistIndex = 0;
+        var selectedRoles = []; // Roles selected for this game
+        var rolesOnGround = []; // Roles selected but not assigned (ambiguity rule)
+        
+        // Game State
+        var currentQuest = 1;
+        var goodWins = 0;
+        var evilWins = 0;
+        var currentLeader = 0;
+        var questHistory = [];
+        var currentTeam = [];
+        var questCards = []; // Array of {player, card: 'success' or 'fail'}
+        var isGameEnded = false;
+        var gameLog = [];
+        var amulets = []; // Array of {quest: number, available: boolean, holder: null or playerIndex, checked: []}
+        var veterans = []; // Array of player indices who have been leaders
+        var magicTokenHolder = null; // Player index with magic token
+        var magicTokenTeamMemberIndex = null; // Which team member (0-based) has magic token
+        var amuletHolders = []; // Players who have received amulets
+        var checkedByAmulet = []; // Players checked by amulets
+        var quest3Size = null; // For 4 players, track if Quest 3 is 2 or 3
+
+        // --- Initialization ---
+        window.onload = function() {
+            loadSavedPlayers();
+            renderPlayerInputs();
+        };
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('quest_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">No saved names</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.style.display = 'inline-block';
+                chip.style.background = 'rgba(255,255,255,0.1)';
+                chip.style.border = '1px solid #555';
+                chip.style.borderRadius = '20px';
+                chip.style.padding = '6px 14px';
+                chip.style.fontSize = '0.85rem';
+                chip.style.cursor = 'pointer';
+                chip.style.margin = '3px';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function updatePlayerCount(delta) {
+            var newCount = playerCount + delta;
+            if (newCount >= 4 && newCount <= 10) {
+                playerCount = newCount;
+                document.getElementById('player-count-display').innerText = playerCount;
+                renderPlayerInputs();
+            }
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            var currentValues = [];
+            var inputs = container.querySelectorAll('.player-input');
+            for(var i=0; i<inputs.length; i++) currentValues.push(inputs[i].value);
+
+            container.innerHTML = '';
+            for (var i = 0; i < playerCount; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "Player " + (i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+        }
+
+        function showRoleSelection() {
+            // Hide setup screen and show role selection first
+            var setupScreen = document.getElementById('setup-screen');
+            var roleScreen = document.getElementById('role-selection-screen');
+            if (setupScreen) setupScreen.classList.add('hidden');
+            if (roleScreen) {
+                roleScreen.classList.remove('hidden');
+            }
+            
+            // Load recommended roles if none selected, then render
+            if (selectedRoles.length === 0) {
+                useRecommendedRoles();
+            } else {
+                renderRoleSelection();
+            }
+        }
+
+        function useRecommendedRoles() {
+            selectedRoles = RECOMMENDED_ROLES[playerCount].slice();
+            renderRoleSelection();
+        }
+
+        function applyScenario(roles) {
+            selectedRoles = roles.slice();
+            renderRoleSelection();
+        }
+
+        function renderRoleSelection() {
+            var info = document.getElementById('role-selection-info');
+            var list = document.getElementById('role-selection-list');
+            
+            if (!info || !list) return;
+            
+            info.innerHTML = 'Select ' + playerCount + ' roles for this game.';
+            list.innerHTML = '';
+            
+            // Scenario Selection UI
+            var scenarios = SCENARIOS[playerCount];
+            if (scenarios && scenarios.length > 0) {
+                var scenarioContainer = document.createElement('div');
+                scenarioContainer.style.marginBottom = '20px';
+                scenarioContainer.style.padding = '15px';
+                scenarioContainer.style.background = 'rgba(0, 150, 136, 0.1)';
+                scenarioContainer.style.border = '1px solid var(--accent-color)';
+                scenarioContainer.style.borderRadius = '8px';
+
+                var scenarioTitle = document.createElement('h3');
+                scenarioTitle.innerText = 'Suggested Scenarios';
+                scenarioTitle.style.marginTop = '0';
+                scenarioTitle.style.fontSize = '1rem';
+                scenarioTitle.style.color = 'var(--accent-color)';
+                scenarioContainer.appendChild(scenarioTitle);
+
+                scenarios.forEach(function(scenario) {
+                    var btn = document.createElement('button');
+                    btn.className = 'secondary-btn';
+                    btn.style.marginTop = '8px';
+                    btn.style.textAlign = 'left';
+                    btn.innerHTML = '<strong>' + scenario.name + '</strong><br><span style="font-size:0.8rem; color:var(--text-secondary);">' + scenario.description + '</span>';
+                    btn.onclick = function() { applyScenario(scenario.roles); };
+                    scenarioContainer.appendChild(btn);
+                });
+
+                list.appendChild(scenarioContainer);
+            }
+
+            var availableRoles = ['Cleric', 'Youth', 'Troublemaker', 'Duke', 'Archduke', 'Morgan', 'Blind Hunter', 'Loyal Servant', 'Minion'];
+            
+            var roleCounts = {};
+            selectedRoles.forEach(function(role) {
+                roleCounts[role] = (roleCounts[role] || 0) + 1;
+            });
+            
+            availableRoles.forEach(function(roleKey) {
+                var role = ROLE_DEFINITIONS[roleKey];
+                if (!role) return;
+                
+                var item = document.createElement('div');
+                item.className = 'role-select-item';
+                item.setAttribute('data-alignment', role.alignment);
+                
+                var count = roleCounts[roleKey] || 0;
+                if (count > 0) item.classList.add('selected');
+                
+                var left = document.createElement('div');
+                left.innerHTML = '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;"><span style="font-size: 1.5rem;">' + (role.rebus || '❓') + '</span><strong>' + role.name + '</strong></div><span style="font-size: 0.85rem; color: var(--text-secondary);">' + role.description + '</span>';
+                
+                var right = document.createElement('div');
+                right.style.display = 'flex';
+                right.style.alignItems = 'center';
+                right.style.gap = '10px';
+                
+                var badge = document.createElement('span');
+                badge.className = 'role-badge ' + (role.alignment === 'good' ? 'badge-good' : 'badge-evil');
+                badge.innerText = role.alignment.toUpperCase();
+                right.appendChild(badge);
+                
+                var countDisplay = document.createElement('span');
+                countDisplay.style.fontSize = '1.2rem';
+                countDisplay.style.fontWeight = 'bold';
+                countDisplay.style.minWidth = '30px';
+                countDisplay.innerText = count;
+                right.appendChild(countDisplay);
+                
+                var minusBtn = document.createElement('button');
+                minusBtn.innerText = '−';
+                minusBtn.style.width = '30px';
+                minusBtn.style.height = '30px';
+                minusBtn.style.borderRadius = '50%';
+                minusBtn.style.border = '2px solid var(--accent-color)';
+                minusBtn.style.background = 'transparent';
+                minusBtn.style.color = 'var(--accent-color)';
+                minusBtn.style.cursor = 'pointer';
+                minusBtn.onclick = function(e) { e.stopPropagation(); removeRole(roleKey); };
+                right.appendChild(minusBtn);
+                
+                var plusBtn = document.createElement('button');
+                plusBtn.innerText = '+';
+                plusBtn.style.width = '30px';
+                plusBtn.style.height = '30px';
+                plusBtn.style.borderRadius = '50%';
+                plusBtn.style.border = '2px solid var(--accent-color)';
+                plusBtn.style.background = 'transparent';
+                plusBtn.style.color = 'var(--accent-color)';
+                plusBtn.style.cursor = 'pointer';
+                plusBtn.onclick = function(e) { e.stopPropagation(); addRole(roleKey); };
+                right.appendChild(plusBtn);
+                
+                item.appendChild(left);
+                item.appendChild(right);
+                list.appendChild(item);
+            });
+            
+            var total = selectedRoles.length;
+            var totalDiv = document.createElement('div');
+            totalDiv.style.marginTop = '20px';
+            totalDiv.style.padding = '15px';
+            totalDiv.style.background = total === playerCount ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)';
+            totalDiv.style.borderRadius = '8px';
+            totalDiv.style.fontWeight = 'bold';
+            totalDiv.innerText = 'Total Roles: ' + total + ' / ' + playerCount;
+            list.appendChild(totalDiv);
+        }
+
+        function addRole(roleKey) {
+            var total = selectedRoles.length;
+            
+            // Special rule for 4-5 players: if ambiguity pool roles are selected, allow N+1 roles
+            var allowedCount = playerCount;
+            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            // Also check if the role being added is from ambiguity pool
+            var addingAmbiguityRole = roleKey === 'Cleric' || roleKey === 'Youth' || roleKey === 'Loyal Servant';
+            if ((playerCount === 4 || playerCount === 5) && (hasAmbiguityRoles || addingAmbiguityRole)) {
+                allowedCount = playerCount + 1;
+            }
+
+            if (total >= allowedCount) {
+                alert('You have selected ' + total + ' roles. Remove a role first.');
+                return;
+            }
+            selectedRoles.push(roleKey);
+            renderRoleSelection();
+        }
+
+        function removeRole(roleKey) {
+            var index = selectedRoles.lastIndexOf(roleKey);
+            if (index !== -1) {
+                selectedRoles.splice(index, 1);
+                renderRoleSelection();
+            }
+        }
+
+        function confirmRoleSelection() {
+            // Special rule for 4-5 players with ambiguity pool roles
+            var allowedCount = playerCount;
+            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
+                allowedCount = playerCount + 1;
+            }
+
+            if (selectedRoles.length !== playerCount && selectedRoles.length !== allowedCount) {
+                alert('Please select exactly ' + playerCount + ' roles (or ' + allowedCount + ' for ambiguous scenarios).');
+                return;
+            }
+            
+            // No role restrictions - allow any combination
+            document.getElementById('role-selection-screen').classList.add('hidden');
+            startRoleDistribution();
+        }
+
+        // --- Role Distribution ---
+        function startRoleDistribution() {
+            // If no roles selected, use recommended
+            if (selectedRoles.length === 0) {
+                useRecommendedRoles();
+            }
+            
+            // Validate roles
+            var allowedCount = playerCount;
+            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
+                allowedCount = playerCount + 1;
+            }
+
+            if (selectedRoles.length !== playerCount && selectedRoles.length !== allowedCount) {
+                alert('Please select exactly ' + playerCount + ' roles (or ' + allowedCount + ' for special scenarios).');
+                return;
+            }
+            
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                names.push(val);
+                
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            localStorage.setItem('quest_players', JSON.stringify(savedPlayers));
+            renderSavedList();
+
+            // Handle N+1 ambiguity rule: randomization only between ambiguity pool roles
+            var rolesToAssign = [];
+            
+            // Define ambiguity pools for different player counts
+            var ambiguityPool = [];
+            if (playerCount === 4 || playerCount === 5) {
+                // For 4-5 players: ambiguity pool is [Cleric, Youth, Loyal Servant]
+                ambiguityPool = ['Cleric', 'Youth', 'Loyal Servant'];
+            }
+            // For 6+ players, no ambiguity rule applies (all roles are fixed)
+            
+            // Separate roles into ambiguity pool and fixed roles
+            var ambiguityRoles = [];
+            var fixedRoles = [];
+            
+            for (var i = 0; i < selectedRoles.length; i++) {
+                if (ambiguityPool.length > 0 && ambiguityPool.indexOf(selectedRoles[i]) !== -1) {
+                    ambiguityRoles.push(selectedRoles[i]);
+                } else {
+                    fixedRoles.push(selectedRoles[i]);
+                }
+            }
+            
+            // If we have ambiguity roles and N+1 total roles, apply ambiguity rule
+            if (selectedRoles.length === playerCount + 1 && ambiguityRoles.length > 0) {
+                // Randomly select required number from ambiguity pool
+                // For 4-5 players: need 2 from [Cleric, Youth, Loyal Servant]
+                var requiredFromAmbiguity = 2;
+                shuffleArray(ambiguityRoles);
+                var selectedAmbiguity = ambiguityRoles.slice(0, requiredFromAmbiguity);
+                
+                // Combine selected ambiguity roles with fixed roles
+                rolesToAssign = selectedAmbiguity.concat(fixedRoles);
+                
+                // Shuffle the final assignment
+                shuffleArray(rolesToAssign);
+                
+                // Track which roles are on the ground
+                rolesOnGround = [];
+                for (var j = 0; j < ambiguityRoles.length; j++) {
+                    if (selectedAmbiguity.indexOf(ambiguityRoles[j]) === -1) {
+                        rolesOnGround.push(ambiguityRoles[j]);
+                    }
+                }
+                if (rolesOnGround.length > 0) {
+                    var removedNames = rolesOnGround.map(function(r) { return ROLE_DEFINITIONS[r].name; });
+                    addLog('One role from the ambiguity pool was randomly removed (Ambiguity Rule): ' + removedNames.join(', '));
+                }
+            } else {
+                // Normal case: shuffle all roles
+                rolesToAssign = selectedRoles.slice();
+                shuffleArray(rolesToAssign);
+                rolesOnGround = []; // No roles on ground in normal case
+                
+                // If we still have N+1 roles (shouldn't happen in normal flow, but handle it)
+                if (rolesToAssign.length > playerCount) {
+                    // Only remove from ambiguity pool if present
+                    if (ambiguityRoles.length > 0) {
+                        var rolesToRemove = [];
+                        for (var k = 0; k < rolesToAssign.length; k++) {
+                            if (ambiguityPool.indexOf(rolesToAssign[k]) !== -1) {
+                                rolesToRemove.push(k);
+                            }
+                        }
+                        if (rolesToRemove.length > 0) {
+                            var removeIndex = rolesToRemove[Math.floor(Math.random() * rolesToRemove.length)];
+                            var removedRole = rolesToAssign[removeIndex];
+                            rolesToAssign.splice(removeIndex, 1);
+                            rolesOnGround = [removedRole];
+                            addLog('One role from the ambiguity pool was randomly removed (Ambiguity Rule): ' + ROLE_DEFINITIONS[removedRole].name);
+                        } else {
+                            // Fallback: remove last role
+                            var droppedRole = rolesToAssign[playerCount];
+                            rolesOnGround = [droppedRole];
+                            addLog('One role was randomly removed (Ambiguity Rule): ' + ROLE_DEFINITIONS[droppedRole].name);
+                        }
+                    } else {
+                        // No ambiguity pool: remove last role
+                        var droppedRole = rolesToAssign[playerCount];
+                        rolesOnGround = [droppedRole];
+                        addLog('One role was randomly removed (Ambiguity Rule): ' + ROLE_DEFINITIONS[droppedRole].name);
+                    }
+                }
+            }
+            
+            players = [];
+            for (var i = 0; i < playerCount; i++) {
+                var roleKey = rolesToAssign[i];
+                var roleDef = ROLE_DEFINITIONS[roleKey];
+                if (!roleDef) {
+                    alert('Error: Invalid role ' + roleKey + '. Please reconfigure roles.');
+                    return;
+                }
+                players.push({
+                    name: names[i],
+                    roleKey: roleKey,
+                    role: roleDef.name,
+                    alignment: roleDef.alignment,
+                    description: roleDef.description,
+                    eliminated: false
+                });
+            }
+            
+            // Don't shuffle players - keep them in input order
+            
+            currentDistIndex = 0;
+            document.getElementById('dist-total-players').innerText = playerCount;
+            document.getElementById('role-selection-screen').classList.add('hidden');
+            showScreen('distribution-screen');
+            updateDistScreen();
+        }
+
+        function updateDistScreen() {
+            document.getElementById('dist-player-num').innerText = currentDistIndex + 1;
+            document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+        }
+
+        function revealRole() {
+            var player = players[currentDistIndex];
+            document.getElementById('reveal-name-header').innerText = player.name;
+            
+            var title = document.getElementById('role-title');
+            var desc = document.getElementById('role-desc');
+            var extra = document.getElementById('role-extra');
+            
+            var isGood = player.alignment === 'good';
+            var roleDef = ROLE_DEFINITIONS[player.roleKey];
+            var rebus = roleDef ? roleDef.rebus : (isGood ? '🛡️' : '⚔️');
+            title.innerHTML = '<span style="font-size: 2rem; margin-right: 10px;">' + rebus + '</span> ' + player.role;
+            title.className = 'role-title ' + (isGood ? 'role-good' : 'role-evil');
+            desc.innerText = player.description;
+            
+            extra.innerHTML = '';
+            
+            // Show teammates for evil players
+            if (!isGood) {
+                if (player.roleKey === 'Blind Hunter') {
+                    // Blind Hunter never knows other evil players (any player count)
+                    extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>Important:</strong> You do not know who the other Minions are. You are alone.</div>';
+                } else {
+                    // Other evil players (Morgan, Minion)
+                    // In 4-5 player games, Blind Hunter is known to other evil
+                    // In 6+ player games, Blind Hunter is not known
+                    var includeBlindHunter = (playerCount === 4 || playerCount === 5);
+                    var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
+                    
+                    if (includeBlindHunter) {
+                        // Include Blind Hunter in team list for 4-5 players, and indicate which one is Blind Hunter
+                        if (evilPlayers.length > 0) {
+                            var teamList = evilPlayers.map(p => {
+                                if (p.roleKey === 'Blind Hunter') {
+                                    return p.name + ' (Blind Hunter)';
+                                }
+                                return p.name;
+                            }).join(', ');
+                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + teamList + '</div>';
+                        }
+                    } else {
+                        // 6+ players: Don't show Blind Hunter at all (no mention)
+                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Blind Hunter');
+                        if (visibleEvil.length > 0) {
+                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + visibleEvil.map(p => p.name).join(', ') + '</div>';
+                        }
+                    }
+                }
+            }
+            
+            // Show information for Cleric about first leader (all player counts)
+            if (player.roleKey === 'Cleric') {
+                var firstLeader = players[currentLeader];
+                var firstLeaderIsGood = firstLeader.alignment === 'good';
+                var clericInfo = '<div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.2); border: 1px solid var(--good-color); border-radius: 8px; color: #C8E6C9;"><strong>Cleric Information:</strong><br>First Leader: <strong>' + firstLeader.name + '</strong><br>The first Leader is <strong style="color: ' + (firstLeaderIsGood ? 'var(--good-color)' : 'var(--evil-color)') + ';">' + (firstLeaderIsGood ? 'Good' : 'Evil') + '</strong>.</div>';
+                extra.innerHTML = (extra.innerHTML ? extra.innerHTML + clericInfo : clericInfo);
+            }
+            
+            var nextBtn = document.getElementById('next-dist-btn');
+            if (currentDistIndex === playerCount - 1) {
+                nextBtn.innerText = "Finish Distribution";
+                nextBtn.style.backgroundColor = "#4CAF50";
+            } else {
+                nextBtn.innerText = "Hide & Next";
+                nextBtn.style.backgroundColor = "#64ffda";
+            }
+            
+            document.getElementById('dist-pass-view').classList.add('hidden');
+            document.getElementById('dist-reveal-view').classList.remove('hidden');
+        }
+
+        function nextDistribute() {
+            currentDistIndex++;
+            if (currentDistIndex >= playerCount) {
+                announceFirstLeader();
+            } else {
+                document.getElementById('dist-pass-view').classList.remove('hidden');
+                document.getElementById('dist-reveal-view').classList.add('hidden');
+                updateDistScreen();
+            }
+        }
+
+        function announceFirstLeader() {
+            // Randomly select first leader
+            currentLeader = Math.floor(Math.random() * playerCount);
+            document.getElementById('first-leader-name').innerText = players[currentLeader].name;
+            addLog('First leader randomly selected: ' + players[currentLeader].name);
+            
+            showScreen('leader-announce-screen');
+        }
+
+        // --- Game Logic ---
+        function startGame() {
+            currentQuest = 1;
+            goodWins = 0;
+            evilWins = 0;
+            questHistory = [];
+            isGameEnded = false;
+            gameLog = [];
+            veterans = [currentLeader]; // First leader is a veteran
+            magicTokenHolder = null;
+            magicTokenTeamMemberIndex = null;
+            amuletHolders = [];
+            checkedByAmulet = [];
+            quest3Size = null;
+            
+            // Initialize amulets based on player count
+            amulets = [];
+            if (playerCount >= 6) {
+                var amuletQuests = AMULET_CONFIG[playerCount] || [];
+                amuletQuests.forEach(function(questNum) {
+                    amulets.push({ 
+                        quest: questNum, 
+                        available: false, 
+                        holder: null,
+                        used: false
+                    });
+                });
+            }
+            
+            addLog("Game started with " + playerCount + " players.");
+            addLog("First leader: " + players[currentLeader].name);
+            
+            showScreen('game-screen');
+            updateGameDisplay();
+            startTeamSelection();
+        }
+
+        function updateGameDisplay() {
+            document.getElementById('good-wins-display').innerText = goodWins;
+            document.getElementById('evil-wins-display').innerText = evilWins;
+            document.getElementById('current-leader-name').innerText = players[currentLeader].name;
+            
+            // Update team lists
+            renderTeamLists();
+            
+            // Update quest board visualization
+            renderQuestBoard();
+            
+            // Update amulets
+            renderAmulets();
+        }
+        
+        function renderTeamLists() {
+            var goodList = document.getElementById('good-team-list');
+            var evilList = document.getElementById('evil-team-list');
+            
+            goodList.innerHTML = '';
+            evilList.innerHTML = '';
+            
+            // Count roles by type (not showing which player has which - secret info)
+            var goodRoleCounts = {};
+            var evilRoleCounts = {};
+            
+            players.forEach(function(player) {
+                if (player.eliminated) return;
+                if (player.alignment === 'good') {
+                    goodRoleCounts[player.roleKey] = (goodRoleCounts[player.roleKey] || 0) + 1;
+                } else {
+                    evilRoleCounts[player.roleKey] = (evilRoleCounts[player.roleKey] || 0) + 1;
+                }
+            });
+            
+            // Add "on the ground" roles to counts (treated same as assigned roles)
+            if (rolesOnGround && rolesOnGround.length > 0) {
+                rolesOnGround.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    if (roleDef) {
+                        if (roleDef.alignment === 'good') {
+                            goodRoleCounts[roleKey] = (goodRoleCounts[roleKey] || 0) + 1;
+                        } else {
+                            evilRoleCounts[roleKey] = (evilRoleCounts[roleKey] || 0) + 1;
+                        }
+                    }
+                });
+            }
+            
+            // Render Good team roles (right side) - sorted by strength
+            var goodRoleKeys = Object.keys(goodRoleCounts);
+            goodRoleKeys.sort(function(a, b) {
+                return (ROLE_STRENGTH[b] || 0) - (ROLE_STRENGTH[a] || 0); // Higher strength first
+            });
+            if (goodRoleKeys.length === 0) {
+                goodList.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">-</span>';
+            } else {
+                goodRoleKeys.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    var count = goodRoleCounts[roleKey];
+                    var item = document.createElement('div');
+                    item.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; margin: 2px; background: rgba(76, 175, 80, 0.15); border: 1px solid rgba(76, 175, 80, 0.4); border-radius: 999px; font-size: 0.75rem; white-space: nowrap;';
+                    
+                    var icon = document.createElement('span');
+                    icon.style.fontSize = '1rem';
+                    icon.textContent = roleDef ? roleDef.rebus : '❓';
+                    
+                    var label = document.createElement('span');
+                    label.style.fontWeight = 'bold';
+                    label.style.color = 'var(--good-color)';
+                    label.textContent = roleDef ? roleDef.name : roleKey;
+                    
+                    item.appendChild(icon);
+                    item.appendChild(label);
+                    
+                    if (count > 1) {
+                        var countBadge = document.createElement('span');
+                        countBadge.style.cssText = 'font-size: 0.7rem; font-weight: bold; color: var(--text-secondary);';
+                        countBadge.textContent = '×' + count;
+                        item.appendChild(countBadge);
+                    }
+                    
+                    goodList.appendChild(item);
+                });
+            }
+            
+            // Render Evil team roles (left side) - sorted by strength
+            var evilRoleKeys = Object.keys(evilRoleCounts);
+            evilRoleKeys.sort(function(a, b) {
+                return (ROLE_STRENGTH[b] || 0) - (ROLE_STRENGTH[a] || 0); // Higher strength first
+            });
+            if (evilRoleKeys.length === 0) {
+                evilList.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">-</span>';
+            } else {
+                evilRoleKeys.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    var count = evilRoleCounts[roleKey];
+                    var item = document.createElement('div');
+                    item.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; margin: 2px; background: rgba(244, 67, 54, 0.15); border: 1px solid rgba(244, 67, 54, 0.4); border-radius: 999px; font-size: 0.75rem; white-space: nowrap;';
+                    
+                    var icon = document.createElement('span');
+                    icon.style.fontSize = '1rem';
+                    icon.textContent = roleDef ? roleDef.rebus : '❓';
+                    
+                    var label = document.createElement('span');
+                    label.style.fontWeight = 'bold';
+                    label.style.color = 'var(--evil-color)';
+                    label.textContent = roleDef ? roleDef.name : roleKey;
+                    
+                    item.appendChild(icon);
+                    item.appendChild(label);
+                    
+                    if (count > 1) {
+                        var countBadge = document.createElement('span');
+                        countBadge.style.cssText = 'font-size: 0.7rem; font-weight: bold; color: var(--text-secondary);';
+                        countBadge.textContent = '×' + count;
+                        item.appendChild(countBadge);
+                    }
+                    
+                    evilList.appendChild(item);
+                });
+            }
+        }
+
+        function renderQuestBoard() {
+            var config = QUEST_CONFIG[playerCount];
+            var board = document.getElementById('quest-board-visual');
+            board.innerHTML = '';
+            
+            for (var q = 1; q <= config.quests.length; q++) {
+                var marker = document.createElement('div');
+                marker.className = 'quest-marker';
+                
+                var questData = questHistory.find(h => h.quest === q);
+                if (questData) {
+                    marker.classList.add(questData.success ? 'completed' : 'failed');
+                } else if (q === currentQuest) {
+                    marker.classList.add('active');
+                }
+                
+                // Remove quest number label for cleaner look
+                
+                var size = document.createElement('div');
+                size.className = 'quest-size';
+                // Handle Quest 3 for 4 players
+                var teamSize = config.quests[q - 1];
+                if (playerCount === 4 && q === 3 && quest3Size !== null) {
+                    teamSize = quest3Size;
+                }
+                size.innerText = teamSize;
+                marker.appendChild(size);
+                
+                if (questData) {
+                    var status = document.createElement('div');
+                    status.className = 'quest-status ' + (questData.success ? 'success' : 'failure');
+                    status.innerText = questData.success ? '✓' : '✗';
+                    marker.appendChild(status);
+                }
+                
+                if (config.fails[q - 1] === 2) {
+                    var failNote = document.createElement('div');
+                    failNote.className = 'quest-fail-note';
+                    failNote.innerText = '2 fails';
+                    marker.appendChild(failNote);
+                }
+                
+                // Check if this quest has an amulet
+                var amuletConfig = AMULET_CONFIG[playerCount] || [];
+                if (amuletConfig.indexOf(q) !== -1) {
+                    var amuletMarker = document.createElement('div');
+                    amuletMarker.className = 'quest-amulet-marker';
+                    amuletMarker.title = 'Amulet available after this quest';
+                    amuletMarker.innerText = '🔮';
+                    marker.appendChild(amuletMarker);
+                    
+                    // Check if amulet is available or has been given
+                    var amulet = amulets.find(a => a.quest === q);
+                    if (amulet) {
+                        if (amulet.available && amulet.holder !== null) {
+                            amuletMarker.classList.add('amulet-given');
+                            amuletMarker.title = 'Amulet given to ' + (amulet.holder !== null ? players[amulet.holder].name : 'someone');
+                        } else if (amulet.available) {
+                            amuletMarker.classList.add('amulet-available');
+                            amuletMarker.title = 'Amulet available';
+                        }
+                    }
+                }
+                
+                board.appendChild(marker);
+            }
+        }
+
+        function renderAmulets() {
+            var container = document.getElementById('amulet-list');
+            container.innerHTML = '';
+            
+            if (amulets.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">No amulets for this player count</span>';
+                return;
+            }
+            
+            amulets.forEach(function(amulet, index) {
+                if (amulet.available) {
+                    var item = document.createElement('div');
+                    item.className = 'amulet-item';
+                    if (amulet.holder !== null) {
+                        item.innerText = 'Quest ' + amulet.quest + ' - ' + (amulet.holder !== null ? players[amulet.holder].name : 'Available');
+                        if (amulet.used) item.classList.add('used');
+                    } else {
+                        item.innerText = 'Quest ' + amulet.quest + ' - Available';
+                    }
+                    container.appendChild(item);
+                }
+            });
+        }
+
+        function startTeamSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            // Handle Quest 3 for 4 players (auto-select size 3)
+            if (playerCount === 4 && currentQuest === 3 && quest3Size === null) {
+                // Auto-select size 3 instead of asking
+                setQuest3Size(3);
+                return;
+            }
+            
+            document.getElementById('phase-title').innerText = 'Team Selection';
+            document.getElementById('phase-content').innerHTML = 
+                '<p><strong>' + players[currentLeader].name + '</strong> is the Leader.</p>' +
+                '<p><strong>Step 1:</strong> Leader selects a team of <strong>' + teamSize + '</strong> players for Quest ' + currentQuest + '.</p>' +
+                '<p style="font-size: 0.9rem; color: var(--text-secondary);">Announce your team selection. Team selection happens offline - just tell everyone who is on the team.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="startQuestCardSelection()">Team Selected - Start Card Selection</button>';
+        }
+
+        function setQuest3Size(size) {
+            quest3Size = size;
+            var config = QUEST_CONFIG[4];
+            config.quests[2] = size; // Update Quest 3 size
+            startTeamSelection();
+        }
+
+        function startQuestCardSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            addLog('Leader ' + players[currentLeader].name + ' selected team for Quest ' + currentQuest + ' (size: ' + teamSize + ')');
+            addLog('Magic token will be on the first team member who selects a card.');
+            
+            // Magic token is automatically on the first person who selects a card
+            magicTokenHolder = null; // We don't track which player, just that first selector has it
+            magicTokenTeamMemberIndex = null; // Will be set to 0 when first card is selected
+            
+            // Directly open the quest card modal
+            openQuestCardModal();
+        }
+
+        function openQuestCardModal() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            questCards = [];
+            
+            // Remove any existing warnings
+            var failCardBtn = document.getElementById('fail-card-btn');
+            if (failCardBtn) {
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+            
+            var modal = document.getElementById('quest-card-modal');
+            if (!modal) {
+                console.error('Quest card modal not found!');
+                return;
+            }
+            
+            document.getElementById('quest-card-progress').innerText = 'Cards selected: 0 / ' + teamSize;
+            var revealBtn = document.getElementById('quest-reveal-btn');
+            if (revealBtn) revealBtn.classList.add('hidden');
+            
+            modal.classList.remove('hidden');
+            updateQuestCardSelection();
+        }
+
+        function updateQuestCardSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            // Don't update if all cards are selected (handled in selectQuestCard)
+            if (questCards.length >= teamSize) {
+                return;
+            }
+            
+            var memberNum = questCards.length + 1;
+            document.getElementById('quest-card-player').innerText = 
+                'Pass device to team member ' + memberNum + ' of ' + teamSize;
+            
+            // Check if this team member has magic token
+            // The first person to select a card automatically has the magic token
+            var hasMagic = (questCards.length === 0);
+            var failCardBtn = document.getElementById('fail-card-btn');
+            if (hasMagic) {
+                magicTokenTeamMemberIndex = 0; // First team member to select has magic token
+                document.getElementById('quest-card-magic-note').innerText = 
+                    '⚠️ You have the Magic token (first to select) - you cannot play a Fail card (unless you are Morgan le Fay).';
+                
+                // Check if Youth is in the game
+                var hasYouth = players.some(function(p) { return p.roleKey === 'Youth'; }) || 
+                              (selectedRoles && selectedRoles.indexOf('Youth') !== -1) ||
+                              (rolesOnGround && rolesOnGround.indexOf('Youth') !== -1);
+                
+                // Add large danger sign on Fail card
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                var warningText = hasYouth ? 
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY<br>OR YOUTH</div>' :
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY</div>';
+                
+                if (!existingWarning) {
+                    var warning = document.createElement('div');
+                    warning.className = 'magic-token-warning';
+                    warning.style.position = 'absolute';
+                    warning.style.top = '0';
+                    warning.style.left = '0';
+                    warning.style.right = '0';
+                    warning.style.bottom = '0';
+                    warning.style.background = 'rgba(244, 67, 54, 0.95)';
+                    warning.style.border = '4px solid #ff0000';
+                    warning.style.borderRadius = '12px';
+                    warning.style.display = 'flex';
+                    warning.style.flexDirection = 'column';
+                    warning.style.alignItems = 'center';
+                    warning.style.justifyContent = 'center';
+                    warning.style.zIndex = '10';
+                    warning.style.padding = '10px';
+                    warning.innerHTML = warningText;
+                    failCardBtn.style.position = 'relative';
+                    failCardBtn.appendChild(warning);
+                } else {
+                    // Update existing warning if Youth status changed
+                    existingWarning.innerHTML = warningText;
+                }
+            } else {
+                document.getElementById('quest-card-magic-note').innerText = '';
+                
+                // Remove warning from Fail card
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+            
+            document.getElementById('quest-card-progress').innerText = 
+                'Cards selected: ' + questCards.length + ' / ' + teamSize;
+        }
+
+        function selectQuestCard(cardType) {
+            console.log('selectQuestCard called with:', cardType);
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            if (questCards.length >= teamSize) {
+                console.log('All cards already selected');
+                return;
+            }
+            
+            // Check magic token restriction
+            // Only restrict if this is the team member with magic token
+            var hasMagic = (magicTokenTeamMemberIndex !== null && questCards.length === magicTokenTeamMemberIndex);
+            if (hasMagic && cardType === 'fail') {
+                // No confirmation dialog - just allow selection to avoid revealing choice
+                // The visual warning on the card is sufficient
+            }
+            
+            questCards.push({
+                player: 'Team Member ' + (questCards.length + 1),
+                card: cardType
+            });
+            
+            addLog('Team member ' + questCards.length + ' selected ' + (cardType === 'success' ? 'Success' : 'Fail') + ' card');
+            
+            // Animate the selected card
+            var cardBtn = cardType === 'success' ? 
+                document.getElementById('success-card-btn') : 
+                document.getElementById('fail-card-btn');
+            if (cardBtn) {
+                cardBtn.classList.add('quest-card-animate');
+                cardBtn.style.pointerEvents = 'none'; // Disable during animation
+                setTimeout(function() {
+                    cardBtn.classList.remove('quest-card-animate');
+                    cardBtn.style.pointerEvents = 'auto';
+                }, 600);
+            }
+            
+            // Check if all cards are selected BEFORE updating UI
+            var allSelected = questCards.length >= teamSize;
+            
+            if (allSelected) {
+                // Hide the card selection modal immediately
+                document.getElementById('quest-card-modal').classList.add('hidden');
+                // Show reveal animation after a brief delay
+                setTimeout(function() {
+                    revealQuestCards();
+                }, 500);
+            } else {
+                // Update UI for next card selection
+                updateQuestCardSelection();
+            }
+        }
+
+        function revealQuestCards() {
+            // Leader collects and shuffles cards, then reveals
+            // IMPORTANT: Shuffle cards to randomize order so players cannot identify who played which card
+            shuffleArray(questCards);
+            
+            var successes = questCards.filter(c => c.card === 'success').length;
+            var failures = questCards.filter(c => c.card === 'fail').length;
+            
+            document.getElementById('quest-card-modal').classList.add('hidden');
+            
+            // Show animated card reveal
+            var container = document.getElementById('revealed-cards-container');
+            container.innerHTML = '';
+            
+            questCards.forEach(function(card, index) {
+                var cardDiv = document.createElement('div');
+                cardDiv.className = 'quest-card-display ' + 
+                    (card.card === 'success' ? 'quest-card-success' : 'quest-card-fail');
+                cardDiv.style.animationDelay = (index * 0.15) + 's';
+                cardDiv.style.width = '100px';
+                cardDiv.style.height = '130px';
+                cardDiv.style.margin = '5px';
+                cardDiv.style.fontSize = '1.5rem';
+                
+                var icon = document.createElement('div');
+                icon.style.fontSize = '2rem';
+                icon.style.marginBottom = '5px';
+                icon.innerText = card.card === 'success' ? '✓' : '✗';
+                cardDiv.appendChild(icon);
+                
+                var label = document.createElement('div');
+                label.style.fontSize = '0.9rem';
+                label.style.fontWeight = 'bold';
+                label.innerText = card.card === 'success' ? 'SUCCESS' : 'FAIL';
+                cardDiv.appendChild(label);
+                
+                container.appendChild(cardDiv);
+            });
+            
+            // Show results
+            var config = QUEST_CONFIG[playerCount];
+            var requiredFails = config.fails[currentQuest - 1];
+            var success = failures < requiredFails;
+            
+            var summary = document.getElementById('quest-result-summary');
+            if (success) {
+                summary.style.background = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%)';
+                summary.style.border = '2px solid var(--good-color)';
+                summary.style.color = 'var(--good-color)';
+                summary.innerHTML = '<div style="font-size: 1.5rem; margin-bottom: 5px;">✓</div><div style="font-size: 0.95rem;">QUEST ' + currentQuest + ' SUCCEEDED!</div><div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">' + successes + ' Success, ' + failures + ' Fail</div>';
+                playQuestSuccess();
+            } else {
+                summary.style.background = 'linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(244, 67, 54, 0.1) 100%)';
+                summary.style.border = '2px solid var(--evil-color)';
+                summary.style.color = 'var(--evil-color)';
+                summary.innerHTML = '<div style="font-size: 1.5rem; margin-bottom: 5px;">✗</div><div style="font-size: 0.95rem;">QUEST ' + currentQuest + ' FAILED!</div><div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">' + successes + ' Success, ' + failures + ' Fail' + (failures > 1 ? 's' : '') + '</div>';
+                playQuestFailure();
+            }
+            
+            document.getElementById('quest-cards-reveal-modal').classList.remove('hidden');
+        }
+
+        function closeQuestReveal() {
+            document.getElementById('quest-cards-reveal-modal').classList.add('hidden');
+            completeQuest();
+        }
+
+
+        function completeQuest() {
+            var config = QUEST_CONFIG[playerCount];
+            var requiredFails = config.fails[currentQuest - 1];
+            var failures = questCards.filter(c => c.card === 'fail').length;
+            var success = failures < requiredFails;
+            
+            questHistory.push({
+                quest: currentQuest,
+                team: config.quests[currentQuest - 1],
+                success: success,
+                failures: failures
+            });
+            
+            if (success) {
+                goodWins++;
+                addLog('Quest ' + currentQuest + ' succeeded!');
+            } else {
+                evilWins++;
+                addLog('Quest ' + currentQuest + ' failed! (' + failures + ' fail card' + (failures > 1 ? 's' : '') + ')');
+            }
+            
+            // Check for amulet availability
+            var amuletAvailable = amulets.find(a => a.quest === currentQuest && !a.available);
+            if (amuletAvailable) {
+                amuletAvailable.available = true;
+            }
+            
+            // Reset magic token
+            magicTokenHolder = null;
+            magicTokenTeamMemberIndex = null;
+            
+            updateGameDisplay();
+            
+            // Check win conditions
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            if (goodWins >= 3) {
+                endGame('good', 'Good wins! 3 quests completed successfully.');
+                return;
+            }
+            if (evilWins >= failThreshold) {
+                startFinalQuest();
+                return;
+            }
+            
+            // Transition phase: Select next leader and handle amulets
+            startTransitionPhase();
+        }
+
+        function startTransitionPhase() {
+            document.getElementById('phase-title').innerText = 'Transition Phase';
+            document.getElementById('phase-content').innerHTML = 
+                '<p><strong>Step 3:</strong> Current Leader selects the next Leader.</p>' +
+                '<p style="font-size: 0.9rem; color: var(--text-secondary);">The next Leader cannot be someone who has already been a Leader (Veteran) or has an Amulet.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="openLeaderSelection()">Select Next Leader</button>';
+        }
+
+        function openLeaderSelection() {
+            document.getElementById('current-leader-select-name').innerText = players[currentLeader].name;
+            var list = document.getElementById('leader-select-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot select: current leader, veterans, amulet holders
+                if (index === currentLeader || veterans.indexOf(index) !== -1 || amuletHolders.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { selectNextLeader(index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('leader-select-modal').classList.remove('hidden');
+        }
+
+        function selectNextLeader(playerIndex) {
+            veterans.push(currentLeader); // Current leader becomes veteran
+            currentLeader = playerIndex;
+            veterans.push(currentLeader); // New leader gets veteran token
+            addLog('New Leader: ' + players[currentLeader].name);
+            
+            document.getElementById('leader-select-modal').classList.add('hidden');
+            
+            // Check for amulet
+            var amuletAvailable = amulets.find(a => a.quest === currentQuest && a.available && a.holder === null);
+            if (amuletAvailable) {
+                openAmuletSelection(amuletAvailable);
+            } else {
+                nextQuest();
+            }
+        }
+
+        function openAmuletSelection(amulet) {
+            document.getElementById('amulet-quest-num').innerText = amulet.quest;
+            var list = document.getElementById('amulet-select-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot select: new leader, veterans, amulet holders, already checked
+                if (index === currentLeader || veterans.indexOf(index) !== -1 || 
+                    amuletHolders.indexOf(index) !== -1 || checkedByAmulet.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { selectAmuletHolder(amulet, index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('amulet-select-modal').classList.remove('hidden');
+        }
+
+        function selectAmuletHolder(amulet, playerIndex) {
+            amulet.holder = playerIndex;
+            amuletHolders.push(playerIndex);
+            addLog(players[playerIndex].name + ' received Amulet after Quest ' + amulet.quest);
+            
+            document.getElementById('amulet-select-modal').classList.add('hidden');
+            openAmuletCheck(amulet, playerIndex);
+        }
+
+        function skipAmulet() {
+            document.getElementById('amulet-select-modal').classList.add('hidden');
+            nextQuest();
+        }
+
+        function openAmuletCheck(amulet, holderIndex) {
+            document.getElementById('amulet-holder-name').innerText = players[holderIndex].name + ' uses the Amulet';
+            var list = document.getElementById('amulet-check-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot check: amulet holder, already checked, amulet holders
+                if (index === holderIndex || checkedByAmulet.indexOf(index) !== -1 || 
+                    amuletHolders.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { performAmuletCheck(amulet, index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('amulet-check-modal').classList.remove('hidden');
+        }
+
+        function performAmuletCheck(amulet, checkedIndex) {
+            checkedByAmulet.push(checkedIndex);
+            amulet.used = true;
+            
+            var checkedPlayer = players[checkedIndex];
+            // Troublemaker always shows as Evil when checked
+            var isTroublemaker = checkedPlayer.roleKey === 'Troublemaker';
+            var actualAlignment = checkedPlayer.alignment;
+            var displayedAlignment = isTroublemaker ? 'evil' : actualAlignment;
+            
+            addLog(players[amulet.holder].name + ' checked ' + checkedPlayer.name + ' with Amulet');
+            
+            // Show result to amulet holder
+            document.getElementById('amulet-check-modal').classList.add('hidden');
+            
+            var resultModal = document.getElementById('amulet-result-modal');
+            var resultText = document.getElementById('amulet-result-text');
+            var checkedName = document.getElementById('amulet-checked-name');
+            
+            checkedName.innerText = checkedPlayer.name;
+            if (displayedAlignment === 'good') {
+                resultText.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">🛡️</div><div style="font-size: 1.3rem; font-weight: bold; color: var(--good-color);">GOOD</div>';
+                resultText.style.color = 'var(--good-color)';
+            } else {
+                resultText.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">⚔️</div><div style="font-size: 1.3rem; font-weight: bold; color: var(--evil-color);">EVIL</div>';
+                resultText.style.color = 'var(--evil-color)';
+            }
+            
+            resultModal.classList.remove('hidden');
+        }
+        
+        function closeAmuletResult() {
+            document.getElementById('amulet-result-modal').classList.add('hidden');
+            nextQuest();
+        }
+
+        function nextQuest() {
+            currentQuest++;
+            var config = QUEST_CONFIG[playerCount];
+            
+            if (currentQuest > config.quests.length) {
+                // All quests completed
+                if (goodWins > evilWins) {
+                    endGame('good', 'Good wins! More successful quests completed.');
+                } else {
+                    endGame('evil', 'Evil wins! More quests failed.');
+                }
+                return;
+            }
+            
+            updateGameDisplay();
+            startTeamSelection();
+        }
+
+        function startFinalQuest() {
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            
+            // Step 1: Show Discussion Phase
+            showDiscussionPhase();
+        }
+        
+        var discussionTimer = null;
+        var discussionTimeLeft = 300; // 5 minutes in seconds
+        var discussionTimerInterval = null;
+        
+        function showDiscussionPhase() {
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            
+            // Hide UI elements for cleaner discussion view
+            var gameStatus = document.querySelector('.game-status');
+            if (gameStatus) gameStatus.style.display = 'none';
+            var questBoard = document.getElementById('quest-board-visual');
+            if (questBoard) questBoard.style.display = 'none';
+            var leaderDisplays = document.querySelectorAll('.leader-display');
+            for (var i = 0; i < leaderDisplays.length; i++) {
+                leaderDisplays[i].style.display = 'none';
+            }
+            var amuletSection = document.getElementById('amulet-section');
+            if (amuletSection) amuletSection.style.display = 'none';
+            var logBtn = document.querySelector('button[onclick="toggleLog()"]');
+            if (logBtn) logBtn.style.display = 'none';
+            var gameLog = document.getElementById('game-log');
+            if (gameLog) gameLog.classList.add('hidden');
+            
+            // Show phase display
+            var phaseDisplay = document.getElementById('phase-display');
+            if (phaseDisplay) phaseDisplay.style.display = 'block';
+            
+            // Reset timer to 5 minutes
+            discussionTimeLeft = 300;
+            
+            // Check if Blind Hunter is in the game
+            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            
+            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
+            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            var hasSpecialGoodRoles = players.some(function(p) {
+                return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
+            });
+            
+            var warningHtml = '';
+            if (hasBlindHunter && hasSpecialGoodRoles) {
+                warningHtml = '<div style="background: rgba(255, 87, 34, 0.3); border: 3px solid #FF5722; border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                    '<p style="font-size: 1.2rem; font-weight: 900; color: #FF5722; margin-bottom: 10px; text-align: center;">⚠️ IMPORTANT WARNING ⚠️</p>' +
+                    '<p style="font-size: 1.1rem; font-weight: bold; color: #FF5722; margin: 10px 0; text-align: center;">DO NOT REVEAL YOUR ROLES!</p>' +
+                    '<p style="margin: 10px 0; font-weight: bold;">Blind Hunter is in the game and can identify special Good roles during The Hunt.</p>' +
+                    '<p style="margin: 10px 0;">If you reveal your roles (Cleric, Troublemaker, Duke, Archduke, Youth), Blind Hunter can identify you and Evil will win!</p>' +
+                    '</div>';
+            }
+            
+            var timerHtml = '<div style="background: rgba(33, 150, 243, 0.2); border: 2px solid var(--accent-color); border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">' +
+                '<p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;">⏱️ Discussion Timer</p>' +
+                '<div style="font-size: 3rem; font-weight: bold; color: var(--accent-color); margin: 15px 0; font-family: monospace;" id="discussion-timer-display">' + formatTime(discussionTimeLeft) + '</div>' +
+                '<div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin: 15px 0; flex-wrap: wrap;">' +
+                '<button onclick="adjustDiscussionTime(-60)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">-1 min</button>' +
+                '<button onclick="adjustDiscussionTime(-30)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">-30 sec</button>' +
+                '<button onclick="toggleDiscussionTimer()" id="discussion-timer-btn" style="padding: 10px 20px; font-size: 1.1rem; font-weight: bold; background: var(--accent-color); border: none; border-radius: 5px; color: white; cursor: pointer;">Start</button>' +
+                '<button onclick="adjustDiscussionTime(30)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">+30 sec</button>' +
+                '<button onclick="adjustDiscussionTime(60)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">+1 min</button>' +
+                '</div>' +
+                '<button onclick="resetDiscussionTimer()" style="padding: 8px 15px; font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; color: var(--text-secondary); cursor: pointer; margin-top: 10px;">Reset to 5 minutes</button>' +
+                '</div>';
+            
+            var phaseTitle = document.getElementById('phase-title');
+            var phaseContent = document.getElementById('phase-content');
+            var actions = document.getElementById('action-buttons');
+            
+            if (!phaseTitle || !phaseContent || !actions) {
+                console.error('Required elements not found for discussion phase');
+                return;
+            }
+            
+            phaseTitle.innerText = 'Discussion Phase - Final Quest';
+            phaseContent.innerHTML = 
+                '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="font-size: 1.2rem; font-weight: bold; color: var(--evil-color); margin-bottom: 10px;">' + failThreshold + ' Quests Have Failed!</p>' +
+                warningHtml +
+                '<p style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;">Discussion Phase:</p>' +
+                '<p style="margin: 10px 0; font-size: 0.95rem; color: var(--text-secondary);">Time to discuss who the Minions of Mordred may be. Once the timer ends, all conversation must cease.</p>' +
+                '</div>' +
+                timerHtml;
+            
+            actions.innerHTML = '<button class="action-btn" onclick="stopDiscussionTimer(); showBlindHunterDecision()">Discussion Complete - Continue</button>';
+            
+            // Auto-start the timer
+            setTimeout(function() {
+                if (!discussionTimerInterval && discussionTimeLeft > 0) {
+                    toggleDiscussionTimer();
+                }
+            }, 100);
+        }
+        
+        function formatTime(seconds) {
+            var mins = Math.floor(seconds / 60);
+            var secs = seconds % 60;
+            return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+        
+        function adjustDiscussionTime(change) {
+            discussionTimeLeft = Math.max(0, Math.min(3600, discussionTimeLeft + change)); // Clamp between 0 and 60 minutes
+            var display = document.getElementById('discussion-timer-display');
+            if (display) {
+                display.textContent = formatTime(discussionTimeLeft);
+                // Update color based on remaining time
+                if (discussionTimeLeft > 30) {
+                    display.style.color = 'var(--accent-color)';
+                } else if (discussionTimeLeft > 0) {
+                    display.style.color = 'var(--evil-color)';
+                }
+            }
+        }
+        
+        function resetDiscussionTimer() {
+            stopDiscussionTimer();
+            discussionTimeLeft = 300;
+            var display = document.getElementById('discussion-timer-display');
+            display.textContent = formatTime(discussionTimeLeft);
+            display.style.color = 'var(--accent-color)';
+            document.getElementById('discussion-timer-btn').textContent = 'Start';
+        }
+        
+        function toggleDiscussionTimer() {
+            if (discussionTimerInterval) {
+                // Pause
+                clearInterval(discussionTimerInterval);
+                discussionTimerInterval = null;
+                document.getElementById('discussion-timer-btn').textContent = 'Start';
+            } else {
+                // Start
+                if (discussionTimeLeft <= 0) {
+                    discussionTimeLeft = 300;
+                }
+                document.getElementById('discussion-timer-btn').textContent = 'Pause';
+                discussionTimerInterval = setInterval(function() {
+                    discussionTimeLeft--;
+                    document.getElementById('discussion-timer-display').textContent = formatTime(discussionTimeLeft);
+                    
+                    if (discussionTimeLeft <= 0) {
+                        stopDiscussionTimer();
+                        alert('⏰ Discussion time is up! All conversation must cease.');
+                    } else if (discussionTimeLeft <= 30) {
+                        // Change color to red when less than 30 seconds
+                        document.getElementById('discussion-timer-display').style.color = 'var(--evil-color)';
+                    }
+                }, 1000);
+            }
+        }
+        
+        function stopDiscussionTimer() {
+            if (discussionTimerInterval) {
+                clearInterval(discussionTimerInterval);
+                discussionTimerInterval = null;
+            }
+            var btn = document.getElementById('discussion-timer-btn');
+            if (btn) btn.textContent = 'Start';
+        }
+        
+        function showBlindHunterDecision() {
+            // Check if Blind Hunter is in the game
+            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            
+            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
+            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            var hasSpecialGoodRoles = players.some(function(p) {
+                return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
+            });
+            
+            // Skip Blind Hunter decision if Blind Hunter is not in game or no special good roles
+            if (!hasBlindHunter || !hasSpecialGoodRoles) {
+                showGoodsLastChance();
+                return;
+            }
+            
+            document.getElementById('phase-title').innerText = 'Blind Hunter Decision';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(255, 152, 0, 0.2); border: 2px solid var(--quest-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="margin: 10px 0; font-size: 1.1rem; font-weight: bold;">The Final Leader asks:</p>' +
+                '<p style="margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 1.1rem; font-weight: bold; color: var(--accent-color);">"Blind Hunter, if you would like to stop the Good team from their last chance, you may enter The Hunt. But you must be correct, otherwise they will win."</p>' +
+                '<p style="margin: 10px 0; color: var(--text-secondary);">If Blind Hunter stays silent, proceed to Good\'s Last Chance.</p>' +
+                '</div>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="showBlindHunterHuntInstructions()" style="background: var(--evil-color);">Blind Hunter Hunts</button>' +
+                '<button class="secondary-btn" onclick="showGoodsLastChance()" style="margin-top: 10px;">Blind Hunter Stays Silent - Good\'s Last Chance</button>';
+        }
+        
+        function showGoodsLastChance() {
+            // Update main screen with Good's Last Chance instructions
+            document.getElementById('phase-title').innerText = 'GOOD\'S LAST CHANCE';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--good-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--good-color); margin-bottom: 15px;">Good\'s Last Chance Instructions:</p>' +
+                '<ol style="text-align: left; margin: 10px 0; padding-left: 20px;">' +
+                '<li style="margin: 8px 0;">Each player gets ready to accuse, but <strong>no further discussion occurs</strong>.</li>' +
+                '<li style="margin: 8px 0;">At the count of three, each player <strong>points at 2 players</strong>.</li>' +
+                '<li style="margin: 8px 0;">Hold your hands in the air, then announce: <strong>"Minions of Mordred, drop your hands."</strong></li>' +
+                '<li style="margin: 8px 0;">At this point, <strong>only Good players should be pointing</strong>.</li>' +
+                '</ol>' +
+                '<p style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>Win Condition:</strong> If Good players are pointing at <strong>all Evil players</strong> and <strong>only Evil players</strong>, Good wins!</p>' +
+                '<p style="margin-top: 10px; padding: 10px; background: rgba(255, 152, 0, 0.3); border-radius: 6px; font-size: 0.9rem;"><strong>Special Rule:</strong> If all Leaders were Evil, Good wins automatically.</p>' +
+                '</div>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="resolveGoodsLastChance()">Resolve Good\'s Last Chance</button>';
+        }
+        
+        function resolveGoodsLastChance() {
+            // Check special rule: all leaders were evil
+            var allLeadersEvil = veterans.every(function(idx) {
+                return players[idx].alignment === 'evil';
+            });
+            
+            if (allLeadersEvil) {
+                endGame('good', 'Good wins! All Leaders were Evil (special rule).');
+                return;
+            }
+            
+            // Show resolution screen
+            document.getElementById('phase-title').innerText = 'Resolve Good\'s Last Chance';
+            document.getElementById('phase-content').innerHTML = 
+                '<p style="margin: 15px 0;">After players pointed and Minions dropped their hands:</p>' +
+                '<p style="color: var(--text-secondary); margin: 15px 0;">Did Good players point at all Evil players and only Evil players?</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="endGame(\'good\', \'Good wins! Good\'s Last Chance succeeded - all Evil players identified correctly.\')" style="background: var(--good-color);">Good Wins</button>' +
+                '<button class="action-btn" onclick="endGame(\'evil\', \'Evil wins! Good\'s Last Chance failed - Evil players not all identified correctly.\')" style="background: var(--evil-color); margin-top: 10px;">Evil Wins</button>';
+        }
+
+        function showBlindHunterHuntInstructions() {
+            // Update main screen with detailed Blind Hunter hunt instructions
+            document.getElementById('phase-title').innerText = 'Blind Hunter Hunt';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--evil-color); margin-bottom: 15px;">Blind Hunter Hunt Instructions:</p>' +
+                '<ol style="text-align: left; margin: 10px 0; padding-left: 20px;">' +
+                '<li style="margin: 8px 0;">Blind Hunter reveals themselves and says they are the Blind Hunter.</li>' +
+                '<li style="margin: 8px 0;">Blind Hunter must identify <strong>2 Good targets</strong> by <strong>role</strong>.</li>' +
+                '<li style="margin: 8px 0;"><strong>Must identify Cleric as one of the targets</strong> (required).</li>' +
+                '<li style="margin: 8px 0;">Targets can be any player (or face-down cards in ' + (playerCount === 4 || playerCount === 5 ? '4-5' : '4-5') + ' player games).</li>' +
+                '<li style="margin: 8px 0;">For targets, Duke and Archduke can be identified as "Loyal Servant".</li>' +
+                '<li style="margin: 8px 0;">No player (except Blind Hunter) may speak during the Hunt.</li>' +
+                '</ol>' +
+                '<p style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.3); border-radius: 6px;"><strong>Win Condition:</strong> If Blind Hunter correctly identifies both targets (including Cleric), <strong>Evil wins</strong>!</p>' +
+                '<p style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>Otherwise:</strong> If Blind Hunter makes a mistake, <strong>Good wins</strong>!</p>' +
+                '</div>' +
+                '<p style="margin: 15px 0; color: var(--text-secondary);">After Blind Hunter has identified their targets:</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="blindHunterHunt()">Blind Hunter Has Identified Targets</button>';
+        }
+        
+        function blindHunterHunt() {
+            // Show resolution screen
+            document.getElementById('phase-title').innerText = 'Blind Hunter Hunt Result';
+            document.getElementById('phase-content').innerHTML = 
+                '<p style="margin: 15px 0;">Did Blind Hunter correctly identify both Good targets (including Cleric)?</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="endGame(\'evil\', \'Blind Hunter correctly identified Good targets. Evil wins!\')" style="background: var(--evil-color);">Blind Hunter Succeeds</button>' +
+                '<button class="action-btn" onclick="endGame(\'good\', \'Blind Hunter failed to identify targets. Good wins!\')" style="background: var(--good-color); margin-top: 10px;">Blind Hunter Fails</button>';
+        }
+
+
+        function endGame(winner, message) {
+            isGameEnded = true;
+            var titleEl = document.getElementById('end-game-title');
+            titleEl.innerText = winner.toUpperCase() + ' WINS!';
+            titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
+            document.getElementById('end-game-message').innerText = message;
+            document.getElementById('end-game-modal').classList.remove('hidden');
+            addLog('GAME OVER: ' + message);
+            
+            // Play victory sound
+            if (winner === 'good') {
+                playGoodWins();
+            } else {
+                playEvilWins();
+            }
+        }
+
+        function toggleLog() {
+            var log = document.getElementById('game-log');
+            log.classList.toggle('hidden');
+        }
+
+        function addLog(message) {
+            var timestamp = new Date().toLocaleTimeString();
+            gameLog.push('[' + timestamp + '] ' + message);
+            
+            var content = document.getElementById('log-content');
+            content.innerHTML = '';
+            gameLog.slice().reverse().forEach(function(entry) {
+                var div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerText = entry;
+                content.appendChild(div);
+            });
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
+            screens.forEach(s => {
+                var el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+            var target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        // Sound Effects
+        function playSound(frequency, duration, type) {
+            try {
+                var ctx = getAudioContext();
+                if (!ctx) return;
+                
+                var oscillator = ctx.createOscillator();
+                var gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type || 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration);
+            } catch (e) {
+                // Silently fail if audio context not available
+            }
+        }
+
+        function playQuestSuccess() {
+            // Heroic victory fanfare - ascending triumphant call
+            playSound(330.00, 0.12, 'sine'); // E4 - heroic base
+            setTimeout(() => playSound(440.00, 0.12, 'sine'), 120); // A4
+            setTimeout(() => playSound(554.37, 0.12, 'sine'), 240); // C#5
+            setTimeout(() => playSound(659.25, 0.15, 'sine'), 360); // E5 - triumphant peak
+            setTimeout(() => playSound(783.99, 0.2, 'sine'), 510); // G5 - victory resolution
+        }
+
+        function playQuestFailure() {
+            // Dark, ominous warning - descending menacing tone
+            playSound(277.18, 0.2, 'sawtooth'); // C#4 - dark warning
+            setTimeout(() => playSound(220.00, 0.25, 'sawtooth'), 200); // A3 - deeper threat
+            setTimeout(() => playSound(174.61, 0.3, 'sawtooth'), 450); // F3 - ominous low
+            setTimeout(() => playSound(146.83, 0.25, 'sawtooth'), 750); // D3 - final dark note
+        }
+
+        function playGoodWins() {
+            // Triumphant fanfare
+            playSound(523.25, 0.15, 'sine'); // C5
+            setTimeout(() => playSound(659.25, 0.15, 'sine'), 150); // E5
+            setTimeout(() => playSound(783.99, 0.15, 'sine'), 300); // G5
+            setTimeout(() => playSound(1046.50, 0.3, 'sine'), 450); // C6
+        }
+
+        function playEvilWins() {
+            // Darker, ominous sound
+            playSound(220.00, 0.2, 'sawtooth'); // A3
+            setTimeout(() => playSound(196.00, 0.2, 'sawtooth'), 200); // G3
+            setTimeout(() => playSound(174.61, 0.3, 'sawtooth'), 400); // F3
+        }
+    </script>
+</body>
+</html>

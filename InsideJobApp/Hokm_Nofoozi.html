@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حکم نفوذی (Inside Job)</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #f5f5dc; /* Beige/Cream Color */
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #ff9800; /* Orange for 'Intel' */
+            --insider-color: #f44336; /* Red for Insider */
+            --agent-color: #4caf50; /* Green for Agents */
+            --btn-bg: #333;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* RTL Support */
+        body.rtl {
+            direction: rtl;
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .lang-toggle, .rules-btn {
+            background: none;
+            border: 1px solid #666;
+            color: #aaa;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .rules-btn {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            background: #00000033;
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .score-box {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-label { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .score-value { font-size: 2rem; font-weight: bold; margin-top: 5px; }
+        
+        .agent-score { color: var(--agent-color); }
+        .insider-score { color: var(--insider-color); }
+
+        /* Mission Card */
+        .mission-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            position: relative;
+            border: 2px solid #444;
+            transition: transform 0.3s ease, border-color 0.3s;
+        }
+
+        .mission-card.active {
+            border-color: var(--accent-color);
+        }
+
+        .mission-wager {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        body.rtl .mission-wager {
+            right: auto;
+            left: 15px;
+        }
+
+        body.rtl #risky-indicator {
+            left: auto;
+            right: 15px;
+        }
+
+        .mission-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        .mission-desc {
+            font-size: 1.1rem;
+            color: #333;
+            line-height: 1.5;
+            max-width: 90%;
+        }
+
+        .trump-indicator {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .trump-icon {
+            font-size: 3rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        button {
+            border: none;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity 0.2s;
+            color: white;
+        }
+
+        button:active { opacity: 0.8; }
+
+        .btn-success { background-color: var(--agent-color); }
+        .btn-fail { background-color: var(--insider-color); }
+        .btn-next { background-color: var(--btn-bg); grid-column: span 2; margin-top: 10px; }
+        .btn-reset { background-color: transparent; color: #666; border: 1px solid #444; font-size: 0.8rem; padding: 8px 12px; margin-left: 10px; }
+        body.rtl .btn-reset { margin-left: 0; margin-right: 10px; }
+
+        .hidden { display: none !important; }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #444;
+        }
+        .close-btn {
+            position: absolute; top: 10px; right: 15px;
+            font-size: 1.5rem; cursor: pointer; color: #888;
+        }
+        body.rtl .close-btn { right: auto; left: 15px; }
+        .rules-text p { margin: 10px 0; line-height: 1.4; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .rules-text b { color: var(--accent-color); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.4s ease-out; }
+
+        .suit-red { color: #d32f2f; }
+        .suit-black { color: #000000; }
+    </style>
+</head>
+<body>
+
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>حکم نفوذی <span style="font-size:0.8rem; color:#888;">(تنظیمات)</span></h1>
+        <div style="text-align:center; margin-top:20px; width: 100%;">
+            <p id="setup-msg" style="color: #aaa; font-size: 1.1rem;">تعداد بازیکنان را انتخاب کنید:</p>
+            
+            <div style="display:flex; gap:15px; justify-content:center; margin-bottom:20px;">
+                <button onclick="startGame(3)" style="background:#333; width:70px; font-size: 1.2rem;">۳</button>
+                <button onclick="startGame(4)" style="background:#333; width:70px; font-size: 1.2rem;">۴</button>
+                <button onclick="startGame(5)" style="background:#333; width:70px; font-size: 1.2rem;">۵</button>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:30px; direction: rtl;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size: 0.95rem;">
+                    <input type="checkbox" id="include-risky" checked style="width:20px; height:20px; cursor:pointer;">
+                    <span>شامل ماموریت‌های پرخطر (با ژتون)</span>
+                </label>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; font-size: 0.9rem; text-align: right; direction: rtl;">
+                <h3 style="margin: 0 0 10px 0; color: var(--accent-color); text-align: center;">اطلاعات کلیدی بازی</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; border-bottom: 1px solid #444; padding-bottom: 5px; font-weight: bold; font-size: 0.8rem;">
+                    <span>نفرات</span>
+                    <span>کارت‌ها</span>
+                    <span>ماموریت</span>
+                    <span>ژتون</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid #333;">
+                    <span>۳ نفر</span>
+                    <span>۱۳</span>
+                    <span>۹</span>
+                    <span>۶</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; padding: 8px 0; border-bottom: 1px solid #333;">
+                    <span>۴ نفر</span>
+                    <span>۱۲</span>
+                    <span>۷</span>
+                    <span>۵</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; padding: 8px 0;">
+                    <span>۵ نفر</span>
+                    <span>۱۰</span>
+                    <span>۶</span>
+                    <span>۴</span>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #888; text-align: center;">
+                    * پایان بازی (رای‌گیری): زمانی که ۲ کارت (برای ۵ نفر ۱ کارت) در دست باقی مانده است.<br>
+                    <span style="color: var(--accent-color); display: block; margin-top: 8px;">
+                        * همه با ۱ ژتون شروع می‌کنند و برنده هر دست ۱ ژتون می‌گیرد.
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <header>
+            <div>
+                <h1 id="app-title">Inside Job</h1>
+            </div>
+            <div class="header-buttons">
+                <button class="rules-btn" onclick="toggleMissions()" id="btn-missions">ماموریت‌ها 📋</button>
+                <button class="rules-btn" onclick="toggleRules()" id="btn-rules">Rules 📜</button>
+                <!-- Lang Toggle Removed/Hidden for Farsi Focus, or kept if user wants to switch back? User said "Only Farsi". Let's hide it but keep logic if needed -->
+                <!-- <button class="lang-toggle" onclick="toggleLang()">EN / FA</button> -->
+                <button class="btn-reset" onclick="confirmReset()" id="btn-reset">Reset</button>
+            </div>
+        </header>
+
+        <!-- Scoreboard -->
+        <div class="score-board" style="justify-content: space-between;">
+            <div class="score-box" style="flex: 1.5;">
+                <span class="score-label" id="score-agents-label">ماموریت‌های انجام شده</span>
+                <span id="agent-score" class="score-value agent-score">0</span>
+            </div>
+            <div class="score-box" style="flex: 1; border-right: 1px solid #444; padding-right: 10px;">
+                <span class="score-label">قوانین سریع</span>
+                <div id="quick-rules-rebus" style="font-size: 0.85rem; margin-top: 8px; text-align: right; line-height: 1.4;">
+                    <!-- Dynamic Rebus Rules -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Pass Phone Screen -->
+        <div id="pass-screen" class="container hidden" style="justify-content: center; text-align: center;">
+            <div style="font-size: 4rem;">📱</div>
+            <h2>گوشی را به حاکم (شروع‌کننده) بدهید</h2>
+            <p>برای انتخاب ماموریت جدید</p>
+            <button onclick="showSelection()" style="background-color: var(--accent-color); color: black; margin-top: 20px;">من حاکم هستم</button>
+        </div>
+
+        <!-- Selection Screen (Hidden by default) -->
+        <div id="selection-area" class="mission-card hidden" style="justify-content: flex-start; padding-top: 20px;">
+            <div class="mission-title" style="font-size: 1.4rem; margin-bottom: 20px; direction: rtl;">یک ماموریت انتخاب کنید</div>
+            <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; flex: 1;">
+                <button onclick="selectMission(0)" class="btn-next" style="flex:1; font-size: 1.1rem; padding: 20px; direction: rtl; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--card-bg); border: 2px solid #444; color: black;">
+                    <span id="sel-opt-1" style="width: 100%;">...</span>
+                </button>
+                <button onclick="selectMission(1)" class="btn-next" style="flex:1; font-size: 1.1rem; padding: 20px; direction: rtl; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--card-bg); border: 2px solid #444; color: black;">
+                    <span id="sel-opt-2" style="width: 100%;">...</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Current Mission Display -->
+        <div id="mission-area" class="mission-card active animate-in hidden">
+            <div class="mission-wager" style="display: none;"> <!-- Wager hidden as pot is physical -->
+                <span id="wager-amount">2</span> 🌰
+            </div>
+            <div id="risky-indicator" style="position: absolute; top: 15px; left: 15px; background: #ff9800; color: #000; font-weight: bold; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; display: none;">
+                ⚠️ پرخطر (ژتون لازم)
+            </div>
+            <div class="mission-title" id="mission-title" style="direction: rtl;">بارگذاری...</div>
+            <div class="mission-desc" id="mission-desc" style="direction: rtl;">برای شروع دکمه را بزنید.</div>
+            
+            <div class="trump-indicator">
+                <span style="font-size:0.8rem; color:#888; text-transform:uppercase;" id="trump-label">حکم</span>
+                <div id="trump-icon" class="trump-icon">♠</div>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div id="controls-area" class="controls hidden">
+            <div style="grid-column: span 2; text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 5px; direction: rtl;">وضعیت ماموریت</div>
+            <button class="btn-success" onclick="resolveMission(true)">
+                <span id="btn-success-text">ماموریت موفق</span> (+۱)
+            </button>
+            <button class="btn-fail" onclick="resolveMission(false)" id="btn-fail-text">ماموریت ناموفق</button>
+            
+            <!-- Trick Winner buttons removed as we don't track insider pot -->
+            
+            <button class="btn-vote" onclick="triggerFinalVote()" id="btn-vote-text" style="grid-column: span 2; background-color: #9c27b0; margin-top: 10px;">🗳️ رای‌گیری نهایی</button>
+        </div>
+    </div>
+
+<!-- Rules Modal -->
+<div id="rules-modal" class="modal hidden" onclick="toggleRules()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="toggleRules()">&times;</span>
+        <h2 id="rules-header">قوانین 📜</h2>
+        <div id="rules-body" class="rules-text">
+            <!-- Rules Injected Here -->
+        </div>
+    </div>
+</div>
+
+<!-- Missions Modal -->
+<div id="missions-modal" class="modal hidden" onclick="toggleMissions()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="toggleMissions()">&times;</span>
+        <h2>لیست ماموریت‌ها</h2>
+        <div id="missions-list" class="rules-text" style="direction: rtl;">
+            <!-- Missions injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Localization ---
+    let currentLang = 'fa'; // Default to Farsi
+
+    const TEXTS = {
+        en: {
+            appTitle: "Inside Job",
+            reset: "Reset",
+            rulesBtn: "Rules 📜",
+            rulesHeader: "Quick Rules",
+            agentsLabel: "Agents (Missions)",
+            insiderLabel: "Insider",
+            trumpLabel: "Trump Suit",
+            btnSuccess: "Mission Success",
+            btnFail: "Mission Failed",
+            btnVote: "🗳️ Final Vote",
+            btnSkip: "Skip / New Mission",
+            confirmReset: "Reset the game scores?",
+            voteMsg: "End Game Vote: If you ran out of cards, vote now!\n\nMost votes on Insider = Agents Win.\nWrong vote = Insider Wins.",
+            rulesBody: `
+                <p>🕵️ <b>Roles:</b> Agents vs 1 Insider.</p>
+                <p>🎯 <b>Goal:</b><br>
+                ✅ <b>Agents:</b> Complete <span id='rule-mission-limit'>--</span> Missions.<br>
+                ❌ <b>Insider:</b> Collect Tokens (Track Physically).</p>
+                <p>🃏 <b>Trick:</b> Must follow suit. 🎭 <b>Insider</b> can cheat.</p>
+            `,
+            suits: {
+                Spades: "Spades", Hearts: "Hearts", Clubs: "Clubs", Diamonds: "Diamonds"
+            }
+        },
+        fa: {
+            appTitle: "حکم نفوذی",
+            reset: "شروع مجدد",
+            rulesBtn: "قوانین 📜",
+            rulesHeader: "قوانین سریع",
+            agentsLabel: "ماموریت‌های انجام شده",
+            insiderLabel: "نفوذی",
+            trumpLabel: "حکم",
+            btnSuccess: "ماموریت موفق",
+            btnFail: "ماموریت ناموفق",
+            btnVote: "🗳️ رای‌گیری نهایی",
+            btnSkip: "رد کردن / ماموریت جدید",
+            confirmReset: "آیا امتیازها صفر شود؟",
+            voteMsg: "رای‌گیری نهایی: اگر کارت‌ها تمام شد، رای دهید!\n\nاکثریت روی نفوذی = برد مامورها.\nرای اشتباه = برد نفوذی.",
+            rulesBody: `
+                <p>🕵️ <b>نقش‌ها:</b> مامورها علیه ۱ نفوذی.</p>
+                <p>🎯 <b>هدف:</b><br>
+                ✅ <b>مامورها:</b> انجام <span id='rule-mission-limit'>--</span> ماموریت.<br>
+                ❌ <b>نفوذی:</b> جمع‌آوری ژتون (فیزیکی بشمارید).</p>
+                <p>🃏 <b>دست:</b> پیروی از خال اجباری. 🎭 <b>نفوذی</b> می‌تواند تقلب کند.</p>
+            `,
+            suits: {
+                Spades: "پیک", Hearts: "دل", Clubs: "گشنیز", Diamonds: "خشت"
+            }
+        }
+    };
+
+    // --- Game Data ---
+    const SUITS = [
+        { name: 'Spades', symbol: '♠', color: 'suit-black' },
+        { name: 'Hearts', symbol: '♥', color: 'suit-red' },
+        { name: 'Clubs', symbol: '♣', color: 'suit-black' },
+        { name: 'Diamonds', symbol: '♦', color: 'suit-red' }
+    ];
+
+    // Official Missions (trump suits assigned randomly at game start)
+    const MISSIONS = [
+        { title_fa: "تناوب زوج و فرد", desc_fa: "هر کارت بازی شده باید به صورت متناوب زوج و فرد باشد." },
+        { title_fa: "هم‌خال", desc_fa: "تمام کارت‌های بازی شده باید از یک خال باشند." },
+        { title_fa: "آخرین کمترین", desc_fa: "آخرین کارت بازی شده باید از تمام کارت‌های دیگر کوچکتر باشد." },
+        { title_fa: "دومین کمترین", desc_fa: "دومین کارت بازی شده باید کمترین عدد از تمام کارت‌های بازی شده باشد." },
+        { title_fa: "فقط زوج", desc_fa: "فقط کارت‌های با عدد زوج می‌توانند بازی شوند." },
+        { title_fa: "آخرین برنده", desc_fa: "آخرین کارت باید دست را ببرد." },
+        { title_fa: "فقط فرد", desc_fa: "فقط کارت‌های با عدد فرد می‌توانند بازی شوند." },
+        { title_fa: "سومین بیشترین", desc_fa: "سومین کارت باید بیشترین عدد از تمام کارت‌های بازی شده باشد." },
+        { title_fa: "اولین برنده", desc_fa: "اولین کارت بازی شده باید دست را ببرد." },
+        { title_fa: "اول و آخر هم‌خال", desc_fa: "اولین و آخرین کارت بازی شده باید از یک خال باشند." },
+        { title_fa: "نزولی", desc_fa: "هر کارت بازی شده باید از کارت قبلی کوچکتر باشد." },
+        { title_fa: "سومین کمترین", desc_fa: "سومین کارت باید از تمام کارت‌های دیگر کوچکتر باشد." },
+        { title_fa: "اول و دوم هم‌خال", desc_fa: "اولین و دومین کارت باید از یک خال باشند." },
+        { title_fa: "اول و سوم هم‌خال", desc_fa: "اولین و سومین کارت باید از یک خال باشند." },
+        { title_fa: "فقط یک تا هفت", desc_fa: "فقط کارت‌های با عدد یک تا هفت می‌توانند بازی شوند." },
+        { title_fa: "صعودی", desc_fa: "هر کارت بازی شده باید از کارت قبلی بزرگتر باشد." },
+        { title_fa: "اولین بیشترین", desc_fa: "اولین کارت بازی شده باید بیشترین عدد از تمام کارت‌های بازی شده باشد." },
+        { title_fa: "دومین بیشترین", desc_fa: "دومین کارت بازی شده باید بیشترین عدد از تمام کارت‌های بازی شده باشد." },
+        { title_fa: "آخرین بیشترین", desc_fa: "آخرین کارت بازی شده باید بیشترین عدد از تمام کارت‌های دیگر باشد." },
+        { title_fa: "اولین کمترین", desc_fa: "اولین کارت بازی شده باید کمترین عدد از تمام کارت‌های بازی شده باشد." },
+        { title_fa: "دومین برنده", desc_fa: "دومین کارت بازی شده باید دست را ببرد." },
+        { title_fa: "سومین برنده", desc_fa: "سومین کارت بازی شده باید دست را ببرد." },
+        { title_fa: "دوم و سوم هم‌خال", desc_fa: "دومین و سومین کارت باید از یک خال باشند." },
+        { title_fa: "دوم و آخر هم‌خال", desc_fa: "دومین و آخرین کارت باید از یک خال باشند." }
+    ];
+
+    // Risky Missions (require Intel tokens, trump suits assigned randomly at game start)
+    const RISKY_MISSIONS = [
+        { title_fa: "ژتون در دومین کارت", desc_fa: "دومین کارت باید با ژتون اطلاعاتی بازی شود.", isRisky: true },
+        { title_fa: "ژتون در سومین کارت", desc_fa: "سومین کارت باید با ژتون اطلاعاتی بازی شود.", isRisky: true },
+        { title_fa: "ژتون در آخرین کارت", desc_fa: "آخرین کارت باید با ژتون اطلاعاتی بازی شود.", isRisky: true },
+        { title_fa: "ژتون در دوم یا سوم", desc_fa: "دومین یا سومین کارت باید با ژتون اطلاعاتی بازی شود.", isRisky: true }
+    ];
+
+    // --- State ---
+    let gameState = {
+        agentScore: 0, // Not used directly anymore, tracking missionsCompleted
+        currentMission: null,
+        currentTrump: null,
+        missionsCompleted: 0,
+        roundsPlayed: 0,
+        playerCount: 4,
+        winLimitMissions: 8,
+        winLimitTokens: 5,
+        usedMissions: [], // Track indices of used missions to ensure uniqueness
+        includeRisky: true, // Whether to include risky missions
+        assignedMissions: [] // Missions with assigned trump suits for this game
+    };
+
+    // WIN CONDITIONS CONFIG
+    const WIN_CONFIG = {
+        3: { missions: 9, tokens: 6, cardsDealt: 13, stopAt: 2, agents: 2 },
+        4: { missions: 7, tokens: 5, cardsDealt: 12, stopAt: 2, agents: 3 },
+        5: { missions: 6, tokens: 4, cardsDealt: 10, stopAt: 1, agents: 4 }
+    };
+
+    // --- Functions ---
+    function startGame(players) {
+        gameState.playerCount = players;
+        gameState.winLimitMissions = WIN_CONFIG[players].missions;
+        gameState.winLimitTokens = WIN_CONFIG[players].tokens;
+        gameState.cardsDealt = WIN_CONFIG[players].cardsDealt;
+        gameState.stopAt = WIN_CONFIG[players].stopAt;
+        gameState.agentCount = WIN_CONFIG[players].agents;
+        gameState.includeRisky = document.getElementById('include-risky').checked;
+        
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        
+        initGame();
+    }
+
+    function assignTrumpsToMissions() {
+        // Combine regular and risky missions
+        let allMissions = MISSIONS.map(m => ({ ...m }));
+        if (gameState.includeRisky) {
+            allMissions = [...allMissions, ...RISKY_MISSIONS.map(m => ({ ...m }))];
+        }
+        
+        // Create balanced trump assignment: 6 missions per suit (for 24 missions)
+        // If risky missions included, distribute evenly across all missions
+        const totalMissions = allMissions.length;
+        const missionsPerSuit = Math.floor(totalMissions / SUITS.length);
+        const remainder = totalMissions % SUITS.length;
+        
+        // Create array of suits: 6 of each, then distribute remainder
+        let suitAssignment = [];
+        for (let i = 0; i < SUITS.length; i++) {
+            const count = missionsPerSuit + (i < remainder ? 1 : 0);
+            for (let j = 0; j < count; j++) {
+                suitAssignment.push(SUITS[i]);
+            }
+        }
+        
+        // Shuffle the suit assignment
+        for (let i = suitAssignment.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [suitAssignment[i], suitAssignment[j]] = [suitAssignment[j], suitAssignment[i]];
+        }
+        
+        // Assign trumps to missions
+        gameState.assignedMissions = allMissions.map((mission, index) => ({
+            ...mission,
+            trumpSuit: suitAssignment[index]
+        }));
+    }
+
+    function initGame() {
+        gameState.missionsCompleted = 0;
+        gameState.roundsPlayed = 0;
+        gameState.candidateMissions = [];
+        gameState.usedMissions = []; // Reset used missions
+        currentLang = 'fa'; // Enforce Farsi
+        
+        // Assign trumps to missions at game start
+        assignTrumpsToMissions();
+        
+        updateScoreboard();
+        startTurn(); 
+        updateUIText(); // Triggers Rebus Update
+    }
+    
+    function getUniqueRandomMission() {
+        const availableMissions = gameState.assignedMissions;
+        
+        // If all missions used, reset used list (reshuffle)
+        if (gameState.usedMissions.length >= availableMissions.length) {
+            gameState.usedMissions = []; // Reshuffle if exhausted
+        }
+        
+        let idx;
+        do {
+            idx = Math.floor(Math.random() * availableMissions.length);
+        } while (gameState.usedMissions.includes(idx));
+        
+        gameState.usedMissions.push(idx);
+        return availableMissions[idx];
+    }
+
+    function startTurn() {
+        // Check if deck is empty scenario handled by getUniqueRandomMission logic above (auto-reshuffle)
+        
+        // Generate 2 candidates with unique missions (trump suits assigned at game start)
+        const m1 = getUniqueRandomMission();
+        const m2 = getUniqueRandomMission();
+        
+        gameState.candidateMissions = [
+            { m: m1, t: m1.trumpSuit },
+            { m: m2, t: m2.trumpSuit }
+        ];
+        
+        // Reset UI to Pass Screen first
+        document.getElementById('pass-screen').classList.remove('hidden');
+        document.getElementById('selection-area').classList.add('hidden');
+        document.getElementById('mission-area').classList.add('hidden');
+        document.getElementById('controls-area').classList.add('hidden');
+    }
+    
+    function showSelection() {
+        document.getElementById('pass-screen').classList.add('hidden');
+        document.getElementById('selection-area').classList.remove('hidden');
+        
+        // Render Options (Full Details in Farsi)
+        const m1 = gameState.candidateMissions[0].m;
+        const t1 = gameState.candidateMissions[0].t;
+        const m2 = gameState.candidateMissions[1].m;
+        const t2 = gameState.candidateMissions[1].t;
+        
+        const risky1 = m1.isRisky ? '<span style="color: #ff9800; font-size: 0.9rem;">⚠️ پرخطر</span>' : '';
+        const risky2 = m2.isRisky ? '<span style="color: #ff9800; font-size: 0.9rem;">⚠️ پرخطر</span>' : '';
+        
+        document.getElementById('sel-opt-1').innerHTML = `
+            <div style="font-size: 3rem; line-height: 1;" class="${t1.color}">${t1.symbol}</div>
+            <b style="font-size: 1.2rem; display:block; margin: 10px 0;">${m1.title_fa} ${risky1}</b>
+            <small style="color: #444;">${m1.desc_fa}</small>
+        `;
+        document.getElementById('sel-opt-2').innerHTML = `
+            <div style="font-size: 3rem; line-height: 1;" class="${t2.color}">${t2.symbol}</div>
+            <b style="font-size: 1.2rem; display:block; margin: 10px 0;">${m2.title_fa} ${risky2}</b>
+            <small style="color: #444;">${m2.desc_fa}</small>
+        `;
+    }
+
+    function selectMission(index) {
+        const selection = gameState.candidateMissions[index];
+        gameState.currentMission = selection.m;
+        gameState.currentTrump = selection.t;
+        
+        // Show Active Mission
+        document.getElementById('selection-area').classList.add('hidden');
+        document.getElementById('mission-area').classList.remove('hidden');
+        document.getElementById('controls-area').classList.remove('hidden');
+        
+        renderMission();
+    }
+
+    function getRandomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function renderMission() {
+        if (!gameState.currentMission) return;
+        const m = gameState.currentMission;
+        const t = gameState.currentTrump;
+
+        // Text in Farsi (missions only have Farsi now)
+        document.getElementById('mission-title').innerText = m.title_fa;
+        document.getElementById('mission-desc').innerText = m.desc_fa;
+
+        // Show risky indicator if applicable
+        const riskyIndicator = document.getElementById('risky-indicator');
+        if (m.isRisky) {
+            riskyIndicator.style.display = 'flex';
+        } else {
+            riskyIndicator.style.display = 'none';
+        }
+
+        // Trump (fixed for each mission, but allow manual override via cycleTrump)
+        const trumpEl = document.getElementById('trump-icon');
+        trumpEl.innerText = t.symbol;
+        trumpEl.className = `trump-icon ${t.color}`;
+        trumpEl.onclick = cycleTrump; 
+        trumpEl.style.cursor = 'pointer';
+
+        // Re-trigger animation
+        const card = document.getElementById('mission-area');
+        card.classList.remove('animate-in');
+        void card.offsetWidth; 
+        card.classList.add('animate-in');
+    }
+    
+    // Separated Logic
+    function resolveMission(success) {
+        if (success) {
+            gameState.missionsCompleted++;
+            updateScoreboard();
+            if (checkWinCondition()) return; // Stop if game over
+            // Removed alert as per user request
+        } else {
+             // Removed alert as per user request
+        }
+        // Proceed to next turn
+        gameState.roundsPlayed++;
+        startTurn();
+    }
+    
+    // Removed resolveTrick
+
+    function checkWinCondition() {
+        // Only check Agent win. Insider tracks own tokens.
+        if (gameState.missionsCompleted >= gameState.winLimitMissions) {
+             alert("✅ مامورها برنده شدند! (تکمیل ماموریت‌ها)");
+             document.getElementById('game-screen').classList.add('hidden');
+             document.getElementById('setup-screen').classList.remove('hidden');
+             return true;
+        }
+        return false;
+    }
+
+    function updateScoreboard() {
+        document.getElementById('agent-score').innerText = `${gameState.missionsCompleted}/${gameState.winLimitMissions}`; 
+    }
+
+    function updateUIText() {
+        const t = TEXTS[currentLang];
+        document.getElementById('app-title').innerText = t.appTitle;
+        document.getElementById('btn-reset').innerText = t.reset;
+        document.getElementById('btn-rules').innerText = t.rulesBtn;
+        document.getElementById('rules-header').innerText = t.rulesHeader;
+        document.getElementById('rules-body').innerHTML = t.rulesBody;
+        document.getElementById('score-agents-label').innerText = t.agentsLabel;
+        // document.getElementById('score-insider-label').innerText = t.insiderLabel;
+        document.getElementById('trump-label').innerText = t.trumpLabel;
+        document.getElementById('btn-success-text').innerText = t.btnSuccess;
+        document.getElementById('btn-fail-text').innerText = t.btnFail;
+        document.getElementById('btn-vote-text').innerText = t.btnVote;
+        // document.getElementById('btn-skip-text').innerText = t.btnSkip; // Removed
+
+        // Update Dynamic Rules (Modal)
+        if (document.getElementById('rule-mission-limit')) {
+            document.getElementById('rule-mission-limit').innerText = gameState.winLimitMissions;
+        }
+        if (document.getElementById('rule-token-limit')) {
+            document.getElementById('rule-token-limit').innerText = gameState.winLimitTokens;
+        }
+        
+        // Update Rebus Rules (Scoreboard)
+        const rebusEl = document.getElementById('quick-rules-rebus');
+        if (rebusEl) {
+            rebusEl.innerHTML = `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:2px; margin-bottom:2px;"><span>✅ ماموریت:</span> <b>${gameState.winLimitMissions}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:2px; margin-bottom:2px;"><span>❌ ژتون:</span> <b>${gameState.winLimitTokens}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:2px; margin-bottom:2px;"><span>🃏 کارت:</span> <b>${gameState.cardsDealt}</b></div>
+                <div style="display:flex; justify-content:space-between;"><span>🛑 رای:</span> <b>${gameState.stopAt}</b></div>
+            `;
+        }
+        
+        // Selection Text update removed to prevent overwriting HTML in showSelection
+
+        // RTL switch
+        if (currentLang === 'fa') {
+            document.body.classList.add('rtl');
+            document.documentElement.lang = 'fa';
+        } else {
+            document.body.classList.remove('rtl');
+            document.documentElement.lang = 'en';
+        }
+        
+        renderMission(); 
+    }
+
+    function triggerFinalVote() {
+        const msg = TEXTS[currentLang].voteMsg;
+        alert(msg);
+    }
+
+    function toggleMissions() {
+        const modal = document.getElementById('missions-modal');
+        const list = document.getElementById('missions-list');
+        
+        if (modal.classList.contains('hidden')) {
+            // Populate with assigned missions (only show if game has started)
+            const availableMissions = gameState.assignedMissions.length > 0 
+                ? gameState.assignedMissions 
+                : [...MISSIONS, ...(gameState.includeRisky ? RISKY_MISSIONS : [])];
+            
+            let html = '';
+            availableMissions.forEach((m, index) => {
+                const isRisky = m.isRisky || false;
+                const trumpSuit = m.trumpSuit || { symbol: '?', color: 'suit-black' };
+                html += `
+                    <div style="border-bottom: 1px solid #444; padding: 10px 0;">
+                        <div style="font-weight: bold; color: ${isRisky ? '#ff9800' : 'var(--accent-color)'};">
+                            ${index + 1}. ${m.title_fa}${isRisky ? ' ⚠️ (پرخطر)' : ''}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #ccc;">${m.desc_fa}</div>
+                        <div style="font-size: 1.2rem; margin-top: 5px;" class="${trumpSuit.color}">حکم: ${trumpSuit.symbol}</div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function toggleRules() {
+        const modal = document.getElementById('rules-modal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === 'en' ? 'fa' : 'en';
+        updateUIText();
+    }
+
+    function cycleTrump() {
+        const currentIdx = SUITS.findIndex(s => s.name === gameState.currentTrump.name);
+        const nextIdx = (currentIdx + 1) % SUITS.length;
+        gameState.currentTrump = SUITS[nextIdx];
+        
+        const trumpEl = document.getElementById('trump-icon');
+        trumpEl.innerText = gameState.currentTrump.symbol;
+        trumpEl.className = `trump-icon ${gameState.currentTrump.color}`;
+    }
+
+    function confirmReset() {
+        const msg = TEXTS[currentLang].confirmReset;
+        if(confirm(msg)) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+    }
+
+    // window.onload = initGame; // Removed auto-init, wait for setup
+
+
+</script>
+</body>
+</html>

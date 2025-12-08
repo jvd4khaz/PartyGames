@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>کراش نایتلس (Crush Nightless)</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-primary: #E0E0E0;
+            --text-secondary: #A0A0A0;
+            --accent-color: #FF9800; /* Orange for Crush */
+            --mafia-color: #F44336;
+            --town-color: #4CAF50;
+            --condemner-color: #9C27B0;
+            --border-radius: 16px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 24px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 0.5rem 0; color: var(--accent-color); font-weight: 900; }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .input-group { margin-bottom: 10px; }
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            font-family: inherit;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        .action-btn {
+            background-color: var(--accent-color);
+            color: #121212;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            font-family: inherit;
+        }
+        .action-btn:active { transform: scale(0.95); }
+
+        .secondary-btn {
+            background-color: #333;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin: 3px;
+            display: inline-block;
+        }
+
+        /* Role Card */
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
+        
+        .target-box {
+            background: rgba(156, 39, 176, 0.15);
+            border: 1px solid var(--condemner-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #E1BEE7;
+            font-weight: bold;
+        }
+        
+        .mafia-box {
+            background: rgba(244, 67, 54, 0.15);
+            border: 1px solid var(--mafia-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #FFCDD2;
+            font-weight: bold;
+        }
+
+        .god-view {
+            text-align: right;
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-top: 10px;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>کراش نایتلس</h1>
+        <p>سناریوی ۶ نفره (بدون شب)</p>
+
+        <div class="setup-info">
+            <strong>نقش‌ها:</strong><br>
+            • ۱ <span style="color:var(--mafia-color)">پدرخوانده</span> (مرگ متصل)<br>
+            • ۱ <span style="color:var(--mafia-color)">مافیا ساده (Goon)</span><br>
+            • ۱ <span style="color:var(--condemner-color)">کینه‌توز (Condemner)</span><br>
+            • ۳ <span style="color:var(--town-color)">شهروند</span> (یکی از آنها هدف است)<br>
+            <br>
+            <strong>قوانین:</strong><br>
+            • <strong>بدون شب:</strong> بازی فاز شب و شلیک ندارد. فقط رأی‌گیری.<br>
+            • <strong>مرگ متصل:</strong> اگر پدرخوانده حذف شود، مافیا ساده هم با او می‌میرد.<br>
+            • <strong>برد کینه‌توز:</strong> اگر «هدف» با رأی‌گیری حذف شود، کینه‌توز همان لحظه برنده می‌شود.<br>
+            • <strong>برد شهروند:</strong> حذف تمام مافیاها و کینه‌توز (اگر مافیاها حذف شوند بازی ادامه دارد تا کینه‌توز هم حذف شود).<br>
+            • <strong>حالت خاص:</strong> اگر در نهایت فقط کینه‌توز و هدف باقی بمانند (۲ نفر آخر)، شهروند برنده است.
+        </div>
+
+        <div style="text-align: right; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem;">اسامی بازیکنان:</div>
+        <div id="inputs-container"></div>
+
+        <div style="text-align: left; margin-top: 10px;">
+            <button onclick="clearInputs()" style="background:none; border:none; color:#888; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
+        </div>
+
+        <!-- Saved Players -->
+        <div id="saved-section" style="margin-top: 20px; text-align: right;">
+            <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">بازیکنان ذخیره شده:</div>
+            <div id="saved-list"></div>
+            <button onclick="clearSaved()" style="background:none; border:none; color:#F44336; cursor:pointer; font-size:0.8rem; margin-top:5px;">حذف تاریخچه</button>
+        </div>
+
+        <button class="action-btn" onclick="startGame()">توزیع نقش‌ها</button>
+    </div>
+
+    <!-- 2. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <p>نفر <span id="pass-num">1</span> از 6</p>
+        <div style="font-size: 4rem; margin: 20px;">📱</div>
+        <h2>گوشی را بدهید به <span id="pass-name" style="color:var(--accent-color)">نام</span></h2>
+        <button class="action-btn" onclick="revealRole()">مشاهده نقش</button>
+    </div>
+
+    <!-- 3. Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <h2 id="reveal-name" style="color:#888; font-size:1.2rem;">نام</h2>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">نقش</div>
+            <div id="role-desc" style="color:#ddd; font-size:0.95rem;">توضیحات</div>
+            
+            <div id="extra-info-box"></div>
+        </div>
+
+        <p style="font-size:0.8rem; color:#666;">نقش و هدف خود را به خاطر بسپارید.</p>
+        <button id="next-btn" class="action-btn" style="background-color:#333;" onclick="nextPlayer()">پنهان کردن و نفر بعدی</button>
+    </div>
+
+    <!-- 4. Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h1>بازی شروع شد</h1>
+        <p style="color:var(--town-color);">نقش‌ها توزیع شدند!</p>
+        
+        <div class="setup-info">
+            <strong>فاز: فقط روز</strong><br>
+            بحث کنید و با رأی اکثریت یک نفر را حذف کنید.<br>
+            مراقب کینه‌توز باشید که می‌خواهد «هدف» خود را بیرون کند!<br>
+            <span style="font-size:0.8rem; color:#888;">(اگر مافیا حذف شد بازی ادامه دارد. اگر فقط کینه‌توز و هدف ماندند، شهروند برنده است)</span>
+        </div>
+
+        <button class="secondary-btn" onclick="toggleGodView()">نمایش/مخفی دفترچه گاد</button>
+        <div id="god-view" class="god-view hidden"></div>
+
+        <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+            <button class="action-btn" style="background-color:var(--mafia-color);" onclick="restartGame()">بازی مجدد (Restart)</button>
+            <button class="secondary-btn" onclick="newSetup()">تنظیمات جدید</button>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        var players = [];
+        var savedPlayers = [];
+        var currentIndex = 0;
+        var playerCount = 6;
+
+        // --- Init ---
+        window.onload = function() {
+            loadSaved();
+            renderInputs();
+        };
+
+        // --- Storage ---
+        function loadSaved() {
+            var s = localStorage.getItem('crush_players');
+            if(s) savedPlayers = JSON.parse(s);
+            renderSaved();
+        }
+
+        function renderSaved() {
+            var div = document.getElementById('saved-list');
+            div.innerHTML = '';
+            if(savedPlayers.length === 0) div.innerHTML = '<span style="color:#555; font-size:0.8rem;">هنوز نامی ذخیره نشده</span>';
+            
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                div.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for(var i=0; i<inputs.length; i++) {
+                if(inputs[i].value === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for(var i=0; i<inputs.length; i++) inputs[i].value = '';
+        }
+
+        function clearSaved() {
+            if(confirm('آیا تاریخچه اسامی پاک شود؟')) {
+                savedPlayers = [];
+                localStorage.removeItem('crush_players');
+                renderSaved();
+            }
+        }
+
+        function renderInputs() {
+            var c = document.getElementById('inputs-container');
+            c.innerHTML = '';
+            for(var i=0; i<playerCount; i++) {
+                var inp = document.createElement('input');
+                inp.className = 'player-input';
+                inp.placeholder = 'بازیکن ' + (i+1);
+                c.appendChild(inp);
+            }
+        }
+
+        // --- Game Logic ---
+        function startGame() {
+            // Names
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for(var i=0; i<inputs.length; i++) {
+                var val = inputs[i].value.trim();
+                if(val) {
+                    names.push(val);
+                    if(savedPlayers.indexOf(val) === -1) savedPlayers.push(val);
+                } else {
+                    names.push('بازیکن ' + (i+1));
+                }
+            }
+            localStorage.setItem('crush_players', JSON.stringify(savedPlayers));
+            renderSaved();
+
+            // Roles
+            // 1 GF, 1 Goon, 1 Condemner, 3 Townies
+            var deck = [
+                { id: 'gf', name: 'پدرخوانده', color: '#F44336', desc: 'شما پدرخوانده هستید. اگر حذف شوید، یار شما (مافیا ساده) هم می‌میرد.' },
+                { id: 'goon', name: 'مافیا ساده', color: '#F44336', desc: 'شما مافیا ساده هستید. اگر پدرخوانده حذف شود، شما هم می‌میرید.' },
+                { id: 'condemner', name: 'کینه‌توز', color: '#9C27B0', desc: 'شما کینه‌توز هستید. برای برنده شدن باید کاری کنید که «هدف» شما با رأی‌گیری حذف شود.' },
+                { id: 'town', name: 'شهروند', color: '#4CAF50', desc: 'شما شهروند هستید. مافیاها و نقش‌های منفی را پیدا کنید.' },
+                { id: 'town', name: 'شهروند', color: '#4CAF50', desc: 'شما شهروند هستید. مافیاها و نقش‌های منفی را پیدا کنید.' },
+                { id: 'town', name: 'شهروند', color: '#4CAF50', desc: 'شما شهروند هستید. مافیاها و نقش‌های منفی را پیدا کنید.' }
+            ];
+
+            shuffle(deck);
+
+            players = [];
+            var townIndices = [];
+            var condemnerIdx = -1;
+            var gfIdx = -1;
+            var goonIdx = -1;
+
+            // Assign initial roles
+            for(var i=0; i<playerCount; i++) {
+                players.push({
+                    name: names[i],
+                    role: deck[i],
+                    target: null // For condemner
+                });
+                
+                if(deck[i].id === 'town') townIndices.push(i);
+                if(deck[i].id === 'condemner') condemnerIdx = i;
+                if(deck[i].id === 'gf') gfIdx = i;
+                if(deck[i].id === 'goon') goonIdx = i;
+            }
+
+            // Pick Target for Condemner (Must be a Townie)
+            // Wiki: "3 Townies (one of whom is unknowingly the condemner's target)"
+            if(condemnerIdx !== -1 && townIndices.length > 0) {
+                var targetIdx = townIndices[Math.floor(Math.random() * townIndices.length)];
+                players[condemnerIdx].target = players[targetIdx].name;
+            }
+
+            // Build God View
+            var godHtml = "";
+            players.forEach(p => {
+                var color = p.role.color;
+                var extra = "";
+                if(p.role.id === 'condemner') extra = " [هدف: " + p.target + "]";
+                if(p.role.id === 'town' && players[condemnerIdx] && players[condemnerIdx].target === p.name) extra = " [هدف است]";
+                godHtml += "<div style='color:"+color+"'>" + p.name + ": " + p.role.name + extra + "</div>";
+            });
+            document.getElementById('god-view').innerHTML = godHtml;
+
+            // Mafia Knowledge
+            if(gfIdx !== -1 && goonIdx !== -1) {
+                players[gfIdx].partner = players[goonIdx].name;
+                players[goonIdx].partner = players[gfIdx].name;
+            }
+
+            // Start UI
+            currentIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function updatePassScreen() {
+            document.getElementById('pass-num').innerText = currentIndex + 1;
+            document.getElementById('pass-name').innerText = players[currentIndex].name;
+        }
+
+        function revealRole() {
+            var p = players[currentIndex];
+            document.getElementById('reveal-name').innerText = p.name;
+            
+            var title = document.getElementById('role-title');
+            var desc = document.getElementById('role-desc');
+            var extra = document.getElementById('extra-info-box');
+            
+            title.innerText = p.role.name;
+            title.style.color = p.role.color;
+            desc.innerText = p.role.desc;
+            extra.innerHTML = '';
+
+            if(p.role.id === 'condemner') {
+                extra.innerHTML = "<div class='target-box'>🎯 هدف شما: " + p.target + "</div>";
+            }
+            
+            if(p.role.id === 'gf') {
+                extra.innerHTML = "<div class='mafia-box'>👿 یار شما: " + p.partner + "</div>";
+            }
+            
+            if(p.role.id === 'goon') {
+                extra.innerHTML = "<div class='mafia-box'>👹 پدرخوانده: " + p.partner + "</div>";
+            }
+
+            var btn = document.getElementById('next-btn');
+            if(currentIndex === playerCount - 1) {
+                btn.innerText = "شروع بازی";
+                btn.style.backgroundColor = "#FF9800";
+                btn.style.color = "black";
+            } else {
+                btn.innerText = "پنهان کردن و نفر بعدی";
+                btn.style.backgroundColor = "#333";
+                btn.style.color = "white";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentIndex++;
+            if(currentIndex >= playerCount) {
+                showScreen('game-screen');
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function restartGame() {
+            if(confirm("آیا بازی با همان بازیکنان مجدداً شروع شود؟")) {
+                startGame();
+            }
+        }
+
+        function newSetup() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+
+        function toggleGodView() {
+            var g = document.getElementById('god-view');
+            if(g.classList.contains('hidden')) g.classList.remove('hidden');
+            else g.classList.add('hidden');
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'pass-screen', 'reveal-screen', 'game-screen'];
+            screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function shuffle(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    </script>
+</body>
+</html>
+o9l

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>True Love</title>
+    <style>
+        :root {
+            --bg-color: #1a0b0f; /* Dark pinkish-black */
+            --card-bg: #2c1218;
+            --text-primary: #FFFFFF;
+            --text-secondary: #ffb3c6;
+            --accent-color: #e91e63; /* Pink */
+            --mafia-color: #ff4081;
+            --town-color: #8bc34a;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 24px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 2rem; margin: 0 0 0.5rem 0; font-weight: 900; color: var(--accent-color); text-shadow: 0 0 10px rgba(233, 30, 99, 0.5); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        /* Setup Styling */
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #ddd;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #2c1218;
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-top: 1px solid #441b25;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+            transition: transform 0.1s;
+            width: 100%;
+        }
+
+        button.action-btn:active { transform: scale(0.95); }
+
+        /* Screens */
+        .hidden { display: none !important; }
+        
+        .heart-icon {
+            font-size: 4rem;
+            margin: 20px 0;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.1); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+            60% { transform: scale(1); }
+        }
+
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid rgba(233, 30, 99, 0.3);
+        }
+
+        .role-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .partner-box {
+            background-color: rgba(233, 30, 99, 0.1);
+            border: 1px solid var(--accent-color);
+            color: #ff80ab;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .mafia-partner-box {
+            background-color: rgba(255, 64, 129, 0.15);
+            border: 1px solid #ff4081;
+            color: #ff4081;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <div class="heart-icon">❤️</div>
+        <h1>True Love</h1>
+        <p>A game of secrets and pairs.</p>
+
+        <div class="setup-info">
+            <strong>Setup (8 Players):</strong><br>
+            • 2 Mafia Lovers<br>
+            • 6 Town Lovers<br><br>
+            <strong>Mechanics:</strong><br>
+            • Everyone is paired up.<br>
+            • If you die, your partner dies.<br>
+            • You don't know your partner's alignment.<br>
+            • Mafia are individually paired with Town.
+        </div>
+
+        <div style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+            Ready to distribute roles?
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div id="bottom-bar" class="bottom-bar">
+        <button class="action-btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- 2. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            Player <span id="player-num-pass">1</span> of 8
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>Pass to Player <span id="player-idx" style="color: var(--accent-color); font-size: 1.5rem;">1</span></h2>
+        <p>Please hand the device to this player.</p>
+        <button class="action-btn" style="margin-top: 20px;" onclick="revealRole()">Reveal Role</button>
+    </div>
+
+    <!-- 3. Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888;">
+            Player <span id="player-num-reveal">1</span>
+        </div>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color: #ccc;">...</div>
+            
+            <div id="lover-partner" class="partner-box">
+                ❤️ Your Lover is: Player X
+            </div>
+
+            <div id="mafia-partner" class="mafia-partner-box hidden">
+                🔪 Your Mafia Partner is: Player Y
+            </div>
+        </div>
+
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">Memorize your role and hide it.</p>
+        <button id="next-btn" class="action-btn" style="background-color: #444;" onclick="nextPlayer()">Hide & Next Player</button>
+    </div>
+
+    <!-- 4. End Screen -->
+    <div id="end-screen" class="container hidden">
+        <div style="font-size: 5rem; margin-bottom: 20px;">💔</div>
+        <h1>Distribution Complete</h1>
+        <p>All roles and pairs have been assigned.</p>
+        
+        <div class="setup-info" style="text-align: center;">
+            <h3 style="margin-top: 0; color: var(--accent-color);">The Couples</h3>
+            <div id="couples-list" style="text-align: left; font-size: 0.9rem; line-height: 1.8;"></div>
+        </div>
+
+        <button class="action-btn" style="margin-top: 20px; background-color: var(--accent-color);" onclick="restartGame()">Restart Game</button>
+        <button class="action-btn" style="margin-top: 10px; background-color: #444;" onclick="newSetup()">New Setup</button>
+    </div>
+
+    <script>
+        // --- Game State ---
+        var players = []; // Array of 8 player objects
+        var currentPlayerIndex = 0;
+        var pairs = []; // Array of pairs [p1_idx, p2_idx]
+
+        // --- Logic ---
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function startGame() {
+            // 1. Setup 8 Player Slots (Indices 0-7)
+            var indices = [0, 1, 2, 3, 4, 5, 6, 7];
+            shuffleArray(indices);
+
+            // 2. Assign Roles according to rules:
+            // "2 Mafia Lovers, 6 Town Lovers"
+            // "Both scum are individually paired with a town player."
+            // This means we have 4 pairs. Two pairs are (Mafia + Town). Two pairs are (Town + Town).
+            
+            // Let's create the pairs first.
+            // We shuffled indices, so we can just take them in chunks of 2.
+            pairs = [];
+            pairs.push([indices[0], indices[1]]);
+            pairs.push([indices[2], indices[3]]);
+            pairs.push([indices[4], indices[5]]);
+            pairs.push([indices[6], indices[7]]);
+
+            // Now assign Mafia.
+            // We need 2 Mafia. They must be in DIFFERENT pairs.
+            // And they must be paired with a Town player.
+            // So we pick Pair 1 and Pair 2 to have a Mafia each.
+            // Inside Pair 1, pick one to be Mafia. Inside Pair 2, pick one to be Mafia.
+            // The rest are Town.
+
+            // Initialize all as Town first
+            players = [];
+            for (var i = 0; i < 8; i++) {
+                players.push({ id: i, role: 'Town Lover', partnerIdx: -1, mafiaPartnerIdx: -1 });
+            }
+
+            // Assign Partners
+            for (var p = 0; p < pairs.length; p++) {
+                var p1 = pairs[p][0];
+                var p2 = pairs[p][1];
+                players[p1].partnerIdx = p2;
+                players[p2].partnerIdx = p1;
+            }
+
+            // Assign Mafia
+            // Pair 0: Pick random member to be Mafia
+            var m1_idx = Math.random() < 0.5 ? pairs[0][0] : pairs[0][1];
+            players[m1_idx].role = 'Mafia Lover';
+
+            // Pair 1: Pick random member to be Mafia
+            var m2_idx = Math.random() < 0.5 ? pairs[1][0] : pairs[1][1];
+            players[m2_idx].role = 'Mafia Lover';
+
+            // Link Mafia Partners (they know each other)
+            players[m1_idx].mafiaPartnerIdx = m2_idx;
+            players[m2_idx].mafiaPartnerIdx = m1_idx;
+
+            // 3. Start UI
+            currentPlayerIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function updatePassScreen() {
+            var pNum = currentPlayerIndex + 1;
+            document.getElementById('player-num-pass').innerText = pNum;
+            document.getElementById('player-idx').innerText = pNum;
+        }
+
+        function revealRole() {
+            var p = players[currentPlayerIndex];
+            var pNum = currentPlayerIndex + 1;
+            var partnerNum = p.partnerIdx + 1;
+
+            document.getElementById('player-num-reveal').innerText = pNum;
+
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            var partnerEl = document.getElementById('lover-partner');
+            var mafiaEl = document.getElementById('mafia-partner');
+
+            titleEl.innerText = p.role;
+            partnerEl.innerText = "❤️ Your Lover is: Player " + partnerNum;
+
+            if (p.role === 'Mafia Lover') {
+                titleEl.style.color = '#ff4081';
+                descEl.innerText = "You are Mafia. You are paired with a Townie.";
+                
+                mafiaEl.classList.remove('hidden');
+                mafiaEl.innerText = "🔪 Your Mafia Teammate is: Player " + (p.mafiaPartnerIdx + 1);
+            } else {
+                titleEl.style.color = '#8bc34a';
+                descEl.innerText = "You are Town. You do not know your partner's alignment.";
+                mafiaEl.classList.add('hidden');
+            }
+
+            // Update Next Button
+            var nextBtn = document.getElementById('next-btn');
+            if (currentPlayerIndex === 7) { // 8 players total (0-7)
+                nextBtn.innerText = "Finish Distribution";
+                nextBtn.style.backgroundColor = "#e91e63";
+            } else {
+                nextBtn.innerText = "Hide & Next Player";
+                nextBtn.style.backgroundColor = "#444";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= 8) {
+                finishGame();
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function finishGame() {
+            var html = "";
+            html += "<div style='background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; color:#ccc;'>";
+            html += "The pairs are now set. <br><br>";
+            html += "<strong>Warning:</strong> Do not reveal this screen to players if you want pairs to remain secret.<br>";
+            html += "</div>";
+            
+            // Optional: Only show a button to reveal pairs
+            html += "<button onclick='revealPairs()' class='action-btn' style='margin-top:15px; background:#555; font-size:0.9rem;'>Reveal Pairs (For Moderator)</button>";
+            html += "<div id='pairs-container' class='hidden' style='margin-top:15px; text-align:left;'>";
+            
+            for (var i = 0; i < pairs.length; i++) {
+                var p1 = pairs[i][0];
+                var p2 = pairs[i][1];
+                html += "<strong>Pair " + (i+1) + ":</strong> Player " + (p1+1) + " & Player " + (p2+1) + "<br>";
+            }
+            html += "</div>";
+            
+            document.getElementById('couples-list').innerHTML = html;
+            showScreen('end-screen');
+        }
+        
+        function restartGame() {
+            if (confirm("Restart with same settings?")) {
+                startGame();
+            }
+        }
+
+        function newSetup() {
+             document.getElementById('setup-screen').classList.remove('hidden');
+             document.getElementById('bottom-bar').classList.remove('hidden');
+             document.getElementById('end-screen').classList.add('hidden');
+             document.getElementById('pass-screen').classList.add('hidden');
+             document.getElementById('reveal-screen').classList.add('hidden');
+        }
+
+        function showScreen(id) {
+            var screens = ['pass-screen', 'reveal-screen', 'end-screen'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
+

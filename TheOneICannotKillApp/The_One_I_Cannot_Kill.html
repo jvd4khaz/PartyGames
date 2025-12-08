@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>کسی که نمی‌توانم بکشم</title>
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Dark Slate */
+            --card-bg: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-color: #8b5cf6; /* Violet for Mystery */
+            --mafia-color: #ef4444;
+            --town-color: #22c55e;
+            --btn-color: #8b5cf6;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 0.5rem 0; font-weight: 900; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .role-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        .player-chip:active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(0.95);
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1e293b;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.1s;
+        }
+        button.action-btn:active { transform: scale(0.95); }
+
+        /* Screens */
+        .hidden { display: none !important; }
+        
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .role-title { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
+        .role-english { display: block; font-size: 0.9rem; opacity: 0.7; font-weight: normal; margin-top: 5px; }
+
+        .mafia-text { color: var(--mafia-color); }
+        .town-text { color: var(--town-color); }
+
+        .forbidden-target-box {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--mafia-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #ff8888;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container" style="padding-bottom: 100px;">
+        <h1>کسی که نمی‌توانم بکشم</h1>
+        <div style="font-size: 0.8rem; color: #888; margin-bottom: 15px;">The One I Cannot Kill (3 Players)</div>
+        
+        <div class="setup-info">
+            <strong>توزیع نقش‌ها (۳ بازیکن):</strong><br>
+            • ۱ <span style="color:var(--mafia-color)">مافیا</span><br>
+            • ۲ <span style="color:var(--town-color)">شهروند ساده</span><br>
+            <br>
+            <em>نکته: مافیا یکی از شهروندان را می‌شناسد که <strong>نباید</strong> به او رأی خروج نهایی (Hammer) بدهد. اگر مافیا رأی آخر را به آن شخص بدهد، مافیا می‌بازد.</em>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
+            <div style="font-weight: bold;">اسامی بازیکنان:</div>
+            <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
+        </div>
+        
+        <div id="player-inputs-container">
+            <input type="text" class="player-input" placeholder="بازیکن ۱" value="">
+            <input type="text" class="player-input" placeholder="بازیکن ۲" value="">
+            <input type="text" class="player-input" placeholder="بازیکن ۳" value="">
+        </div>
+
+        <!-- Saved Players Section -->
+        <div id="saved-players-section" style="margin-top: 20px; text-align: right;">
+            <div style="font-size: 0.9rem; color: #aaa; margin-bottom: 8px;">
+                بازیکنان ذخیره شده:
+            </div>
+            <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;">
+                <!-- Chips -->
+            </div>
+            <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#ef4444; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">حذف تاریخچه</button>
+        </div>
+    </div>
+
+    <!-- Setup Bottom Bar -->
+    <div id="setup-bar" class="bottom-bar">
+        <button class="action-btn" onclick="startDistribution()">توزیع نقش‌ها</button>
+    </div>
+
+    <!-- 2. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            نوبت: <span id="player-name-pass"></span>
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>گوشی را بدهید به:</h2>
+        <h1 id="pass-target-name" style="color: var(--accent-color);"></h1>
+        <button class="action-btn" style="margin-top: 20px;" onclick="revealRole()">مشاهده نقش</button>
+    </div>
+
+    <!-- 3. Role Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <h2 id="reveal-player-name"></h2>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color: #ccc; font-size: 0.95rem; line-height: 1.6;">...</div>
+            <div id="role-extra"></div>
+        </div>
+
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">نقش را به خاطر بسپارید.</p>
+        <button class="action-btn" style="background-color: #334155;" onclick="nextDistribute()">نفر بعدی</button>
+    </div>
+
+    <!-- 4. Game View -->
+    <div id="game-menu" class="container hidden">
+        <h1>وضعیت بازی</h1>
+        <p style="color:#22c55e; font-weight:bold;">نقش‌ها توزیع شدند.</p>
+        <p>گوشی را به کنار بگذارید و بحث را شروع کنید.</p>
+        <p style="font-size:0.9rem;">این بازی فقط یک روز طول می‌کشد.<br>شهروندان باید مافیا را پیدا کنند و به او رأی دهند.<br>مافیا باید سعی کند یکی از شهروندان را حذف کند، اما نباید به "هدف ممنوعه" رأی آخر را بدهد.</p>
+        
+        <div style="border-top: 1px solid #334155; margin: 20px 0; width: 100%;"></div>
+        
+        <div class="setup-info" style="text-align: center;">
+            <h3>دفترچه راوی / گاد</h3>
+            <button onclick="toggleGodView()" style="background:none; border:1px solid #555; color:#aaa; padding:5px 10px; border-radius:4px;">نمایش/مخفی</button>
+            <div id="god-view" class="hidden" style="text-align: right; margin-top: 10px; font-size: 0.9rem; line-height: 1.8;"></div>
+        </div>
+        
+        <button class="action-btn" style="margin-top: 20px; background-color: #ef4444;" onclick="restartGame()">بازی مجدد (Restart)</button>
+        <button class="action-btn" style="margin-top: 10px; background-color: #334155;" onclick="newSetup()">تنظیمات جدید</button>
+    </div>
+
+    <script>
+        // --- Constants ---
+        var ROLE_DEFS = {
+            mafia: { 
+                name: 'مافیا', 
+                english: 'Mafia (Semi-Priest)',
+                color: '#ef4444', 
+                desc: 'شما مافیا هستید. هدف شما این است که در پایان روز زنده بمانید. اگر در روز رأی‌گیری، رأی خروج نهایی (Hammer) روی شخصی که مشخص شده ثبت شود، شما بلافاصله بازی را می‌بازید.' 
+            },
+            town: { 
+                name: 'شهروند ساده', 
+                english: 'Vanilla Townie',
+                color: '#22c55e', 
+                desc: 'شما یک شهروند ساده هستید. هیچ قابلیت خاصی ندارید. هدف شما پیدا کردن و حذف مافیا در رأی‌گیری روز است.' 
+            }
+        };
+
+        // --- State ---
+        var totalPlayers = 3;
+        var players = []; // { name, roleKey, roleObj, forbiddenTarget? }
+        var currentIndex = 0;
+        var savedPlayers = [];
+
+        // --- Init ---
+        window.onload = function() {
+            loadSavedPlayers();
+            
+            // Fill inputs if we have saved names and inputs are empty (Optional convenience)
+            var inputs = document.querySelectorAll('.player-input');
+            // Just clear them on load to be safe or leave empty
+        };
+
+        // --- Storage ---
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('mafia_one_cannot_kill_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">نامی ذخیره نشده</span>';
+                return;
+            }
+
+            for (var i = 0; i < savedPlayers.length; i++) {
+                (function(name) {
+                    var chip = document.createElement('div');
+                    chip.className = 'player-chip';
+                    chip.innerText = name;
+                    chip.onclick = function() { fillInput(name); };
+                    container.appendChild(chip);
+                })(savedPlayers[i]);
+            }
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
+        }
+
+        function clearSavedPlayers() {
+            if (confirm('آیا مطمئن هستید؟')) {
+                savedPlayers = [];
+                localStorage.removeItem('mafia_one_cannot_kill_players');
+                renderSavedList();
+            }
+        }
+
+        // --- Logic ---
+        function startDistribution() {
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            var filledCount = 0;
+
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim();
+                if (val) {
+                    names.push(val);
+                    filledCount++;
+                    // Save logic
+                    if (savedPlayers.indexOf(val) === -1) savedPlayers.push(val);
+                } else {
+                    names.push("بازیکن " + (i + 1));
+                }
+            }
+            
+            localStorage.setItem('mafia_one_cannot_kill_players', JSON.stringify(savedPlayers));
+
+            // Roles: 1 Mafia, 2 Town
+            var deck = ['mafia', 'town', 'town'];
+            shuffleArray(deck);
+
+            players = [];
+            var mafiaPlayer = null;
+            var townPlayers = [];
+
+            // 1. Create Players
+            for (var i = 0; i < 3; i++) {
+                var p = {
+                    id: i,
+                    name: names[i],
+                    roleKey: deck[i],
+                    roleObj: ROLE_DEFS[deck[i]],
+                    forbiddenTarget: null
+                };
+                players.push(p);
+                
+                if (p.roleKey === 'mafia') mafiaPlayer = p;
+                else townPlayers.push(p);
+            }
+
+            // 2. Pick Forbidden Target for Mafia
+            // Randomly pick one of the 2 town players
+            var forbiddenIndex = Math.floor(Math.random() * townPlayers.length);
+            var forbiddenTownie = townPlayers[forbiddenIndex];
+            
+            mafiaPlayer.forbiddenTarget = forbiddenTownie.name;
+
+            // 3. Build God View
+            var godHtml = "";
+            godHtml += "<span style='color:#ef4444'>👹 " + mafiaPlayer.name + " (مافیا)</span><br>";
+            godHtml += "<span style='font-size:0.8rem; color:#ff8888'>❌ نباید بکشد: " + forbiddenTownie.name + "</span><br><br>";
+            
+            for (var i = 0; i < townPlayers.length; i++) {
+                godHtml += "<span>👤 " + townPlayers[i].name + " (شهروند)</span>";
+                if (townPlayers[i] === forbiddenTownie) godHtml += " <span style='font-size:0.8rem; color:#888'>(هدف ممنوعه)</span>";
+                godHtml += "<br>";
+            }
+            document.getElementById('god-view').innerHTML = godHtml;
+
+            // Start
+            currentIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('setup-bar').classList.add('hidden');
+            showPassScreen();
+        }
+
+        function showPassScreen() {
+            var p = players[currentIndex];
+            document.getElementById('player-name-pass').innerText = "نفر " + (currentIndex + 1);
+            document.getElementById('pass-target-name').innerText = p.name;
+            showScreen('pass-screen');
+        }
+
+        function revealRole() {
+            var p = players[currentIndex];
+            document.getElementById('reveal-player-name').innerText = p.name;
+            
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            var extraEl = document.getElementById('role-extra');
+            
+            titleEl.innerHTML = p.roleObj.name + "<span class='role-english'>" + p.roleObj.english + "</span>";
+            titleEl.style.color = p.roleObj.color;
+            descEl.innerText = p.roleObj.desc;
+            
+            extraEl.innerHTML = "";
+            if (p.roleKey === 'mafia') {
+                extraEl.innerHTML = "<div class='forbidden-target-box'>شخصی که نباید او را حذف کنید:<br><span style='font-size:1.4rem; color:white;'>" + p.forbiddenTarget + "</span></div>";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextDistribute() {
+            currentIndex++;
+            if (currentIndex >= 3) {
+                showScreen('game-menu');
+            } else {
+                showPassScreen();
+            }
+        }
+
+        // --- Utils ---
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'pass-screen', 'reveal-screen', 'game-menu'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function restartGame() {
+            if(confirm("آیا بازی با همان تنظیمات مجدداً شروع شود؟")) {
+                startDistribution();
+            }
+        }
+        
+        function newSetup() {
+             document.getElementById('setup-screen').classList.remove('hidden');
+             document.getElementById('setup-bar').classList.remove('hidden');
+             document.getElementById('game-menu').classList.add('hidden');
+             document.getElementById('pass-screen').classList.add('hidden');
+             document.getElementById('reveal-screen').classList.add('hidden');
+        }
+
+        function toggleGodView() {
+            var el = document.getElementById('god-view');
+            if (el.classList.contains('hidden')) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+    </script>
+</body>
+</html>

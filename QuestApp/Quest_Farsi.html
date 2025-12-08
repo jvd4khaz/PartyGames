@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>نبرد فریدون</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #00ff88;
+            --good-color: #00ff88;
+            --evil-color: #ff3366;
+            --quest-color: #FF9800;
+            --amulet-color: #9C27B0;
+            --btn-color: #00ff88;
+            --btn-text: #0a192f;
+            --border-radius: 8px;
+            --success-glow: rgba(0, 255, 136, 0.8);
+            --fail-glow: rgba(255, 51, 102, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* Player Selection Buttons */
+        .player-select-btn {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.2) 0%, rgba(100, 255, 218, 0.1) 100%);
+            color: var(--accent-color);
+            border: 3px solid var(--accent-color);
+            padding: 18px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin: 12px 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.2);
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-select-btn:hover {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.3) 0%, rgba(100, 255, 218, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
+            border-color: var(--accent-color);
+        }
+        .player-select-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(100, 255, 218, 0.3);
+        }
+
+        .hidden { display: none !important; }
+
+        /* Role Card */
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            margin-bottom: 10px; 
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .role-good { 
+            color: var(--good-color); 
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            font-weight: 900;
+        }
+        .role-evil { 
+            color: var(--evil-color); 
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+            font-weight: 900;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Quest Board Visualization */
+        .quest-board-visual {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.1) 0%, rgba(255,152,0,0.05) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(255,152,0,0.3);
+            direction: ltr; /* Quest order left to right */
+        }
+        .quest-marker {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .quest-marker.active {
+            border-color: #ff9800;
+            background: radial-gradient(circle, rgba(255,152,0,0.35) 0%, rgba(255,152,0,0.15) 70%, rgba(0,0,0,0.15) 100%);
+            box-shadow: 0 0 12px rgba(255,152,0,0.45);
+            animation: questPulse 1.8s ease-in-out infinite;
+            transform: scale(1.07);
+        }
+        .quest-marker.completed {
+            border-color: var(--good-color);
+            background: rgba(76, 175, 80, 0.3);
+        }
+        @keyframes questPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.45);
+            }
+            60% {
+                box-shadow: 0 0 0 16px rgba(255, 152, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+            }
+        }
+        .quest-marker.failed {
+            border-color: var(--evil-color);
+            background: rgba(244, 67, 54, 0.3);
+        }
+        .quest-number {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .quest-size {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--quest-color);
+        }
+        .quest-status {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .quest-status.success { color: var(--good-color); }
+        .quest-status.failure { color: var(--evil-color); }
+        .quest-fail-note {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--evil-color);
+            margin-top: 5px;
+        }
+        .quest-amulet-marker {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(156, 39, 176, 0.3);
+            border: 2px solid var(--amulet-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 10;
+            animation: amuletPulse 2s ease-in-out infinite;
+        }
+        .quest-amulet-marker.amulet-available {
+            background: rgba(156, 39, 176, 0.6);
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.8);
+            animation: amuletPulse 1s ease-in-out infinite;
+        }
+        .quest-amulet-marker.amulet-given {
+            background: rgba(156, 39, 176, 0.4);
+            opacity: 0.7;
+            animation: none;
+        }
+        @keyframes amuletPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Game Status */
+        .game-status {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .status-item {
+            text-align: center;
+        }
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Leader Display */
+        .leader-display {
+            padding: 15px;
+            background: rgba(100, 255, 218, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .leader-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+
+        /* Amulet Display */
+        .amulet-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(156, 39, 176, 0.1);
+            border: 2px solid var(--amulet-color);
+            border-radius: 8px;
+        }
+        .amulet-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--amulet-color);
+            margin-bottom: 10px;
+        }
+        .amulet-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .amulet-item {
+            padding: 8px 12px;
+            background: rgba(156, 39, 176, 0.2);
+            border: 1px solid var(--amulet-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .amulet-item.used {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        /* Saved Players */
+        .saved-list-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            min-height: 40px;
+        }
+        .saved-list-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: auto;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        /* Log */
+        .log-entry {
+            font-size: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid #233554;
+            padding: 5px 0;
+            color: #8892b0;
+        }
+
+        /* Card Animations */
+        .quest-card-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 200px;
+            border-radius: 12px;
+            margin: 10px;
+            font-size: 2rem;
+            font-weight: 900;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: auto;
+        }
+        .quest-card-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            border: 3px solid #81C784;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+        .quest-card-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.6);
+            border-color: #A5D6A7;
+        }
+        .quest-card-fail {
+            background: linear-gradient(135deg, #F44336 0%, #E57373 100%);
+            color: white;
+            border: 3px solid #EF5350;
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+        }
+        .quest-card-fail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(244, 67, 54, 0.6);
+            border-color: #EF9A9A;
+        }
+        .quest-card-animate {
+            animation: cardFlip 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .quest-card-glow {
+            animation: cardGlow 1s ease-in-out infinite alternate;
+        }
+        @keyframes cardFlip {
+            0% { transform: rotateY(0deg) scale(0.8); opacity: 0; }
+            50% { transform: rotateY(90deg) scale(1.1); }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+        @keyframes cardGlow {
+            from { box-shadow: 0 0 20px var(--success-glow); }
+            to { box-shadow: 0 0 40px var(--success-glow), 0 0 60px var(--success-glow); }
+        }
+        .card-reveal-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        /* Role Selection */
+        .role-select-item {
+            background: rgba(255,255,255,0.05);
+            border: 3px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .role-select-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .role-select-item.selected {
+            border-width: 3px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            transform: translateX(-5px);
+        }
+        .role-select-item[data-alignment="good"] {
+            border-right: 5px solid var(--good-color);
+        }
+        .role-select-item[data-alignment="good"]:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--good-color);
+        }
+        .role-select-item[data-alignment="good"].selected {
+            background: linear-gradient(270deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0.1) 100%);
+            border-color: var(--good-color);
+        }
+        .role-select-item[data-alignment="evil"] {
+            border-right: 5px solid var(--evil-color);
+        }
+        .role-select-item[data-alignment="evil"]:hover {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--evil-color);
+        }
+        .role-select-item[data-alignment="evil"].selected {
+            background: linear-gradient(270deg, rgba(255, 51, 102, 0.25) 0%, rgba(255, 51, 102, 0.1) 100%);
+            border-color: var(--evil-color);
+        }
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .badge-good { 
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%); 
+            color: #0a192f;
+            font-weight: 900;
+        }
+        .badge-evil { 
+            background: linear-gradient(135deg, #ff3366 0%, #cc1a4d 100%); 
+            color: white;
+            font-weight: 900;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .container, .modal-overlay > .container { 
+            animation: fadeIn 0.3s ease-out; 
+        }
+        .card-reveal-container > div {
+            animation: slideIn 0.4s ease-out backwards;
+        }
+        .card-reveal-container > div:nth-child(1) { animation-delay: 0.1s; }
+        .card-reveal-container > div:nth-child(2) { animation-delay: 0.2s; }
+        .card-reveal-container > div:nth-child(3) { animation-delay: 0.3s; }
+        .card-reveal-container > div:nth-child(4) { animation-delay: 0.4s; }
+        .card-reveal-container > div:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>نبرد فریدون</h1>
+        <p>بازی نقش‌آفرینی و استنتاج</p>
+
+        <div class="setup-info">
+            <strong>خلاصه بازی:</strong><br>
+            • به یاران نقش‌های خوب یا بد (لشکر ضحاک) به صورت پنهان داده می‌شود<br>
+            • سردار اعضای گروه را برای هر پیکار برمی‌گزیند<br>
+            • گروه پیکار را با گزینش نشان پیروزی یا شکست اجرا می‌کند<br>
+            • سپاه فریدون با تکمیل ۳ پیکار پیروز برنده می‌شود<br>
+            • لشکر ضحاک با شکست ۳ پیکار برنده می‌شود<br>
+            • برای ۴ تا ۱۰ یار
+        </div>
+
+        <div class="input-group">
+            <label>تعداد یاران:</label>
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(-1)">-</button>
+                <span id="player-count-display" style="font-size:1.5rem; font-weight:bold;">۷</span>
+                <button class="secondary-btn" style="width:40px;" onclick="updatePlayerCount(1)">+</button>
+            </div>
+        </div>
+
+        <div id="player-inputs-container" style="margin-top:20px;"></div>
+        
+        <!-- Saved Players List -->
+        <div class="saved-list-container">
+            <div class="saved-list-label">اسامی ذخیره شده (برای پر کردن لمس کنید):</div>
+            <div id="saved-list" style="text-align: center;"></div>
+        </div>
+
+        <button class="action-btn" onclick="showRoleSelection()">تنظیم نقش‌ها</button>
+        
+        <!-- Thematic Introduction -->
+        <div class="setup-info" style="margin-top: 20px; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3);">
+            <strong style="color: var(--quest-color);">📜 روایت آغازین (برای خواندن توسط گیم مستر):</strong>
+            <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px; text-align: right; line-height: 1.8; font-size: 0.95rem;">
+                <p style="margin: 10px 0;">ای یاران، هشیار باشید!</p>
+                <p style="margin: 10px 0;">هزار سال است که ضحّاکِ ماردوش بر این سرزمین فرمان می‌راند و دلش به دروغِ اهریمن آلوده است. اما اکنون زمانِ خیزش فرا رسیده است! کاوهٔ آهنگر درفشِ چرمین را برافراشته و فریدونِ راستکار، شاهِ راستین ما، در پیشاپیشِ سپاه می‌تازد تا نورِ خسروانی را بازگرداند.</p>
+                <p style="margin: 10px 0;">شما همگی در این نبردِ واپسین گرد آمده‌اید. در میانِ شما سپاهِ فریدون ایستاده است — رزمندگانِ شاهِ راستین و پیمان‌بستگانِ راهِ روشنایی. اما بپرهیزید! لشکرِ ضحّاک نیز در میانِ ما پنهان است — پیروانِ تاریکی و ستم.</p>
+                <p style="margin: 10px 0;">بسیاری از شما سردارانِ دلیرِ سپاهِ نور هستید. اما شماری، خائنانِ تبهکار و پیروانِ آشوب و ویرانی‌اند.</p>
+                <p style="margin: 10px 0;">برای سرافرازی، باید پنج پیکارِ بزرگ را پشت سر بگذارید:</p>
+                <p style="margin: 10px 0;">هنگامی که سالار گروهی را برای پیکار برمی‌گزیند، سردارانِ راستین باید همراهی کنند.</p>
+                <p style="margin: 10px 0;">خائنانِ پنهان، نیرنگ خواهند کرد.</p>
+                <p style="margin: 10px 0;">چون سالار به راستیِ کسی گمان ببرد، می‌تواند درفش کاویان بر او عطا کند تا به راستی گام بردارد. و اگر شک بر ما چیره آید، می‌توانیم جامِ جهان‌نما را بنگریم تا حقیقتِ یاران را ببینیم.</p>
+                <p style="margin: 10px 0;">اگر سه پیکار به ناکامی بیانجامد، اهریمنیان خواهند کوشید تا بگریزند — اما نمی‌توانند سرافراز گردند مگر از واپسین نبرد جان به در برند!</p>
+                <p style="margin: 10px 0; font-weight: bold; color: var(--accent-color);">پیکار آغاز می‌شود! ای سالار، نخستین گروهِ خویش را برای پیکار برگزین!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Selection Screen -->
+    <div id="role-selection-screen" class="container hidden">
+        <h1>گزینش نقش‌ها</h1>
+        <p id="role-selection-info" style="color: var(--text-secondary); margin-bottom: 20px;"></p>
+        <div id="role-selection-list"></div>
+        <button class="action-btn" onclick="confirmRoleSelection()">تأیید نقش‌ها</button>
+        <button class="secondary-btn" onclick="useRecommendedRoles()">استفاده از پیشنهادی</button>
+    </div>
+
+    <!-- 2. Role Distribution Phase -->
+    <div id="distribution-screen" class="container hidden">
+        <div id="dist-pass-view">
+            <p>دستگاه را به:</p>
+            <h2 id="dist-player-name" style="font-size:2rem; color:var(--accent-color);">نام یار</h2>
+            <div style="font-size:4rem; margin:20px;">📱</div>
+            <p>یار <span id="dist-player-num">۱</span> از <span id="dist-total-players">۷</span></p>
+            <button class="action-btn" onclick="revealRole()">نمایش نقش</button>
+        </div>
+
+        <div id="dist-reveal-view" class="hidden">
+            <h2 id="reveal-name-header">نام یار</h2>
+            <div class="role-card">
+                <div id="role-title" class="role-title">نقش</div>
+                <div id="role-desc" style="font-size:0.95rem; margin-bottom:10px; color:#ddd;"></div>
+                <div id="role-extra" style="font-size:0.9rem; color:#ffd700;"></div>
+            </div>
+            <p style="font-size:0.8rem; color:#666;">نقش خود را حفظ کنید و پنهان کنید.</p>
+            <button id="next-dist-btn" class="action-btn" onclick="nextDistribute()">پنهان و بعدی</button>
+        </div>
+    </div>
+
+    <!-- 3. Leader Announcement -->
+    <div id="leader-announce-screen" class="container hidden">
+        <h1>سردار اول</h1>
+        <div class="leader-display">
+            <p style="color: var(--text-secondary);">سردار اول:</p>
+            <div class="leader-name" id="first-leader-name">نام یار</div>
+        </div>
+        
+        <!-- Thematic Narrative for First Quest -->
+        <div class="setup-info" style="margin-top: 20px; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3);">
+            <strong style="color: var(--quest-color);">📜 روایت آغاز پیکار (برای خواندن توسط گیم مستر):</strong>
+            <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px; text-align: right; line-height: 1.8; font-size: 0.95rem;">
+                <p style="margin: 10px 0;">ای سردار، اکنون زمانِ نخستین پیکار فرا رسیده است. درفشِ کاوه برافراشته و سپاهِ فریدون آمادهٔ نبرد است. اما هشیار باش! در میانِ یاران تو، خائنانِ ضحّاک نیز پنهان‌اند.</p>
+                <p style="margin: 10px 0;">گروهی را برای این پیکار برگزین. سردارانِ راستین همراهی خواهند کرد، اما اگر خائنی در میان باشد، نیرنگ خواهد کرد و پیکار به ناکامی خواهد انجامید.</p>
+                <p style="margin: 10px 0; font-weight: bold; color: var(--accent-color);">ای سردار، نخستین گروهِ خویش را برای پیکار برگزین!</p>
+            </div>
+        </div>
+        
+        <p style="color: var(--text-secondary); margin-top: 15px;">سردار اعضای گروه را برای پیکار ۱ برمی‌گزیند.</p>
+        <button class="action-btn" onclick="startGame()">شروع پیکار ۱</button>
+    </div>
+
+    <!-- 4. Main Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h1>میدان نبرد</h1>
+        
+        <!-- Compact Team Layout -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <!-- Evil Team (Left) -->
+            <div style="flex: 1; background: rgba(244, 67, 54, 0.05); border: 1px solid var(--evil-color); border-radius: 8px; padding: 8px; min-height: 60px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: var(--evil-color); font-weight: bold;">
+                    <span>لشکر ضحاک</span>
+                    <span>برد: <strong id="evil-wins-display" style="color: var(--evil-color); font-size: 0.95rem;">۰</strong></span>
+                </div>
+                <div id="evil-team-list" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-content: flex-start;">
+                    <!-- Evil roles will be listed here -->
+                </div>
+            </div>
+            
+            <!-- Good Team (Right) -->
+            <div style="flex: 1; background: rgba(76, 175, 80, 0.05); border: 1px solid var(--good-color); border-radius: 8px; padding: 8px; min-height: 60px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: var(--good-color); font-weight: bold;">
+                    <span>سپاه فریدون</span>
+                    <span>برد: <strong id="good-wins-display" style="color: var(--good-color); font-size: 0.95rem;">۰</strong></span>
+                </div>
+                <div id="good-team-list" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-content: flex-start;">
+                    <!-- Good roles will be listed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quest Board Visualization -->
+        <div class="quest-board-visual" id="quest-board-visual">
+            <!-- Quest markers will be generated here -->
+        </div>
+
+        <!-- Current Leader -->
+        <div class="leader-display">
+            <div class="status-label">سردار فعلی</div>
+            <div class="leader-name" id="current-leader-name">نام یار</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="action-buttons" style="margin-top: 20px;"></div>
+
+        <!-- Current Phase Display -->
+        <div id="phase-display" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <div id="phase-title" style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); margin-bottom: 10px;"></div>
+            <div id="phase-content"></div>
+        </div>
+
+        <!-- Amulets Section -->
+        <div class="amulet-section" id="amulet-section">
+            <div class="amulet-title">🔮 جام‌های جهان‌بین</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 10px 0;" id="amulet-explanation">
+                جام‌ها توسط سردار آخرین پیکار به دیگران داده می‌شوند و اجازه می‌دهند یک بازیکن وفاداری بازیکن دیگری را بررسی کند.
+            </p>
+            <div class="amulet-list" id="amulet-list">
+                <!-- Amulets will be generated here -->
+            </div>
+        </div>
+
+        <!-- Game Log -->
+        <button class="secondary-btn" onclick="toggleLog()">نمایش/پنهان لاگ بازی</button>
+        <div id="game-log" class="hidden" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: right; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+            <div id="log-content"></div>
+        </div>
+
+        <!-- End Game Modal -->
+        <div id="end-game-modal" class="modal-overlay hidden">
+            <div class="container" style="max-width:500px; border: 2px solid var(--accent-color);">
+                <h1 id="end-game-title" style="margin-bottom: 20px;">پایان بازی</h1>
+                <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
+                <button class="action-btn" onclick="location.reload()">بازی جدید</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Magic Token Modal -->
+    <div id="magic-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2>درفش کاویان</h2>
+            <p style="margin: 15px 0;">سردار: یاری را برای دریافت درفش کاویان برگزینید.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">یاری که درفش کاویان دارد نمی‌تواند نیرنگ کند (مگر اینکه نقشش اجازه دهد).</p>
+            <div id="magic-player-list" style="margin: 20px 0;"></div>
+            <button class="secondary-btn" onclick="document.getElementById('magic-modal').classList.add('hidden')">رد کردن (روی سردار بگذارید)</button>
+        </div>
+    </div>
+
+    <!-- Quest Card Selection Modal -->
+    <div id="quest-card-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2 style="font-size: 1.3rem; margin-bottom: 10px;">شروع پیکار</h2>
+            <p id="quest-card-player" style="margin: 10px 0; font-size: 1rem; color: var(--accent-color); font-weight: bold;"></p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+                <button class="quest-card-display quest-card-success" onclick="selectQuestCard('success'); return false;" id="success-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✓</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">همراهی</div>
+                </button>
+                <button class="quest-card-display quest-card-fail" onclick="selectQuestCard('fail'); return false;" id="fail-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✗</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">نیرنگ</div>
+                </button>
+            </div>
+            <p id="quest-card-progress" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;"></p>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p id="quest-card-magic-note" style="color: var(--amulet-color); font-weight: bold; margin: 10px 0; padding: 10px; background: rgba(156, 39, 176, 0.2); border-radius: 8px; font-size: 0.9rem;"></p>
+                <p style="color: var(--text-secondary); margin: 10px 0; font-size: 0.85rem;">یک نشان برای پیکار برگزینید.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quest Cards Reveal Modal -->
+    <div id="quest-cards-reveal-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:90vh; overflow-y: auto; padding: 15px;">
+            <h2 style="color: var(--accent-color); font-size: 1.2rem; margin-bottom: 8px;">نشان‌های پیکار نمایش داده شد</h2>
+            <div class="card-reveal-container" id="revealed-cards-container" style="margin: 10px 0;"></div>
+            <div id="quest-result-summary" style="margin: 10px 0; padding: 10px; border-radius: 8px; font-size: 0.95rem; font-weight: bold;"></div>
+            <button class="action-btn" onclick="closeQuestReveal()" style="margin-top: 8px; padding: 10px 20px; font-size: 0.95rem;">ادامه</button>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.8rem;"></p>
+        </div>
+    </div>
+
+
+    <!-- Leader Selection Modal -->
+    <div id="leader-select-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2>گزینش سردار بعدی</h2>
+            <div id="leader-select-list" style="margin: 15px 0;"></div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="margin: 10px 0;">سردار فعلی: <strong id="current-leader-select-name"></strong></p>
+                <p style="margin: 10px 0; color: var(--text-secondary); font-size: 0.9rem;">یاری را برگزینید که قبلاً سردار نبوده و جام جهان‌بین ندارد.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amulet Selection Modal -->
+    <div id="amulet-select-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2>جام جهان‌بین در دسترس</h2>
+            <div id="amulet-select-list" style="margin: 15px 0;"></div>
+            <button class="secondary-btn" onclick="skipAmulet()" style="margin-top: 10px;">رد کردن جام جهان‌بین</button>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="margin: 10px 0; color: var(--text-secondary); font-size: 0.9rem;">بعد از پیکار <span id="amulet-quest-num"></span> یک جام جهان‌بین در دسترس است.</p>
+                <p style="margin: 10px 0; color: var(--text-secondary); font-size: 0.9rem;">یاری را برای دریافت جام جهان‌بین برگزینید (نمی‌تواند سردار جدید باشد و نمی‌تواند نشان کهنه‌سرباز/جام جهان‌بین داشته باشد).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amulet Check Modal -->
+    <div id="amulet-check-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2>بررسی جام جهان‌بین</h2>
+            <div id="amulet-check-list" style="margin: 15px 0;"></div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p id="amulet-holder-name" style="margin: 10px 0; color: var(--amulet-color); font-weight: bold;"></p>
+                <p style="margin: 10px 0; color: var(--text-secondary); font-size: 0.9rem;">یاری را برای بررسی وفاداری برگزینید.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Amulet Result Modal -->
+    <div id="amulet-result-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto; padding: 20px;">
+            <h2 style="color: var(--amulet-color); margin-bottom: 15px;">نتیجه بررسی جام جهان‌بین</h2>
+            <p style="margin: 15px 0; font-size: 1.1rem;">شما بررسی کردید:</p>
+            <p id="amulet-checked-name" style="margin: 10px 0; font-size: 1.3rem; font-weight: bold; color: var(--accent-color);"></p>
+            <div id="amulet-result-text" style="margin: 20px 0; padding: 20px; border-radius: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 3px solid;"></div>
+            <button class="action-btn" onclick="closeAmuletResult()" style="margin-top: 15px;">ادامه</button>
+        </div>
+    </div>
+
+    <!-- Amulet Result Modal -->
+    <div id="amulet-result-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto; padding: 20px;">
+            <h2 style="color: var(--amulet-color); margin-bottom: 15px;">نتیجه بررسی جام جهان‌بین</h2>
+            <p style="margin: 15px 0; font-size: 1.1rem;">شما بررسی کردید:</p>
+            <p id="amulet-checked-name" style="margin: 10px 0; font-size: 1.3rem; font-weight: bold; color: var(--accent-color);"></p>
+            <div id="amulet-result-text" style="margin: 20px 0; padding: 20px; border-radius: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 3px solid;"></div>
+            <button class="action-btn" onclick="closeAmuletResult()" style="margin-top: 15px;">ادامه</button>
+        </div>
+    </div>
+
+    <!-- Final Quest Modal -->
+    <div id="final-quest-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
+            <h2>واپسین پیکار</h2>
+            <div id="final-quest-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration (Director's Cut) ---
+        // Quest 3 for 4 players can be 2 or 3 (handled dynamically)
+        var QUEST_CONFIG = {
+            4: { quests: [3, 2, 3, 2], fails: [1, 1, 1, 1], evil: 2, quest3Options: [2, 3] },
+            5: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 3 },
+            6: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 3 },
+            7: { quests: [3, 2, 3, 4, 3], fails: [1, 1, 1, 2, 1], evil: 4 },
+            8: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 4 },
+            9: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 5 },
+            10: { quests: [4, 3, 4, 5, 4], fails: [1, 1, 2, 2, 1], evil: 5 }
+        };
+        
+        // Amulet placement: [quest after which amulet appears]
+        var AMULET_CONFIG = {
+            6: [4],  // 1 amulet after Quest 4
+            7: [4, 3],  // 2 amulets: after Quest 4 and Quest 3
+            8: [4, 3, 2],  // 3 amulets: after Quest 4, 3, and 2
+            9: [4, 3, 2],
+            10: [4, 3, 2]
+        };
+
+        // --- Role Definitions ---
+        // Role strength ranking (higher number = stronger/more important)
+        var ROLE_STRENGTH = {
+            // Evil: Zahhak > Neghabdar > Khaen
+            'Morgan': 30,      // ضحاک ماردوش - strongest evil
+            'Blind Hunter': 20, // نقاب‌دار
+            'Minion': 10,      // خائن - weakest evil
+            
+            // Good: Cleric > Duke > Archduke > Troublemaker > Youth > Loyal Servant
+            'Cleric': 60,      // موبد - strongest good
+            'Duke': 50,        // کاوه آهنگر
+            'Archduke': 40,    // رستم دستان
+            'Troublemaker': 30, // سیاوش
+            'Youth': 20,       // جوان خام
+            'Loyal Servant': 10 // سرباز - weakest good
+        };
+        
+        var ROLE_DEFINITIONS = {
+            'Loyal Servant': { name: 'سرباز', symbol: '🛡️', rebus: '🛡️', alignment: 'good', description: 'سربازی که برای خوبی می‌جنگد.' },
+            'Cleric': { name: 'موبد', symbol: '🔮', rebus: '🔮', alignment: 'good', description: 'می‌داند اولین سردار خوب است یا بد.', required: false },
+            'Youth': { name: 'جوان خام', symbol: '🌱', rebus: '🌱', alignment: 'good', description: 'اگر درفش کاویان به شما داده شود، باید نیرنگ کنید. این نشانه ناپختگی و بی‌تجربگی شماست.', required: false },
+            'Troublemaker': { name: 'سیاوش', symbol: '⚔️', rebus: '⚔️', alignment: 'good', description: 'شما به ناحق متهم شده‌اید. اگر برای وفاداری بررسی شوید، به موبد و در جام جهان‌بین جزو لشکر ضحاک نشان داده می‌شوید.', required: false },
+            'Duke': { name: 'کاوه آهنگر', symbol: '🔨', rebus: '🔨', alignment: 'good', description: 'می‌تواند یک دست را در واپسین پیکار حذف کند.', required: false },
+            'Archduke': { name: 'رستم دستان', symbol: '💪', rebus: '💪', alignment: 'good', description: 'می‌تواند یک دست را در واپسین پیکار عوض کند.', required: false },
+            'Minion': { name: 'خائن', symbol: '🗡️', rebus: '🗡️', alignment: 'evil', description: 'خائنی که برای بدی می‌جنگد.', required: false },
+            'Morgan': { name: 'ضحاک ماردوش', symbol: '🐉', rebus: '🐉', alignment: 'evil', description: 'می‌تواند درفش کاویان را نادیده بگیرد و نیرنگ یا همراهی کند.', required: false },
+            'Blind Hunter': { name: 'نقاب‌دار', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: 'سایر اعضای لشکر ضحاک را نمی‌شناسد. می‌تواند در پیکار نهایی شکار کند.', required: false }
+        };
+
+        // Recommended roles by player count
+        var RECOMMENDED_ROLES = {
+            4: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'],
+            5: ['Loyal Servant', 'Loyal Servant', 'Minion', 'Morgan', 'Blind Hunter'],
+            6: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion'],
+            7: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            8: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            9: ['Cleric', 'Troublemaker', 'Archduke', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
+            10: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion']
+        };
+
+        var SCENARIOS = {
+            4: [
+                { name: 'نبرد کلاسیک', description: 'سرباز، سرباز در برابر ضحاک و نقاب‌دار', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'] },
+                { name: 'نبرد مبهم', description: '۲ نقش از (موبد، جوان خام، سرباز) + ضحاک و نقاب‌دار (۵ نقش، ۱ نقش حذف می‌شود)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter'] }
+            ],
+            5: [
+                { name: 'نبرد کلاسیک', description: '۲ سرباز در برابر ضحاک، نقاب‌دار و خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] },
+                { name: 'نبرد مبهم', description: '۲ نقش از (موبد، جوان خام، سرباز) + ضحاک، نقاب‌دار و خائن (۶ نقش، ۱ نقش حذف می‌شود)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+            ],
+            6: [
+                { name: 'نسخه کارگردان', description: 'موبد، کاوه، سیاوش در برابر ضحاک، نقاب‌دار، خائن', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion'] },
+                { name: 'نبرد کلاسیک', description: '۳ سرباز در برابر ضحاک، نقاب‌دار، خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+            ],
+            7: [
+                { name: 'نسخه کارگردان', description: 'موبد، کاوه، سیاوش در برابر ضحاک، نقاب‌دار، ۲ خائن', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
+                { name: 'نبرد کلاسیک', description: '۳ سرباز در برابر ضحاک، نقاب‌دار، ۲ خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+            ],
+            8: [
+                { name: 'نسخه کارگردان', description: 'موبد، کاوه، سیاوش، سرباز در برابر ضحاک، نقاب‌دار، ۲ خائن', roles: ['Cleric', 'Duke', 'Troublemaker', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
+                { name: 'نبرد کلاسیک', description: '۴ سرباز در برابر ضحاک، نقاب‌دار، ۲ خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+            ],
+            9: [
+                { name: 'نسخه کارگردان', description: 'موبد، رستم، سیاوش، ۲ سرباز در برابر ضحاک، نقاب‌دار، ۳ خائن', roles: ['Cleric', 'Archduke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
+                { name: 'نبرد کلاسیک', description: '۴ سرباز در برابر ضحاک، نقاب‌دار، ۳ خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+            ],
+            10: [
+                { name: 'نسخه کارگردان', description: 'موبد، رستم، کاوه، سیاوش، ۲ سرباز در برابر ضحاک، نقاب‌دار، ۳ خائن', roles: ['Cleric', 'Archduke', 'Duke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
+                { name: 'نبرد کلاسیک', description: '۵ سرباز در برابر ضحاک، نقاب‌دار، ۳ خائن', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+            ]
+        };
+
+        // --- Global State ---
+        var playerCount = 7;
+        var players = [];
+        var savedPlayers = [];
+        var currentDistIndex = 0;
+        var selectedRoles = []; // Roles selected for this game
+        var rolesOnGround = []; // Roles selected but not assigned (ambiguity rule)
+        
+        // Game State
+        var currentQuest = 1;
+        var goodWins = 0;
+        var evilWins = 0;
+        var currentLeader = 0;
+        var questHistory = [];
+        var currentTeam = [];
+        var questCards = []; // Array of {player, card: 'success' or 'fail'}
+        var isGameEnded = false;
+        var gameLog = [];
+        var amulets = []; // Array of {quest: number, available: boolean, holder: null or playerIndex, checked: []}
+        var veterans = []; // Array of player indices who have been leaders
+        var magicTokenHolder = null; // Player index with magic token
+        var magicTokenTeamMemberIndex = null; // Which team member (0-based) has magic token
+        var amuletHolders = []; // Players who have received amulets
+        var checkedByAmulet = []; // Players checked by amulets
+        var quest3Size = null; // For 4 players, track if Quest 3 is 2 or 3
+        
+        // Handle page visibility to prevent freezing on mobile
+        var audioContext = null;
+        function getAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    // Audio not supported
+                }
+            }
+            // Resume audio context if suspended (common on mobile when returning to app)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().catch(function() {});
+            }
+            return audioContext;
+        }
+        
+        // Handle page visibility changes to prevent freezing
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Page is now visible - resume audio context and wake up the page
+                getAudioContext();
+                // Force a repaint to wake up the page
+                if (document.body) {
+                    var display = document.body.style.display;
+                    document.body.style.display = 'none';
+                    document.body.offsetHeight; // Trigger reflow
+                    document.body.style.display = display;
+                }
+            }
+        });
+        
+        // Handle page focus to prevent freezing
+        window.addEventListener('focus', function() {
+            getAudioContext();
+        });
+        
+        // Auto-save game state periodically to prevent data loss
+        function saveGameState() {
+            try {
+                // Only save if game is in progress
+                if (players.length > 0 && !isGameEnded) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentQuest: currentQuest,
+                        currentLeader: currentLeader,
+                        goodWins: goodWins,
+                        evilWins: evilWins,
+                        questHistory: questHistory,
+                        veterans: veterans,
+                        amuletHolders: amuletHolders,
+                        checkedByAmulet: checkedByAmulet,
+                        quest3Size: quest3Size,
+                        amulets: amulets,
+                        questCards: questCards,
+                        magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
+                        selectedRoles: selectedRoles,
+                        currentDistIndex: currentDistIndex
+                    };
+                    localStorage.setItem('quest_game_state_farsi', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Keep page alive with minimal activity
+        setInterval(function() {
+            if (!document.hidden) {
+                // Small periodic activity to prevent page from being suspended
+                getAudioContext();
+            }
+        }, 10000);
+
+        // --- Initialization ---
+        window.onload = function() {
+            loadSavedPlayers();
+            renderPlayerInputs();
+        };
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('quest_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">هیچ نام ذخیره‌شده‌ای وجود ندارد</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.style.display = 'inline-block';
+                chip.style.background = 'rgba(255,255,255,0.1)';
+                chip.style.border = '1px solid #555';
+                chip.style.borderRadius = '20px';
+                chip.style.padding = '6px 14px';
+                chip.style.fontSize = '0.85rem';
+                chip.style.cursor = 'pointer';
+                chip.style.margin = '3px';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function updatePlayerCount(delta) {
+            var newCount = playerCount + delta;
+            if (newCount >= 4 && newCount <= 10) {
+                playerCount = newCount;
+                document.getElementById('player-count-display').innerText = toFarsiNum(playerCount);
+                renderPlayerInputs();
+            }
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            var currentValues = [];
+            var inputs = container.querySelectorAll('.player-input');
+            for(var i=0; i<inputs.length; i++) currentValues.push(inputs[i].value);
+
+            container.innerHTML = '';
+            for (var i = 0; i < playerCount; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "یار " + toFarsiNum(i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+        }
+
+        function showRoleSelection() {
+            // Hide setup screen and show role selection first
+            var setupScreen = document.getElementById('setup-screen');
+            var roleScreen = document.getElementById('role-selection-screen');
+            if (setupScreen) setupScreen.classList.add('hidden');
+            if (roleScreen) {
+                roleScreen.classList.remove('hidden');
+            }
+            
+            // Load recommended roles if none selected, then render
+            if (selectedRoles.length === 0) {
+                useRecommendedRoles();
+            } else {
+                renderRoleSelection();
+            }
+        }
+
+        function useRecommendedRoles() {
+            selectedRoles = RECOMMENDED_ROLES[playerCount].slice();
+            renderRoleSelection();
+        }
+
+        function applyScenario(roles) {
+            selectedRoles = roles.slice();
+            renderRoleSelection();
+        }
+
+        function renderRoleSelection() {
+            var info = document.getElementById('role-selection-info');
+            var list = document.getElementById('role-selection-list');
+            
+            if (!info || !list) return;
+            
+            info.innerHTML = 'برای این بازی ' + toFarsiNum(playerCount) + ' نقش برگزینید.';
+            list.innerHTML = '';
+            
+            // Scenario Selection UI
+            var scenarios = SCENARIOS[playerCount];
+            if (scenarios && scenarios.length > 0) {
+                var scenarioContainer = document.createElement('div');
+                scenarioContainer.style.marginBottom = '20px';
+                scenarioContainer.style.padding = '15px';
+                scenarioContainer.style.background = 'rgba(0, 150, 136, 0.1)';
+                scenarioContainer.style.border = '1px solid var(--accent-color)';
+                scenarioContainer.style.borderRadius = '8px';
+
+                var scenarioTitle = document.createElement('h3');
+                scenarioTitle.innerText = 'سناریوهای پیشنهادی';
+                scenarioTitle.style.marginTop = '0';
+                scenarioTitle.style.fontSize = '1rem';
+                scenarioTitle.style.color = 'var(--accent-color)';
+                scenarioContainer.appendChild(scenarioTitle);
+
+                scenarios.forEach(function(scenario) {
+                    var btn = document.createElement('button');
+                    btn.className = 'secondary-btn';
+                    btn.style.marginTop = '8px';
+                    btn.style.textAlign = 'right';
+                    btn.innerHTML = '<strong>' + scenario.name + '</strong><br><span style="font-size:0.8rem; color:var(--text-secondary);">' + scenario.description + '</span>';
+                    btn.onclick = function() { applyScenario(scenario.roles); };
+                    scenarioContainer.appendChild(btn);
+                });
+
+                list.appendChild(scenarioContainer);
+            }
+
+            var availableRoles = ['Cleric', 'Youth', 'Troublemaker', 'Duke', 'Archduke', 'Morgan', 'Blind Hunter', 'Loyal Servant', 'Minion'];
+            
+            var roleCounts = {};
+            selectedRoles.forEach(function(role) {
+                roleCounts[role] = (roleCounts[role] || 0) + 1;
+            });
+            
+            availableRoles.forEach(function(roleKey) {
+                var role = ROLE_DEFINITIONS[roleKey];
+                if (!role) return;
+                
+                var item = document.createElement('div');
+                item.className = 'role-select-item';
+                item.setAttribute('data-alignment', role.alignment);
+                
+                var count = roleCounts[roleKey] || 0;
+                if (count > 0) item.classList.add('selected');
+                
+                var left = document.createElement('div');
+                left.innerHTML = '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;"><span style="font-size: 1.5rem;">' + (role.rebus || '❓') + '</span><strong>' + role.name + '</strong></div><span style="font-size: 0.85rem; color: var(--text-secondary);">' + role.description + '</span>';
+                
+                var right = document.createElement('div');
+                right.style.display = 'flex';
+                right.style.alignItems = 'center';
+                right.style.gap = '10px';
+                
+                var badge = document.createElement('span');
+                badge.className = 'role-badge ' + (role.alignment === 'good' ? 'badge-good' : 'badge-evil');
+                badge.innerText = role.alignment === 'good' ? 'خوب' : 'بد';
+                right.appendChild(badge);
+                
+                var countDisplay = document.createElement('span');
+                countDisplay.style.fontSize = '1.2rem';
+                countDisplay.style.fontWeight = 'bold';
+                countDisplay.style.minWidth = '30px';
+                countDisplay.innerText = toFarsiNum(count);
+                right.appendChild(countDisplay);
+                
+                var minusBtn = document.createElement('button');
+                minusBtn.innerText = '−';
+                minusBtn.style.width = '30px';
+                minusBtn.style.height = '30px';
+                minusBtn.style.borderRadius = '50%';
+                minusBtn.style.border = '2px solid var(--accent-color)';
+                minusBtn.style.background = 'transparent';
+                minusBtn.style.color = 'var(--accent-color)';
+                minusBtn.style.cursor = 'pointer';
+                minusBtn.onclick = function(e) { e.stopPropagation(); removeRole(roleKey); };
+                right.appendChild(minusBtn);
+                
+                var plusBtn = document.createElement('button');
+                plusBtn.innerText = '+';
+                plusBtn.style.width = '30px';
+                plusBtn.style.height = '30px';
+                plusBtn.style.borderRadius = '50%';
+                plusBtn.style.border = '2px solid var(--accent-color)';
+                plusBtn.style.background = 'transparent';
+                plusBtn.style.color = 'var(--accent-color)';
+                plusBtn.style.cursor = 'pointer';
+                plusBtn.onclick = function(e) { e.stopPropagation(); addRole(roleKey); };
+                right.appendChild(plusBtn);
+                
+                item.appendChild(left);
+                item.appendChild(right);
+                list.appendChild(item);
+            });
+            
+            var total = selectedRoles.length;
+            var totalDiv = document.createElement('div');
+            totalDiv.style.marginTop = '20px';
+            totalDiv.style.padding = '15px';
+            totalDiv.style.background = total === playerCount ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)';
+            totalDiv.style.borderRadius = '8px';
+            totalDiv.style.fontWeight = 'bold';
+                totalDiv.innerText = 'تعداد نقش‌ها: ' + toFarsiNum(total) + ' / ' + toFarsiNum(playerCount);
+            list.appendChild(totalDiv);
+        }
+
+        function addRole(roleKey) {
+            var total = selectedRoles.length;
+                // Special rule for 4-5 players: if ambiguity pool roles are selected, allow N+1 roles
+                var allowedCount = playerCount;
+                // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+                var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+                // Also check if the role being added is from ambiguity pool
+                var addingAmbiguityRole = roleKey === 'Cleric' || roleKey === 'Youth' || roleKey === 'Loyal Servant';
+                if ((playerCount === 4 || playerCount === 5) && (hasAmbiguityRoles || addingAmbiguityRole)) {
+                    allowedCount = playerCount + 1;
+                }
+
+                if (total >= allowedCount) {
+                    alert('شما ' + toFarsiNum(total) + ' نقش برگزیده‌اید. ابتدا یک نقش را حذف کنید.');
+                    return;
+                }
+            selectedRoles.push(roleKey);
+            renderRoleSelection();
+        }
+
+        function removeRole(roleKey) {
+            var index = selectedRoles.lastIndexOf(roleKey);
+            if (index !== -1) {
+                selectedRoles.splice(index, 1);
+                renderRoleSelection();
+            }
+        }
+
+        function confirmRoleSelection() {
+            // Special rule for 4-5 players with ambiguity pool roles
+            var allowedCount = playerCount;
+            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
+                allowedCount = playerCount + 1;
+            }
+
+            if (selectedRoles.length !== playerCount && selectedRoles.length !== allowedCount) {
+                alert('لطفاً ' + toFarsiNum(playerCount) + ' (یا ' + toFarsiNum(allowedCount) + ' در صورت وجود نقش‌های مبهم) نقش برگزینید.');
+                return;
+            }
+            
+            // No role restrictions - allow any combination
+            document.getElementById('role-selection-screen').classList.add('hidden');
+            startRoleDistribution();
+        }
+
+        // --- Role Distribution ---
+        function startRoleDistribution() {
+            // If no roles selected, use recommended
+            if (selectedRoles.length === 0) {
+                useRecommendedRoles();
+            }
+            
+            // Validate roles
+            var allowedCount = playerCount;
+            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
+            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
+                allowedCount = playerCount + 1;
+            }
+
+            if (selectedRoles.length !== playerCount && selectedRoles.length !== allowedCount) {
+                alert('لطفاً ابتدا نقش‌ها را تنظیم کنید. دکمه "تنظیم نقش‌ها" را بزنید.');
+                return;
+            }
+            
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                names.push(val);
+                
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            localStorage.setItem('quest_players', JSON.stringify(savedPlayers));
+            renderSavedList();
+
+            // Randomly select first leader BEFORE assigning roles
+            currentLeader = Math.floor(Math.random() * playerCount);
+            addLog('سردار اول به صورت تصادفی برگزیده شد: یار ' + toFarsiNum(currentLeader + 1));
+
+            // Handle N+1 ambiguity rule: randomization only between ambiguity pool roles
+            var rolesToAssign = [];
+            
+            // Define ambiguity pools for different player counts
+            var ambiguityPool = [];
+            if (playerCount === 4 || playerCount === 5) {
+                // For 4-5 players: ambiguity pool is [Cleric, Youth, Loyal Servant]
+                ambiguityPool = ['Cleric', 'Youth', 'Loyal Servant'];
+            }
+            // For 6+ players, no ambiguity rule applies (all roles are fixed)
+            
+            // Separate roles into ambiguity pool and fixed roles
+            var ambiguityRoles = [];
+            var fixedRoles = [];
+            
+            for (var i = 0; i < selectedRoles.length; i++) {
+                if (ambiguityPool.length > 0 && ambiguityPool.indexOf(selectedRoles[i]) !== -1) {
+                    ambiguityRoles.push(selectedRoles[i]);
+                } else {
+                    fixedRoles.push(selectedRoles[i]);
+                }
+            }
+            
+            // If we have ambiguity roles and N+1 total roles, apply ambiguity rule
+            if (selectedRoles.length === playerCount + 1 && ambiguityRoles.length > 0) {
+                // Randomly select required number from ambiguity pool
+                // For 4-5 players: need 2 from [Cleric, Youth, Loyal Servant]
+                var requiredFromAmbiguity = 2;
+                shuffleArray(ambiguityRoles);
+                var selectedAmbiguity = ambiguityRoles.slice(0, requiredFromAmbiguity);
+                
+                // Combine selected ambiguity roles with fixed roles
+                rolesToAssign = selectedAmbiguity.concat(fixedRoles);
+                
+                // Shuffle the final assignment
+                shuffleArray(rolesToAssign);
+                
+                // Track which roles are on the ground
+                rolesOnGround = [];
+                for (var j = 0; j < ambiguityRoles.length; j++) {
+                    if (selectedAmbiguity.indexOf(ambiguityRoles[j]) === -1) {
+                        rolesOnGround.push(ambiguityRoles[j]);
+                    }
+                }
+                if (rolesOnGround.length > 0) {
+                    var removedNames = rolesOnGround.map(function(r) { return ROLE_DEFINITIONS[r].name; });
+                    addLog('یک نقش از نقش‌های مبهم به صورت تصادفی حذف شد (قانون ابهام): ' + removedNames.join('، '));
+                }
+            } else {
+                // Normal case: shuffle all roles
+                rolesToAssign = selectedRoles.slice();
+                shuffleArray(rolesToAssign);
+                rolesOnGround = []; // No roles on ground in normal case
+                
+                // If we still have N+1 roles (shouldn't happen in normal flow, but handle it)
+                if (rolesToAssign.length > playerCount) {
+                    // Only remove from ambiguity pool if present
+                    if (ambiguityRoles.length > 0) {
+                        var rolesToRemove = [];
+                        for (var k = 0; k < rolesToAssign.length; k++) {
+                            if (ambiguityPool.indexOf(rolesToAssign[k]) !== -1) {
+                                rolesToRemove.push(k);
+                            }
+                        }
+                        if (rolesToRemove.length > 0) {
+                            var removeIndex = rolesToRemove[Math.floor(Math.random() * rolesToRemove.length)];
+                            var removedRole = rolesToAssign[removeIndex];
+                            rolesToAssign.splice(removeIndex, 1);
+                            rolesOnGround = [removedRole];
+                            addLog('یک نقش از نقش‌های مبهم به صورت تصادفی حذف شد (قانون ابهام): ' + ROLE_DEFINITIONS[removedRole].name);
+                        } else {
+                            // Fallback: remove last role
+                            var droppedRole = rolesToAssign[playerCount];
+                            rolesOnGround = [droppedRole];
+                            addLog('یک نقش به صورت تصادفی حذف شد (قانون ابهام): ' + ROLE_DEFINITIONS[droppedRole].name);
+                        }
+                    } else {
+                        // No ambiguity pool: remove last role
+                        var droppedRole = rolesToAssign[playerCount];
+                        rolesOnGround = [droppedRole];
+                        addLog('یک نقش به صورت تصادفی حذف شد (قانون ابهام): ' + ROLE_DEFINITIONS[droppedRole].name);
+                    }
+                }
+            }
+            
+            players = [];
+            for (var i = 0; i < playerCount; i++) {
+                var roleKey = rolesToAssign[i];
+                var roleDef = ROLE_DEFINITIONS[roleKey];
+                if (!roleDef) {
+                    alert('Error: Invalid role ' + roleKey + '. Please reconfigure roles.');
+                    return;
+                }
+                players.push({
+                    name: names[i],
+                    roleKey: roleKey,
+                    role: roleDef.name,
+                    alignment: roleDef.alignment,
+                    description: roleDef.description,
+                    eliminated: false
+                });
+            }
+            
+            // Don't shuffle players - keep them in input order
+            
+            currentDistIndex = 0;
+            document.getElementById('dist-total-players').innerText = toFarsiNum(playerCount);
+            document.getElementById('role-selection-screen').classList.add('hidden');
+            showScreen('distribution-screen');
+            updateDistScreen();
+        }
+
+        function updateDistScreen() {
+            document.getElementById('dist-player-num').innerText = toFarsiNum(currentDistIndex + 1);
+            document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+        }
+
+        function revealRole() {
+            var player = players[currentDistIndex];
+            document.getElementById('reveal-name-header').innerText = player.name;
+            
+            var title = document.getElementById('role-title');
+            var desc = document.getElementById('role-desc');
+            var extra = document.getElementById('role-extra');
+            
+            var isGood = player.alignment === 'good';
+            var roleDef = ROLE_DEFINITIONS[player.roleKey];
+            var rebus = roleDef ? roleDef.rebus : (isGood ? '🛡️' : '⚔️');
+            title.innerHTML = '<span style="font-size: 2rem; margin-left: 10px;">' + rebus + '</span> ' + player.role;
+            title.className = 'role-title ' + (isGood ? 'role-good' : 'role-evil');
+            desc.innerText = player.description;
+            
+            extra.innerHTML = '';
+            
+            // Show information for Cleric about first leader (all player counts)
+            if (player.roleKey === 'Cleric') {
+                var firstLeader = players[currentLeader];
+                var firstLeaderIsGood = firstLeader.alignment === 'good';
+                extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.2); border: 1px solid var(--good-color); border-radius: 8px; color: #C8E6C9;"><strong>اطلاعات موبد:</strong><br>سردار اول: <strong>' + firstLeader.name + '</strong><br>سردار اول <strong style="color: ' + (firstLeaderIsGood ? 'var(--good-color)' : 'var(--evil-color)') + ';">' + (firstLeaderIsGood ? 'خوب' : 'بد') + '</strong> است.</div>';
+            }
+            
+            // Show teammates for evil players
+            if (!isGood) {
+                if (player.roleKey === 'Blind Hunter') {
+                    // Blind Hunter never knows other evil players (any player count)
+                    extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند. شما تنها هستید.</div>';
+                } else {
+                    // Other evil players (Morgan, Minion)
+                    // In 4-5 player games, Blind Hunter is known to other evil
+                    // In 6+ player games, Blind Hunter is not known
+                    var includeBlindHunter = (playerCount === 4 || playerCount === 5);
+                    var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
+                    
+                    if (includeBlindHunter) {
+                        // Include Blind Hunter in team list for 4-5 players, and indicate which one is Blind Hunter
+                        if (evilPlayers.length > 0) {
+                            var teamList = evilPlayers.map(p => {
+                                if (p.roleKey === 'Blind Hunter') {
+                                    return p.name + ' (نقاب‌دار)';
+                                } else if (p.roleKey === 'Morgan') {
+                                    return p.name + ' (ضحاک ماردوش)';
+                                }
+                                return p.name;
+                            }).join('، ');
+                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>هم‌گروهی‌های لشکر ضحاک شما:</strong> ' + teamList + '</div>';
+                        }
+                    } else {
+                        // 6+ players: Don't show Blind Hunter at all (no mention)
+                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Blind Hunter');
+                        if (visibleEvil.length > 0) {
+                            var teamList = visibleEvil.map(p => {
+                                if (p.roleKey === 'Morgan') {
+                                    return p.name + ' (ضحاک ماردوش)';
+                                }
+                                return p.name;
+                            }).join('، ');
+                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>هم‌گروهی‌های لشکر ضحاک شما:</strong> ' + teamList + '</div>';
+                        }
+                    }
+                }
+            }
+            
+            var nextBtn = document.getElementById('next-dist-btn');
+            if (currentDistIndex === playerCount - 1) {
+                nextBtn.innerText = "پایان توزیع";
+                nextBtn.style.backgroundColor = "#4CAF50";
+            } else {
+                nextBtn.innerText = "پنهان و بعدی";
+                nextBtn.style.backgroundColor = "#64ffda";
+            }
+            
+            document.getElementById('dist-pass-view').classList.add('hidden');
+            document.getElementById('dist-reveal-view').classList.remove('hidden');
+        }
+
+        function nextDistribute() {
+            currentDistIndex++;
+            if (currentDistIndex >= playerCount) {
+                // All roles distributed, show first leader announcement
+                document.getElementById('first-leader-name').innerText = players[currentLeader].name;
+                addLog('سردار اول: ' + players[currentLeader].name);
+                showScreen('leader-announce-screen');
+            } else {
+                document.getElementById('dist-pass-view').classList.remove('hidden');
+                document.getElementById('dist-reveal-view').classList.add('hidden');
+                updateDistScreen();
+            }
+        }
+
+        // --- Game Logic ---
+        function startGame() {
+            currentQuest = 1;
+            goodWins = 0;
+            evilWins = 0;
+            questHistory = [];
+            isGameEnded = false;
+            gameLog = [];
+            veterans = [currentLeader]; // First leader is a veteran
+            magicTokenHolder = null;
+            magicTokenTeamMemberIndex = null;
+            amuletHolders = [];
+            checkedByAmulet = [];
+            quest3Size = null;
+            
+            // Initialize amulets based on player count
+            amulets = [];
+            if (playerCount >= 6) {
+                var amuletQuests = AMULET_CONFIG[playerCount] || [];
+                amuletQuests.forEach(function(questNum) {
+                    amulets.push({ 
+                        quest: questNum, 
+                        available: false, 
+                        holder: null,
+                        used: false
+                    });
+                });
+            }
+            
+            addLog("بازی با " + toFarsiNum(playerCount) + " یار شروع شد.");
+            addLog("سردار اول: " + players[currentLeader].name);
+            
+            showScreen('game-screen');
+            updateGameDisplay();
+            startTeamSelection();
+        }
+
+        function updateGameDisplay() {
+            document.getElementById('good-wins-display').innerText = toFarsiNum(goodWins);
+            document.getElementById('evil-wins-display').innerText = toFarsiNum(evilWins);
+            document.getElementById('current-leader-name').innerText = players[currentLeader].name;
+            
+            // Update team lists
+            renderTeamLists();
+            
+            // Update quest board visualization
+            renderQuestBoard();
+            
+            // Update amulets
+            renderAmulets();
+        }
+        
+        function renderTeamLists() {
+            var goodList = document.getElementById('good-team-list');
+            var evilList = document.getElementById('evil-team-list');
+            
+            goodList.innerHTML = '';
+            evilList.innerHTML = '';
+            
+            // Count roles by type (not showing which player has which - secret info)
+            var goodRoleCounts = {};
+            var evilRoleCounts = {};
+            
+            players.forEach(function(player) {
+                if (player.eliminated) return;
+                if (player.alignment === 'good') {
+                    goodRoleCounts[player.roleKey] = (goodRoleCounts[player.roleKey] || 0) + 1;
+                } else {
+                    evilRoleCounts[player.roleKey] = (evilRoleCounts[player.roleKey] || 0) + 1;
+                }
+            });
+            
+            // Add "on the ground" roles to counts
+            if (rolesOnGround && rolesOnGround.length > 0) {
+                rolesOnGround.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    if (roleDef) {
+                        if (roleDef.alignment === 'good') {
+                            goodRoleCounts[roleKey] = (goodRoleCounts[roleKey] || 0) + 1;
+                        } else {
+                            evilRoleCounts[roleKey] = (evilRoleCounts[roleKey] || 0) + 1;
+                        }
+                    }
+                });
+            }
+            
+            // Render Good team roles (right side) - sorted by strength
+            var goodRoleKeys = Object.keys(goodRoleCounts);
+            goodRoleKeys.sort(function(a, b) {
+                return (ROLE_STRENGTH[b] || 0) - (ROLE_STRENGTH[a] || 0); // Higher strength first
+            });
+            
+            if (goodRoleKeys.length === 0) {
+                goodList.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">-</span>';
+            } else {
+                goodRoleKeys.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    var count = goodRoleCounts[roleKey];
+                    var item = document.createElement('div');
+                    // Compact chip style
+                    item.style.cssText = 'display: inline-flex; align-items: center; padding: 2px 6px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--good-color); border-radius: 4px; font-size: 0.75rem; white-space: nowrap;';
+                    item.innerHTML = '<span style="font-size: 1rem; margin-left: 4px;">' + (roleDef ? roleDef.rebus : '❓') + '</span><span style="font-weight: bold; color: var(--good-color);">' + (roleDef ? roleDef.name : roleKey) + '</span>' + (count > 1 ? '<span style="margin-right: 3px; font-weight: bold; opacity: 0.8;">×' + toFarsiNum(count) + '</span>' : '');
+                    goodList.appendChild(item);
+                });
+            }
+            
+            // Render Evil team roles (left side) - sorted by strength
+            var evilRoleKeys = Object.keys(evilRoleCounts);
+            evilRoleKeys.sort(function(a, b) {
+                return (ROLE_STRENGTH[b] || 0) - (ROLE_STRENGTH[a] || 0); // Higher strength first
+            });
+            
+            if (evilRoleKeys.length === 0) {
+                evilList.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">-</span>';
+            } else {
+                evilRoleKeys.forEach(function(roleKey) {
+                    var roleDef = ROLE_DEFINITIONS[roleKey];
+                    var count = evilRoleCounts[roleKey];
+                    var item = document.createElement('div');
+                    // Compact chip style
+                    item.style.cssText = 'display: inline-flex; align-items: center; padding: 2px 6px; background: rgba(244, 67, 54, 0.15); border: 1px solid var(--evil-color); border-radius: 4px; font-size: 0.75rem; white-space: nowrap;';
+                    item.innerHTML = '<span style="font-size: 1rem; margin-left: 4px;">' + (roleDef ? roleDef.rebus : '❓') + '</span><span style="font-weight: bold; color: var(--evil-color);">' + (roleDef ? roleDef.name : roleKey) + '</span>' + (count > 1 ? '<span style="margin-right: 3px; font-weight: bold; opacity: 0.8;">×' + toFarsiNum(count) + '</span>' : '');
+                    evilList.appendChild(item);
+                });
+            }
+        }
+
+        function renderQuestBoard() {
+            var config = QUEST_CONFIG[playerCount];
+            var board = document.getElementById('quest-board-visual');
+            board.innerHTML = '';
+            
+            for (var q = 1; q <= config.quests.length; q++) {
+                var marker = document.createElement('div');
+                marker.className = 'quest-marker';
+                
+                var questData = questHistory.find(h => h.quest === q);
+                if (questData) {
+                    marker.classList.add(questData.success ? 'completed' : 'failed');
+                } else if (q === currentQuest) {
+                    marker.classList.add('active');
+                }
+                
+                // Remove quest number label for cleaner look
+                
+                var size = document.createElement('div');
+                size.className = 'quest-size';
+                // Handle Quest 3 for 4 players
+                var teamSize = config.quests[q - 1];
+                if (playerCount === 4 && q === 3 && quest3Size !== null) {
+                    teamSize = quest3Size;
+                }
+                size.innerText = toFarsiNum(teamSize);
+                marker.appendChild(size);
+                
+                if (questData) {
+                    var status = document.createElement('div');
+                    status.className = 'quest-status ' + (questData.success ? 'success' : 'failure');
+                    status.innerText = questData.success ? '✓' : '✗';
+                    marker.appendChild(status);
+                }
+                
+                if (config.fails[q - 1] === 2) {
+                    var failNote = document.createElement('div');
+                    failNote.className = 'quest-fail-note';
+                    failNote.innerText = toFarsiNum(2) + ' ✗';
+                    marker.appendChild(failNote);
+                }
+                
+                // Check if this quest has an amulet
+                var amuletConfig = AMULET_CONFIG[playerCount] || [];
+                if (amuletConfig.indexOf(q) !== -1) {
+                    var amuletMarker = document.createElement('div');
+                    amuletMarker.className = 'quest-amulet-marker';
+                    amuletMarker.title = 'جام جهان‌بین بعد از این پیکار در دسترس است';
+                    amuletMarker.innerText = '🔮';
+                    marker.appendChild(amuletMarker);
+                    
+                    // Check if amulet is available or has been given
+                    var amulet = amulets.find(a => a.quest === q);
+                    if (amulet) {
+                        if (amulet.available && amulet.holder !== null) {
+                            amuletMarker.classList.add('amulet-given');
+                            amuletMarker.title = 'جام جهان‌بین به ' + (amulet.holder !== null ? players[amulet.holder].name : 'کسی') + ' داده شد';
+                        } else if (amulet.available) {
+                            amuletMarker.classList.add('amulet-available');
+                            amuletMarker.title = 'جام جهان‌بین در دسترس';
+                        }
+                    }
+                }
+                
+                board.appendChild(marker);
+            }
+        }
+
+        function renderAmulets() {
+            var container = document.getElementById('amulet-list');
+            var explanation = document.getElementById('amulet-explanation');
+            container.innerHTML = '';
+            
+            // Hide explanation and section if no amulets for this player count
+            if (amulets.length === 0) {
+                if (explanation) explanation.style.display = 'none';
+                var amuletSection = document.getElementById('amulet-section');
+                if (amuletSection) amuletSection.style.display = 'none';
+                return;
+            } else {
+                // Show explanation and section if amulets exist
+                if (explanation) explanation.style.display = 'block';
+                var amuletSection = document.getElementById('amulet-section');
+                if (amuletSection) amuletSection.style.display = 'block';
+            }
+            
+            amulets.forEach(function(amulet, index) {
+                if (amulet.available) {
+                    var item = document.createElement('div');
+                    item.className = 'amulet-item';
+                    if (amulet.holder !== null) {
+                        item.innerText = 'پیکار ' + toFarsiNum(amulet.quest) + ' - ' + (amulet.holder !== null ? players[amulet.holder].name : 'در دسترس');
+                        if (amulet.used) item.classList.add('used');
+                    } else {
+                        item.innerText = 'پیکار ' + toFarsiNum(amulet.quest) + ' - در دسترس';
+                    }
+                    container.appendChild(item);
+                }
+            });
+        }
+
+        function startTeamSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            // Handle Quest 3 for 4 players (can be 2 or 3)
+            if (playerCount === 4 && currentQuest === 3 && quest3Size === null) {
+                // Auto-select size 3 instead of asking
+                setQuest3Size(3);
+                return;
+            }
+            
+            document.getElementById('phase-title').innerText = 'گزینش گروه';
+            document.getElementById('phase-content').innerHTML = 
+                '<p><strong>' + players[currentLeader].name + '</strong> سردار است.</p>' +
+                '<p><strong>مرحله ' + toFarsiNum(1) + ':</strong> سردار گروهی از <strong>' + toFarsiNum(teamSize) + '</strong> یار برای پیکار ' + toFarsiNum(currentQuest) + ' برمی‌گزیند.</p>' +
+                '<p style="font-size: 0.9rem; color: var(--text-secondary);">گزینش گروه خود را اعلام کنید. گزینش گروه به صورت آفلاین انجام می‌شود - فقط به همه بگویید چه کسانی در گروه هستند.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="startQuestCardSelection()">گروه برگزیده شد - شروع پیکار</button>';
+        }
+
+        function setQuest3Size(size) {
+            quest3Size = size;
+            var config = QUEST_CONFIG[4];
+            config.quests[2] = size; // Update Quest 3 size
+            startTeamSelection();
+        }
+
+        function startQuestCardSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            addLog('سردار ' + players[currentLeader].name + ' گروه را برای پیکار ' + toFarsiNum(currentQuest) + ' برگزید (اندازه: ' + toFarsiNum(teamSize) + ')');
+            addLog('درفش کاویان روی اولین عضو گروهی که نشان برمی‌گزیند خواهد بود.');
+            
+            // Magic token is automatically on the first person who selects a card
+            magicTokenHolder = null; // We don't track which player, just that first selector has it
+            magicTokenTeamMemberIndex = null; // Will be set to 0 when first card is selected
+            
+            // Directly open the quest card modal
+            openQuestCardModal();
+        }
+
+        function openQuestCardModal() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            questCards = [];
+            
+            // Remove any existing warnings
+            var failCardBtn = document.getElementById('fail-card-btn');
+            if (failCardBtn) {
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+            
+            var modal = document.getElementById('quest-card-modal');
+            if (!modal) {
+                console.error('Quest card modal not found!');
+                return;
+            }
+            
+            document.getElementById('quest-card-progress').innerText = 'نشان‌های برگزیده شده: ' + toFarsiNum(0) + ' / ' + toFarsiNum(teamSize);
+            var revealBtn = document.getElementById('quest-reveal-btn');
+            if (revealBtn) revealBtn.classList.add('hidden');
+            
+            modal.classList.remove('hidden');
+            updateQuestCardSelection();
+        }
+
+        function updateQuestCardSelection() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            // Don't update if all cards are selected (handled in selectQuestCard)
+            if (questCards.length >= teamSize) {
+                return;
+            }
+            
+            var memberNum = questCards.length + 1;
+            document.getElementById('quest-card-player').innerText = 
+                'دستگاه را به عضو گروه ' + toFarsiNum(memberNum) + ' از ' + toFarsiNum(teamSize) + ' بدهید';
+            
+            // Check if this team member has magic token
+            // The first person to select a card automatically has the magic token
+            var hasMagic = (questCards.length === 0);
+            var failCardBtn = document.getElementById('fail-card-btn');
+            if (hasMagic) {
+                magicTokenTeamMemberIndex = 0; // First team member to select has magic token
+                document.getElementById('quest-card-magic-note').innerText = 
+                    '⚠️ شما پیشاپیشِ سپاه هستید و درفش کاویان را دارید و نمی‌توانید نیرنگ کنید مگر اینکه ضحاک ماردوش باشید.';
+                
+                // Check if Youth is in the game
+                var hasYouth = players.some(function(p) { return p.roleKey === 'Youth'; }) || 
+                              (selectedRoles && selectedRoles.indexOf('Youth') !== -1) ||
+                              (rolesOnGround && rolesOnGround.indexOf('Youth') !== -1);
+                
+                // Add large danger sign on Fail card
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                var warningText = hasYouth ? 
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">فقط<br>ضحاک ماردوش<br>یا جوان خام</div>' :
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">فقط<br>ضحاک ماردوش</div>';
+                
+                if (!existingWarning) {
+                    var warning = document.createElement('div');
+                    warning.className = 'magic-token-warning';
+                    warning.style.position = 'absolute';
+                    warning.style.top = '0';
+                    warning.style.left = '0';
+                    warning.style.right = '0';
+                    warning.style.bottom = '0';
+                    warning.style.background = 'rgba(244, 67, 54, 0.95)';
+                    warning.style.border = '4px solid #ff0000';
+                    warning.style.borderRadius = '12px';
+                    warning.style.display = 'flex';
+                    warning.style.flexDirection = 'column';
+                    warning.style.alignItems = 'center';
+                    warning.style.justifyContent = 'center';
+                    warning.style.zIndex = '10';
+                    warning.style.padding = '10px';
+                    warning.innerHTML = warningText;
+                    failCardBtn.style.position = 'relative';
+                    failCardBtn.appendChild(warning);
+                } else {
+                    // Update existing warning if Youth status changed
+                    existingWarning.innerHTML = warningText;
+                }
+            } else {
+                document.getElementById('quest-card-magic-note').innerText = '';
+                
+                // Remove warning from Fail card
+                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+            
+            document.getElementById('quest-card-progress').innerText = 
+                'نشان‌های برگزیده شده: ' + toFarsiNum(questCards.length) + ' / ' + toFarsiNum(teamSize);
+        }
+
+        function selectQuestCard(cardType) {
+            console.log('selectQuestCard called with:', cardType);
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            
+            if (questCards.length >= teamSize) {
+                console.log('All cards already selected');
+                return;
+            }
+            
+            // Check magic token restriction
+            // Only restrict if this is the team member with magic token
+            var hasMagic = (magicTokenTeamMemberIndex !== null && questCards.length === magicTokenTeamMemberIndex);
+            if (hasMagic && cardType === 'fail') {
+                // Show warning but allow selection (don't block to avoid revealing choice)
+                // Player should know the rule: only ضحاک ماردوش can play Fail with magic token
+                // No confirmation needed - just let them choose
+            }
+            
+            questCards.push({
+                player: 'Team Member ' + (questCards.length + 1),
+                card: cardType
+            });
+            
+            addLog('عضو گروه ' + toFarsiNum(questCards.length) + ' نشان ' + (cardType === 'success' ? 'همراهی' : 'نیرنگ') + ' را برگزید');
+            
+            // Animate the selected card
+            var cardBtn = cardType === 'success' ? 
+                document.getElementById('success-card-btn') : 
+                document.getElementById('fail-card-btn');
+            if (cardBtn) {
+                cardBtn.classList.add('quest-card-animate');
+                cardBtn.style.pointerEvents = 'none'; // Disable during animation
+                setTimeout(function() {
+                    cardBtn.classList.remove('quest-card-animate');
+                    cardBtn.style.pointerEvents = 'auto';
+                }, 600);
+            }
+            
+            // Check if all cards are selected BEFORE updating UI
+            var allSelected = questCards.length >= teamSize;
+            
+            if (allSelected) {
+                // Hide the card selection modal immediately
+                document.getElementById('quest-card-modal').classList.add('hidden');
+                // Show reveal animation after a brief delay
+                setTimeout(function() {
+                    revealQuestCards();
+                }, 500);
+            } else {
+                // Update UI for next card selection
+                updateQuestCardSelection();
+            }
+        }
+
+        function revealQuestCards() {
+            // Leader collects and shuffles cards, then reveals
+            // IMPORTANT: Shuffle cards to randomize order so players cannot identify who played which card
+            shuffleArray(questCards);
+            
+            var successes = questCards.filter(c => c.card === 'success').length;
+            var failures = questCards.filter(c => c.card === 'fail').length;
+            
+            document.getElementById('quest-card-modal').classList.add('hidden');
+            
+            // Show animated card reveal
+            var container = document.getElementById('revealed-cards-container');
+            container.innerHTML = '';
+            
+            questCards.forEach(function(card, index) {
+                var cardDiv = document.createElement('div');
+                cardDiv.className = 'quest-card-display ' + 
+                    (card.card === 'success' ? 'quest-card-success' : 'quest-card-fail');
+                cardDiv.style.animationDelay = (index * 0.15) + 's';
+                cardDiv.style.width = '100px';
+                cardDiv.style.height = '130px';
+                cardDiv.style.margin = '5px';
+                cardDiv.style.fontSize = '1.5rem';
+                
+                var icon = document.createElement('div');
+                icon.style.fontSize = '2rem';
+                icon.style.marginBottom = '5px';
+                icon.innerText = card.card === 'success' ? '✓' : '✗';
+                cardDiv.appendChild(icon);
+                
+                var label = document.createElement('div');
+                label.style.fontSize = '0.9rem';
+                label.style.fontWeight = 'bold';
+                label.innerText = card.card === 'success' ? 'همراهی' : 'نیرنگ';
+                cardDiv.appendChild(label);
+                
+                container.appendChild(cardDiv);
+            });
+            
+            // Show results
+            var config = QUEST_CONFIG[playerCount];
+            var requiredFails = config.fails[currentQuest - 1];
+            var success = failures < requiredFails;
+            
+            var summary = document.getElementById('quest-result-summary');
+            if (success) {
+                summary.style.background = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(76, 175, 80, 0.1) 100%)';
+                summary.style.border = '2px solid var(--good-color)';
+                summary.style.color = 'var(--good-color)';
+                summary.innerHTML = '<div style="font-size: 1.5rem; margin-bottom: 5px;">✓</div><div style="font-size: 0.95rem;">پیکار ' + toFarsiNum(currentQuest) + ' پیروز شد!</div><div style="font-size: 1rem; margin-top: 8px; opacity: 0.9; font-weight: bold;">' + toFarsiNum(successes) + ' همراهی، ' + toFarsiNum(failures) + ' نیرنگ</div>';
+                playQuestSuccess();
+            } else {
+                summary.style.background = 'linear-gradient(135deg, rgba(244, 67, 54, 0.3) 0%, rgba(244, 67, 54, 0.1) 100%)';
+                summary.style.border = '2px solid var(--evil-color)';
+                summary.style.color = 'var(--evil-color)';
+                summary.innerHTML = '<div style="font-size: 1.5rem; margin-bottom: 5px;">✗</div><div style="font-size: 0.95rem;">پیکار ' + toFarsiNum(currentQuest) + ' شکست خورد!</div><div style="font-size: 1rem; margin-top: 8px; opacity: 0.9; font-weight: bold;">' + toFarsiNum(successes) + ' همراهی، ' + toFarsiNum(failures) + ' نیرنگ</div>';
+                playQuestFailure();
+            }
+            
+            document.getElementById('quest-cards-reveal-modal').classList.remove('hidden');
+        }
+
+        function closeQuestReveal() {
+            document.getElementById('quest-cards-reveal-modal').classList.add('hidden');
+            completeQuest();
+        }
+
+
+        function completeQuest() {
+            var config = QUEST_CONFIG[playerCount];
+            var requiredFails = config.fails[currentQuest - 1];
+            var failures = questCards.filter(c => c.card === 'fail').length;
+            var success = failures < requiredFails;
+            
+            questHistory.push({
+                quest: currentQuest,
+                team: config.quests[currentQuest - 1],
+                success: success,
+                failures: failures
+            });
+            
+            if (success) {
+                goodWins++;
+                addLog('پیکار ' + toFarsiNum(currentQuest) + ' پیروز شد!');
+            } else {
+                evilWins++;
+                addLog('پیکار ' + toFarsiNum(currentQuest) + ' شکست خورد! (' + toFarsiNum(failures) + ' نیرنگ)');
+            }
+            
+            // Check for amulet availability
+            var amuletAvailable = amulets.find(a => a.quest === currentQuest && !a.available);
+            if (amuletAvailable) {
+                amuletAvailable.available = true;
+            }
+            
+            // Reset magic token
+            magicTokenHolder = null;
+            magicTokenTeamMemberIndex = null;
+            
+            updateGameDisplay();
+            
+            // Check win conditions
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            if (goodWins >= 3) {
+                endGame('good', 'سپاه فریدون برنده شد! ' + toFarsiNum(3) + ' پیکار با پیروزی تکمیل شد.');
+                return;
+            }
+            if (evilWins >= failThreshold) {
+                startFinalQuest();
+                return;
+            }
+            
+            // Transition phase: Select next leader and handle amulets
+            startTransitionPhase();
+        }
+
+        function startTransitionPhase() {
+            document.getElementById('phase-title').innerText = 'فاز انتقال';
+            document.getElementById('phase-content').innerHTML = 
+                '<p><strong>مرحله ' + toFarsiNum(3) + ':</strong> سردار فعلی سردار بعدی را برمی‌گزیند.</p>' +
+                '<p style="font-size: 0.9rem; color: var(--text-secondary);">سردار بعدی نمی‌تواند کسی باشد که قبلاً سردار بوده (کهنه‌سرباز) یا جام جهان‌بین دارد.</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = '<button class="action-btn" onclick="openLeaderSelection()">گزینش سردار بعدی</button>';
+        }
+
+        function openLeaderSelection() {
+            document.getElementById('current-leader-select-name').innerText = players[currentLeader].name;
+            var list = document.getElementById('leader-select-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot select: current leader, veterans, amulet holders
+                if (index === currentLeader || veterans.indexOf(index) !== -1 || amuletHolders.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { selectNextLeader(index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('leader-select-modal').classList.remove('hidden');
+        }
+
+        function selectNextLeader(playerIndex) {
+            veterans.push(currentLeader); // Current leader becomes veteran
+            currentLeader = playerIndex;
+            veterans.push(currentLeader); // New leader gets veteran token
+            addLog('سردار جدید: ' + players[currentLeader].name);
+            
+            document.getElementById('leader-select-modal').classList.add('hidden');
+            
+            // Check for amulet
+            var amuletAvailable = amulets.find(a => a.quest === currentQuest && a.available && a.holder === null);
+            if (amuletAvailable) {
+                openAmuletSelection(amuletAvailable);
+            } else {
+                nextQuest();
+            }
+        }
+
+        function openAmuletSelection(amulet) {
+            document.getElementById('amulet-quest-num').innerText = amulet.quest;
+            var list = document.getElementById('amulet-select-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot select: new leader, veterans, amulet holders, already checked
+                if (index === currentLeader || veterans.indexOf(index) !== -1 || 
+                    amuletHolders.indexOf(index) !== -1 || checkedByAmulet.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { selectAmuletHolder(amulet, index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('amulet-select-modal').classList.remove('hidden');
+        }
+
+        function selectAmuletHolder(amulet, playerIndex) {
+            amulet.holder = playerIndex;
+            amuletHolders.push(playerIndex);
+            addLog(players[playerIndex].name + ' بعد از پیکار ' + toFarsiNum(amulet.quest) + ' جام جهان‌بین دریافت کرد');
+            
+            document.getElementById('amulet-select-modal').classList.add('hidden');
+            openAmuletCheck(amulet, playerIndex);
+        }
+
+        function skipAmulet() {
+            document.getElementById('amulet-select-modal').classList.add('hidden');
+            nextQuest();
+        }
+
+        function openAmuletCheck(amulet, holderIndex) {
+            document.getElementById('amulet-holder-name').innerText = players[holderIndex].name + ' از جام جهان‌بین استفاده می‌کند';
+            var list = document.getElementById('amulet-check-list');
+            list.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                // Cannot check: amulet holder, already checked, amulet holders
+                if (index === holderIndex || checkedByAmulet.indexOf(index) !== -1 || 
+                    amuletHolders.indexOf(index) !== -1) {
+                    return;
+                }
+                
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.innerText = player.name;
+                btn.onclick = function() { performAmuletCheck(amulet, index); };
+                list.appendChild(btn);
+            });
+            
+            document.getElementById('amulet-check-modal').classList.remove('hidden');
+        }
+
+        function performAmuletCheck(amulet, checkedIndex) {
+            checkedByAmulet.push(checkedIndex);
+            amulet.used = true;
+            
+            var checkedPlayer = players[checkedIndex];
+            // Troublemaker always shows as Evil when checked
+            var isTroublemaker = checkedPlayer.roleKey === 'Troublemaker';
+            var actualAlignment = checkedPlayer.alignment;
+            var displayedAlignment = isTroublemaker ? 'evil' : actualAlignment;
+            
+            addLog(players[amulet.holder].name + ' با جام جهان‌بین ' + checkedPlayer.name + ' را بررسی کرد');
+            
+            // Show result to amulet holder
+            document.getElementById('amulet-check-modal').classList.add('hidden');
+            
+            var resultModal = document.getElementById('amulet-result-modal');
+            var resultText = document.getElementById('amulet-result-text');
+            var checkedName = document.getElementById('amulet-checked-name');
+            
+            checkedName.innerText = checkedPlayer.name;
+            if (displayedAlignment === 'good') {
+                resultText.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">🛡️</div><div style="font-size: 1.3rem; font-weight: bold; color: var(--good-color);">خوب</div>';
+                resultText.style.color = 'var(--good-color)';
+            } else {
+                resultText.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">⚔️</div><div style="font-size: 1.3rem; font-weight: bold; color: var(--evil-color);">بد</div>';
+                resultText.style.color = 'var(--evil-color)';
+            }
+            
+            resultModal.classList.remove('hidden');
+        }
+        
+        function closeAmuletResult() {
+            document.getElementById('amulet-result-modal').classList.add('hidden');
+            nextQuest();
+        }
+
+        function nextQuest() {
+            currentQuest++;
+            var config = QUEST_CONFIG[playerCount];
+            
+            if (currentQuest > config.quests.length) {
+                // All quests completed
+                if (goodWins > evilWins) {
+                    endGame('good', 'سپاه فریدون برنده شد! پیکار‌های پیروز بیشتری تکمیل شد.');
+                } else {
+                    endGame('evil', 'بدی برنده شد! پیکار‌های بیشتری شکست خورد.');
+                }
+                return;
+            }
+            
+            updateGameDisplay();
+            startTeamSelection();
+        }
+
+        function startFinalQuest() {
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            
+            // Step 1: Show Discussion Phase
+            showDiscussionPhase();
+        }
+        
+        var discussionTimer = null;
+        var discussionTimeLeft = 300; // 5 minutes in seconds
+        var discussionTimerInterval = null;
+        
+        function showDiscussionPhase() {
+            var failThreshold = (playerCount === 4) ? 2 : 3;
+            
+            // Hide UI elements for cleaner discussion view
+            var gameStatus = document.querySelector('.game-status');
+            if (gameStatus) gameStatus.style.display = 'none';
+            var questBoard = document.getElementById('quest-board-visual');
+            if (questBoard) questBoard.style.display = 'none';
+            var leaderDisplays = document.querySelectorAll('.leader-display');
+            for (var i = 0; i < leaderDisplays.length; i++) {
+                leaderDisplays[i].style.display = 'none';
+            }
+            var amuletSection = document.getElementById('amulet-section');
+            if (amuletSection) amuletSection.style.display = 'none';
+            var logBtn = document.querySelector('button[onclick="toggleLog()"]');
+            if (logBtn) logBtn.style.display = 'none';
+            var gameLog = document.getElementById('game-log');
+            if (gameLog) gameLog.classList.add('hidden');
+            
+            // Show phase display
+            var phaseDisplay = document.getElementById('phase-display');
+            if (phaseDisplay) phaseDisplay.style.display = 'block';
+            
+            // Reset timer to 5 minutes
+            discussionTimeLeft = 300;
+            
+            // Check if Blind Hunter is in the game
+            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            
+            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
+            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            var hasSpecialGoodRoles = players.some(function(p) {
+                return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
+            });
+            
+            var warningHtml = '';
+            if (hasBlindHunter && hasSpecialGoodRoles) {
+                warningHtml = '<div style="background: rgba(255, 87, 34, 0.3); border: 3px solid #FF5722; border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                    '<p style="font-size: 1.2rem; font-weight: 900; color: #FF5722; margin-bottom: 10px; text-align: center;">⚠️ هشدار مهم ⚠️</p>' +
+                    '<p style="font-size: 1.1rem; font-weight: bold; color: #FF5722; margin: 10px 0; text-align: center;">نقش‌های خود را فاش نکنید!</p>' +
+                    '<p style="margin: 10px 0; font-weight: bold;">نقاب‌دار در بازی است و می‌تواند در شکار نقش‌های خاص خوبی را شناسایی کند.</p>' +
+                    '<p style="margin: 10px 0;">اگر نقش‌های خود را (موبد، سیاوش، کاوه، رستم، جوان خام) فاش کنید، نقاب‌دار می‌تواند شما را شناسایی کند و بدی برنده می‌شود!</p>' +
+                    '</div>';
+            }
+            
+            var timerHtml = '<div style="background: rgba(33, 150, 243, 0.2); border: 2px solid var(--accent-color); border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">' +
+                '<p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;">⏱️ تایمر بحث</p>' +
+                '<div style="font-size: 3rem; font-weight: bold; color: var(--accent-color); margin: 15px 0; font-family: monospace;" id="discussion-timer-display">' + formatTime(discussionTimeLeft) + '</div>' +
+                '<div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin: 15px 0; flex-wrap: wrap;">' +
+                '<button onclick="adjustDiscussionTime(-60)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">-1 دقیقه</button>' +
+                '<button onclick="adjustDiscussionTime(-30)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">-30 ثانیه</button>' +
+                '<button onclick="toggleDiscussionTimer()" id="discussion-timer-btn" style="padding: 10px 20px; font-size: 1.1rem; font-weight: bold; background: var(--accent-color); border: none; border-radius: 5px; color: white; cursor: pointer;">شروع</button>' +
+                '<button onclick="adjustDiscussionTime(30)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">+30 ثانیه</button>' +
+                '<button onclick="adjustDiscussionTime(60)" style="padding: 8px 15px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--accent-color); border-radius: 5px; color: white; cursor: pointer;">+1 دقیقه</button>' +
+                '</div>' +
+                '<button onclick="resetDiscussionTimer()" style="padding: 8px 15px; font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; color: var(--text-secondary); cursor: pointer; margin-top: 10px;">بازنشانی به 5 دقیقه</button>' +
+                '</div>';
+            
+            var phaseTitle = document.getElementById('phase-title');
+            var phaseContent = document.getElementById('phase-content');
+            var actions = document.getElementById('action-buttons');
+            
+            if (!phaseTitle || !phaseContent || !actions) {
+                console.error('Required elements not found for discussion phase');
+                return;
+            }
+            
+            phaseTitle.innerText = 'فاز بحث - واپسین پیکار';
+            phaseContent.innerHTML = 
+                '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="font-size: 1.2rem; font-weight: bold; color: var(--evil-color); margin-bottom: 10px;">' + toFarsiNum(failThreshold) + ' پیکار شکست خورد!</p>' +
+                '<div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin: 15px 0; border-right: 4px solid var(--evil-color);">' +
+                '<p style="font-weight: bold; color: var(--evil-color); margin-bottom: 10px;">📜 روایت واپسین پیکار:</p>' +
+                '<p style="text-align: right; line-height: 1.8; font-size: 0.95rem; margin: 8px 0;">سه پیکار به ناکامی انجامید. تاریکی بر میدان نبرد چیره شده و لشکر ضحّاک ماردوش در آستانهٔ پیروزی است. اما هنوز امید هست!</p>' +
+                '</div>' +
+                warningHtml +
+                '<p style="margin: 15px 0; font-size: 1.1rem; font-weight: bold;">فاز بحث:</p>' +
+                '<p style="margin: 10px 0; font-size: 0.95rem; color: var(--text-secondary);">زمان برای بحث درباره اینکه چه کسانی لشکر ضحاک هستند. وقتی تایمر تمام شد، همه گفتگو باید متوقف شود.</p>' +
+                '</div>' +
+                timerHtml;
+            
+            actions.innerHTML = '<button class="action-btn" onclick="stopDiscussionTimer(); showBlindHunterDecision()">بحث تمام شد - ادامه</button>';
+            
+            // Auto-start the timer
+            setTimeout(function() {
+                if (!discussionTimerInterval && discussionTimeLeft > 0) {
+                    toggleDiscussionTimer();
+                }
+            }, 100);
+        }
+        
+        function formatTime(seconds) {
+            var mins = Math.floor(seconds / 60);
+            var secs = seconds % 60;
+            return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+        
+        function adjustDiscussionTime(change) {
+            discussionTimeLeft = Math.max(0, Math.min(3600, discussionTimeLeft + change)); // Clamp between 0 and 60 minutes
+            var display = document.getElementById('discussion-timer-display');
+            if (display) {
+                display.textContent = formatTime(discussionTimeLeft);
+                // Update color based on remaining time
+                if (discussionTimeLeft > 30) {
+                    display.style.color = 'var(--accent-color)';
+                } else if (discussionTimeLeft > 0) {
+                    display.style.color = 'var(--evil-color)';
+                }
+            }
+        }
+        
+        function resetDiscussionTimer() {
+            stopDiscussionTimer();
+            discussionTimeLeft = 300;
+            var display = document.getElementById('discussion-timer-display');
+            display.textContent = formatTime(discussionTimeLeft);
+            display.style.color = 'var(--accent-color)';
+            document.getElementById('discussion-timer-btn').textContent = 'شروع';
+        }
+        
+        function toggleDiscussionTimer() {
+            if (discussionTimerInterval) {
+                // Pause
+                clearInterval(discussionTimerInterval);
+                discussionTimerInterval = null;
+                document.getElementById('discussion-timer-btn').textContent = 'شروع';
+            } else {
+                // Start
+                if (discussionTimeLeft <= 0) {
+                    discussionTimeLeft = 300;
+                }
+                document.getElementById('discussion-timer-btn').textContent = 'توقف';
+                discussionTimerInterval = setInterval(function() {
+                    discussionTimeLeft--;
+                    document.getElementById('discussion-timer-display').textContent = formatTime(discussionTimeLeft);
+                    
+                    if (discussionTimeLeft <= 0) {
+                        stopDiscussionTimer();
+                        alert('⏰ زمان بحث تمام شد! همه گفتگو باید متوقف شود.');
+                    } else if (discussionTimeLeft <= 30) {
+                        // Change color to red when less than 30 seconds
+                        document.getElementById('discussion-timer-display').style.color = 'var(--evil-color)';
+                    }
+                }, 1000);
+            }
+        }
+        
+        function stopDiscussionTimer() {
+            if (discussionTimerInterval) {
+                clearInterval(discussionTimerInterval);
+                discussionTimerInterval = null;
+            }
+            var btn = document.getElementById('discussion-timer-btn');
+            if (btn) btn.textContent = 'شروع';
+        }
+        
+        function showBlindHunterDecision() {
+            // Check if Blind Hunter is in the game
+            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            
+            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
+            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            var hasSpecialGoodRoles = players.some(function(p) {
+                return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
+            });
+            
+            // Skip Blind Hunter decision if Blind Hunter is not in game or no special good roles
+            if (!hasBlindHunter || !hasSpecialGoodRoles) {
+                showGoodsLastChance();
+                return;
+            }
+            
+            // Keep UI elements hidden for cleaner view
+            document.getElementById('phase-title').innerText = 'تصمیم نقاب‌دار';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(255, 152, 0, 0.2); border: 2px solid var(--quest-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<p style="margin: 10px 0; font-size: 1.1rem; font-weight: bold;">سردار نهایی می‌پرسد:</p>' +
+                '<p style="margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 1.1rem; font-weight: bold; color: var(--accent-color);">"نقاب‌دار، اگر می‌خواهید سپاه فریدون را از واپسین فرصتشان بازدارید، می‌توانید وارد شکار شوید. اما باید درست شناسایی کنید، وگرنه آن‌ها برنده می‌شوند."</p>' +
+                '<p style="margin: 10px 0; color: var(--text-secondary);">اگر نقاب‌دار ساکت بماند، به واپسین پیکار (واپسین فرصت خوبی) می‌رویم.</p>' +
+                '</div>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="showBlindHunterHuntInstructions()" style="background: var(--evil-color);">نقاب‌دار شکار می‌کند</button>' +
+                '<button class="secondary-btn" onclick="showGoodsLastChance()" style="margin-top: 10px;">نقاب‌دار ساکت ماند - واپسین پیکار</button>';
+        }
+        
+        function showGoodsLastChance() {
+            // Update main screen with Good's Last Chance instructions
+            document.getElementById('phase-title').innerText = 'واپسین پیکار';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--good-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin: 15px 0; border-right: 4px solid var(--good-color);">' +
+                '<p style="font-weight: bold; color: var(--good-color); margin-bottom: 10px;">📜 روایت واپسین پیکار:</p>' +
+                '<p style="text-align: right; line-height: 1.8; font-size: 0.95rem; margin: 8px 0;">اکنون زمانِ واپسین نبرد فرا رسیده است. یاران سپاه فریدون باید یک‌بار و برای همیشه خائنان را شناسایی کنند. این آخرین فرصت است — اگر در این پیکار نیز شکست بخورند، تاریکی بر سرزمین چیره خواهد شد و ضحّاک ماردوش برای همیشه بر تخت خواهد نشست.</p>' +
+                '<p style="text-align: right; line-height: 1.8; font-size: 0.95rem; margin: 8px 0;">همه یاران باید آماده شوند. در این لحظهٔ سرنوشت‌ساز، حقیقت باید آشکار شود.</p>' +
+                '</div>' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--good-color); margin-bottom: 15px;">دستورالعمل واپسین پیکار:</p>' +
+                '<ol style="text-align: right; margin: 10px 0; padding-right: 20px; direction: rtl;">' +
+                '<li style="margin: 8px 0;">هر یار آماده اتهام می‌شود، اما <strong>دیگر بحثی انجام نمی‌شود</strong>.</li>' +
+                '<li style="margin: 8px 0;">در شمارش ' + toFarsiNum(3) + '، هر یار به <strong>' + toFarsiNum(2) + ' یار اشاره می‌کند</strong>.</li>' +
+                '<li style="margin: 8px 0;">دست‌های خود را در هوا نگه دارید، سپس اعلام کنید: <strong>"لشکر ضحاک، دست‌های خود را پایین بیاورید."</strong></li>' +
+                '<li style="margin: 8px 0;">در این مرحله، <strong>فقط یاران سپاه فریدون باید اشاره کنند</strong>.</li>' +
+                '</ol>' +
+                '<p style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>شرط برد:</strong> اگر یاران سپاه فریدون به <strong>همه یاران لشکر ضحاک</strong> و <strong>فقط یاران لشکر ضحاک</strong> اشاره کنند، سپاه فریدون برنده می‌شود!</p>' +
+                '<p style="margin-top: 10px; padding: 10px; background: rgba(255, 152, 0, 0.3); border-radius: 6px; font-size: 0.9rem;"><strong>قانون ویژه:</strong> اگر همه سرداران لشکر ضحاک بودند، سپاه فریدون به طور خودکار برنده می‌شود.</p>' +
+                '</div>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="resolveGoodsLastChance()">حل واپسین پیکار</button>';
+        }
+        
+        function resolveGoodsLastChance() {
+            // Check special rule: all leaders were evil
+            var allLeadersEvil = veterans.every(function(idx) {
+                return players[idx].alignment === 'evil';
+            });
+            
+            if (allLeadersEvil) {
+                endGame('good', 'سپاه فریدون برنده شد! همه سرداران لشکر ضحاک بودند (قانون ویژه).');
+                return;
+            }
+            
+            // Show resolution screen
+            document.getElementById('phase-title').innerText = 'حل واپسین پیکار';
+            document.getElementById('phase-content').innerHTML = 
+                '<p style="margin: 15px 0;">بعد از اینکه یاران اشاره کردند و لشکر ضحاک دست‌های خود را پایین آوردند:</p>' +
+                '<p style="color: var(--text-secondary); margin: 15px 0;">آیا یاران سپاه فریدون به همه یاران لشکر ضحاک و فقط یاران لشکر ضحاک اشاره کردند؟</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="endGame(\'good\', \'سپاه فریدون برنده شد! واپسین پیکار پیروز شد - همه یاران لشکر ضحاک به درستی شناسایی شدند.\')" style="background: var(--good-color);">سپاه فریدون برنده شد</button>' +
+                '<button class="action-btn" onclick="endGame(\'evil\', \'لشکر ضحاک برنده شد! واپسین پیکار شکست خورد - همه یاران لشکر ضحاک به درستی شناسایی نشدند.\')" style="background: var(--evil-color); margin-top: 10px;">لشکر ضحاک برنده شد</button>';
+        }
+
+        function showBlindHunterHuntInstructions() {
+            // Update main screen with detailed Blind Hunter hunt instructions
+            document.getElementById('phase-title').innerText = 'شکار نقاب‌دار';
+            document.getElementById('phase-content').innerHTML = 
+                '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
+                '<div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin: 15px 0; border-right: 4px solid var(--evil-color);">' +
+                '<p style="font-weight: bold; color: var(--evil-color); margin-bottom: 10px;">📜 روایت شکار:</p>' +
+                '<p style="text-align: right; line-height: 1.8; font-size: 0.95rem; margin: 8px 0;">نقاب‌دار، شکارچی تاریکی، خود را آشکار کرده است. اکنون زمانِ شکار فرا رسیده. اگر بتواند دو هدف خوب را شناسایی کند — از جمله موبد، نگهبانِ نور — تاریکی بر روشنایی چیره خواهد شد و ضحّاک ماردوش پیروز خواهد گشت.</p>' +
+                '<p style="text-align: right; line-height: 1.8; font-size: 0.95rem; margin: 8px 0;">اما اگر در شناسایی اشتباه کند، نور بر تاریکی پیروز خواهد شد و فریدون تاج شاهی را بر سر خواهد نهاد.</p>' +
+                '</div>' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--evil-color); margin-bottom: 15px;">دستورالعمل شکار نقاب‌دار:</p>' +
+                '<ol style="text-align: right; margin: 10px 0; padding-right: 20px; direction: rtl;">' +
+                '<li style="margin: 8px 0;">نقاب‌دار خود را نشان می‌دهد و می‌گوید که نقاب‌دار است.</li>' +
+                '<li style="margin: 8px 0;">نقاب‌دار باید <strong>' + toFarsiNum(2) + ' هدف خوب</strong> را با <strong>نقش</strong> شناسایی کند.</li>' +
+                '<li style="margin: 8px 0;"><strong>باید موبد را به عنوان یکی از اهداف شناسایی کند</strong> (الزامی است).</li>' +
+                '<li style="margin: 8px 0;">اهداف می‌توانند هر یاری باشند (یا نشان رو به پایین در بازی ' + toFarsiNum(4) + '-' + toFarsiNum(5) + ' نفره).</li>' +
+                '<li style="margin: 8px 0;">برای اهداف، کاوه آهنگر و رستم دستان می‌توانند به عنوان "سرباز" شناسایی شوند.</li>' +
+                '<li style="margin: 8px 0;">هیچ یاری (به جز نقاب‌دار) نمی‌تواند در طول شکار صحبت کند.</li>' +
+                '</ol>' +
+                '<p style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.3); border-radius: 6px;"><strong>شرط برد:</strong> اگر نقاب‌دار هر دو هدف را به درستی شناسایی کند (شامل موبد)، <strong>بدی برنده می‌شود</strong>!</p>' +
+                '<p style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>در غیر این صورت:</strong> اگر نقاب‌دار اشتباه کند، <strong>خوبی برنده می‌شود</strong>!</p>' +
+                '</div>' +
+                '<p style="margin: 15px 0; color: var(--text-secondary);">بعد از اینکه نقاب‌دار اهداف خود را شناسایی کرد:</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="blindHunterHunt()">نقاب‌دار اهداف را شناسایی کرد</button>';
+        }
+        
+        function blindHunterHunt() {
+            // Show resolution screen
+            document.getElementById('phase-title').innerText = 'نتیجه شکار نقاب‌دار';
+            document.getElementById('phase-content').innerHTML = 
+                '<p style="margin: 15px 0;">آیا نقاب‌دار هر دو هدف خوب را به درستی شناسایی کرد (شامل موبد)؟</p>';
+            
+            var actions = document.getElementById('action-buttons');
+            actions.innerHTML = 
+                '<button class="action-btn" onclick="endGame(\'evil\', \'نقاب‌دار اهداف خوب را به درستی شناسایی کرد. لشکر ضحاک برنده شد!\')" style="background: var(--evil-color);">نقاب‌دار پیروز شد</button>' +
+                '<button class="action-btn" onclick="endGame(\'good\', \'نقاب‌دار در شناسایی اهداف شکست خورد. خوبی برنده شد!\')" style="background: var(--good-color); margin-top: 10px;">نقاب‌دار شکست خورد</button>';
+        }
+
+
+        function endGame(winner, message) {
+            isGameEnded = true;
+            var titleEl = document.getElementById('end-game-title');
+            titleEl.innerText = (winner === 'good' ? 'خوبی' : 'بدی') + ' برنده شد!';
+            titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
+            document.getElementById('end-game-message').innerText = message;
+            document.getElementById('end-game-modal').classList.remove('hidden');
+            addLog('پایان بازی: ' + message);
+            
+            // Play victory sound
+            if (winner === 'good') {
+                playGoodWins();
+            } else {
+                playEvilWins();
+            }
+        }
+
+        function toggleLog() {
+            var log = document.getElementById('game-log');
+            log.classList.toggle('hidden');
+        }
+
+        function addLog(message) {
+            var timestamp = new Date().toLocaleTimeString();
+            gameLog.push('[' + timestamp + '] ' + message);
+            
+            var content = document.getElementById('log-content');
+            content.innerHTML = '';
+            gameLog.slice().reverse().forEach(function(entry) {
+                var div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerText = entry;
+                content.appendChild(div);
+            });
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
+            screens.forEach(s => {
+                var el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+            var target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        // Convert English numbers to Farsi numerals
+        function toFarsiNum(num) {
+            var farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            var numStr = num.toString();
+            var result = '';
+            for (var i = 0; i < numStr.length; i++) {
+                var char = numStr[i];
+                if (char >= '0' && char <= '9') {
+                    result += farsiDigits[parseInt(char)];
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        // Sound Effects
+        function playSound(frequency, duration, type) {
+            try {
+                var ctx = getAudioContext();
+                if (!ctx) return;
+                
+                var oscillator = ctx.createOscillator();
+                var gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type || 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration);
+            } catch (e) {
+                // Silently fail if audio context not available
+            }
+        }
+
+        function playQuestSuccess() {
+            // Heroic victory fanfare - ascending triumphant call
+            playSound(330.00, 0.12, 'sine'); // E4 - heroic base
+            setTimeout(() => playSound(440.00, 0.12, 'sine'), 120); // A4
+            setTimeout(() => playSound(554.37, 0.12, 'sine'), 240); // C#5
+            setTimeout(() => playSound(659.25, 0.15, 'sine'), 360); // E5 - triumphant peak
+            setTimeout(() => playSound(783.99, 0.2, 'sine'), 510); // G5 - victory resolution
+        }
+
+        function playQuestFailure() {
+            // Dark, ominous warning - descending menacing tone
+            playSound(277.18, 0.2, 'sawtooth'); // C#4 - dark warning
+            setTimeout(() => playSound(220.00, 0.25, 'sawtooth'), 200); // A3 - deeper threat
+            setTimeout(() => playSound(174.61, 0.3, 'sawtooth'), 450); // F3 - ominous low
+            setTimeout(() => playSound(146.83, 0.25, 'sawtooth'), 750); // D3 - final dark note
+        }
+
+        function playGoodWins() {
+            // Triumphant fanfare
+            playSound(523.25, 0.15, 'sine'); // C5
+            setTimeout(() => playSound(659.25, 0.15, 'sine'), 150); // E5
+            setTimeout(() => playSound(783.99, 0.15, 'sine'), 300); // G5
+            setTimeout(() => playSound(1046.50, 0.3, 'sine'), 450); // C6
+        }
+
+        function playEvilWins() {
+            // Darker, ominous sound
+            playSound(220.00, 0.2, 'sawtooth'); // A3
+            setTimeout(() => playSound(196.00, 0.2, 'sawtooth'), 200); // G3
+            setTimeout(() => playSound(174.61, 0.3, 'sawtooth'), 400); // F3
+        }
+    </script>
+</body>
+</html>

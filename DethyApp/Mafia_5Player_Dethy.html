@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>معمای ۴ کارآگاه</title>
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Dark Slate */
+            --card-bg: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6; /* Blue for Cop */
+            --mafia-color: #ef4444;
+            --cop-color: #3b82f6;
+            --btn-color: #3b82f6;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 0.5rem 0; font-weight: 900; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1e293b;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.1s;
+        }
+        button.action-btn:active { transform: scale(0.95); }
+
+        /* Screens */
+        .hidden { display: none !important; }
+        
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .role-title { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
+
+        /* Night Action UI */
+        .target-btn {
+            width: 100%;
+            background: #334155;
+            border: 1px solid #475569;
+            color: white;
+            padding: 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .target-btn:active { background: var(--accent-color); }
+
+        .result-box {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .mafia-text { color: #ef4444; }
+        .town-text { color: #22c55e; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container" style="padding-bottom: 100px;">
+        <h1>معمای ۴ کارآگاه</h1>
+        <p>سناریوی ۱ مافیا و ۴ پلیس</p>
+
+        <div class="setup-info">
+            <strong>نقش‌ها:</strong><br>
+            • ۱ <span style="color:var(--mafia-color)">مافیا</span> (گاد فادر)<br>
+            • ۱ <span style="color:var(--cop-color)">پلیس معتبر</span> (استعلام درست)<br>
+            • ۱ <span style="color:var(--cop-color)">پلیس برعکس</span> (استعلام برعکس)<br>
+            • ۱ <span style="color:var(--cop-color)">پلیس بدبین</span> (همیشه مافیا)<br>
+            • ۱ <span style="color:var(--cop-color)">پلیس ساده‌لوح</span> (همیشه شهروند)<br>
+            <br>
+            <em>نکته: هیچ پلیسی نمی‌داند کدام نوع پلیس است. همه فقط می‌دانند "پلیس" هستند.</em>
+        </div>
+
+        <div style="text-align: right; width: 100%; margin-bottom: 10px; font-weight: bold;">اسامی بازیکنان:</div>
+        <div id="player-inputs">
+            <input type="text" class="player-input" placeholder="جواد" value="جواد">
+            <input type="text" class="player-input" placeholder="ریحانه" value="ریحانه">
+            <input type="text" class="player-input" placeholder="رایان" value="رایان">
+            <input type="text" class="player-input" placeholder="بازیکن ۴" value="بازیکن ۴">
+            <input type="text" class="player-input" placeholder="بازیکن ۵" value="بازیکن ۵">
+        </div>
+    </div>
+
+    <!-- Setup Bottom Bar -->
+    <div id="setup-bar" class="bottom-bar">
+        <button class="action-btn" onclick="startDistribution()">توزیع نقش‌ها</button>
+    </div>
+
+    <!-- 2. Pass Screen (Shared) -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            نوبت: <span id="player-name-pass"></span>
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>گوشی را بدهید به:</h2>
+        <h1 id="pass-target-name" style="color: var(--accent-color);"></h1>
+        <button id="pass-action-btn" class="action-btn" style="margin-top: 20px;" onclick="revealContent()">مشاهده</button>
+    </div>
+
+    <!-- 3. Role Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <h2 id="reveal-player-name"></h2>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color: #ccc; font-size: 0.95rem; line-height: 1.6;">...</div>
+        </div>
+
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">نقش را به خاطر بسپارید.</p>
+        <button class="action-btn" style="background-color: #334155;" onclick="nextDistribute()">نفر بعدی</button>
+    </div>
+
+    <!-- 4. Distribution End / Phase Menu -->
+    <div id="phase-menu" class="container hidden">
+        <h1>فاز بازی</h1>
+        <p id="night-indicator" style="font-weight:bold; color:var(--accent-color);">شروع بازی</p>
+        <p>گوشی را به راوی بدهید.</p>
+        
+        <button class="action-btn" style="margin-bottom: 15px;" onclick="startNight()">شروع شب جدید</button>
+        
+        <div style="border-top: 1px solid #334155; margin: 20px 0; width: 100%;"></div>
+        
+        <div class="setup-info" style="text-align: center;">
+            <h3>نتایج واقعی (مخصوص راوی/گاد)</h3>
+            <button onclick="toggleGodView()" style="background:none; border:1px solid #555; color:#aaa; padding:5px 10px; border-radius:4px;">نمایش/مخفی</button>
+            <div id="god-view" class="hidden" style="text-align: right; margin-top: 10px; font-size: 0.85rem;"></div>
+            <div id="mafia-kill-log" style="text-align: right; margin-top: 10px; font-size: 0.85rem; color: #ef4444;"></div>
+        </div>
+        
+        <button class="action-btn" style="background-color: #ef4444; margin-top: 20px;" onclick="location.reload()">بازی جدید</button>
+    </div>
+
+    <!-- 5. Night Action Screen -->
+    <div id="night-screen" class="container hidden">
+        <h2 id="night-player-name"></h2>
+        <p>یک نفر را برای استعلام انتخاب کنید:</p>
+        
+        <div id="target-list" style="width: 100%;">
+            <!-- Target Buttons -->
+        </div>
+
+        <button class="action-btn" style="background-color: #334155; margin-top: 10px;" onclick="nextNight()">رد شدن / نفر بعدی</button>
+    </div>
+
+    <!-- 6. Result Screen -->
+    <div id="result-screen" class="container hidden">
+        <h2>نتیجه استعلام</h2>
+        <p>وضعیت بازیکن انتخاب شده:</p>
+        
+        <div id="result-box" class="result-box">
+            ...
+        </div>
+
+        <button class="action-btn" onclick="finishResult()">تایید و نفر بعدی</button>
+    </div>
+
+    <script>
+        // --- Constants ---
+        var ROLE_DEFS = {
+            mafia: { name: 'مافیا', color: '#ef4444', desc: 'شما مافیا هستید. هدف شما حذف شهروندان است.' },
+            sane: { name: 'پلیس', realType: 'sane', color: '#3b82f6', desc: 'شما پلیس هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            insane: { name: 'پلیس', realType: 'insane', color: '#3b82f6', desc: 'شما پلیس هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            paranoid: { name: 'پلیس', realType: 'paranoid', color: '#3b82f6', desc: 'شما پلیس هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            naive: { name: 'پلیس', realType: 'naive', color: '#3b82f6', desc: 'شما پلیس هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' }
+        };
+
+        // --- State ---
+        var playerNames = [];
+        var players = []; // { name, roleKey, roleObj }
+        var currentIndex = 0;
+        var isNightPhase = false;
+        var nightNumber = 0;
+
+        // --- Setup ---
+        function startDistribution() {
+            // Get Names
+            var inputs = document.querySelectorAll('.player-input');
+            playerNames = [];
+            for (var i = 0; i < inputs.length; i++) {
+                playerNames.push(inputs[i].value.trim() || inputs[i].getAttribute('placeholder'));
+            }
+
+            // Assign Roles
+            var deck = ['mafia', 'sane', 'insane', 'paranoid', 'naive'];
+            shuffleArray(deck);
+
+            players = [];
+            var godHtml = "";
+            for (var j = 0; j < 5; j++) {
+                var rKey = deck[j];
+                var rObj = ROLE_DEFS[rKey];
+                players.push({
+                    id: j,
+                    name: playerNames[j],
+                    roleKey: rKey,
+                    roleObj: rObj
+                });
+
+                // Build God View String
+                var realRoleName = rObj.name;
+                if (rKey === 'sane') realRoleName += " (معتبر)";
+                if (rKey === 'insane') realRoleName += " (برعکس)";
+                if (rKey === 'paranoid') realRoleName += " (بدبین/همیشه مافیا)";
+                if (rKey === 'naive') realRoleName += " (ساده‌لوح/همیشه شهر)";
+                
+                godHtml += "<strong>" + playerNames[j] + ":</strong> " + realRoleName + "<br>";
+            }
+            document.getElementById('god-view').innerHTML = godHtml;
+
+            // Start Flow
+            currentIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('setup-bar').classList.add('hidden');
+            
+            showPassScreen(false); // false = distribution mode
+        }
+
+        // --- Distribution Flow ---
+        function showPassScreen(nightMode) {
+            var p = players[currentIndex];
+            document.getElementById('player-name-pass').innerText = nightMode ? ("شب - نفر " + (currentIndex + 1)) : ("توزیع - نفر " + (currentIndex + 1));
+            document.getElementById('pass-target-name').innerText = p.name;
+            
+            var btn = document.getElementById('pass-action-btn');
+            btn.onclick = nightMode ? startNightTurn : revealRole;
+            btn.innerText = nightMode ? "شروع نوبت" : "مشاهده نقش";
+
+            showScreen('pass-screen');
+        }
+
+        function revealRole() {
+            var p = players[currentIndex];
+            document.getElementById('reveal-player-name').innerText = p.name;
+            
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            
+            titleEl.innerText = p.roleObj.name;
+            titleEl.style.color = p.roleObj.color;
+            descEl.innerText = p.roleObj.desc;
+
+            showScreen('reveal-screen');
+        }
+
+        function nextDistribute() {
+            currentIndex++;
+            if (currentIndex >= 5) {
+                showScreen('phase-menu');
+            } else {
+                showPassScreen(false);
+            }
+        }
+
+        // --- Night Flow ---
+        function startNight() {
+            currentIndex = 0;
+            isNightPhase = true;
+            nightNumber++;
+            document.getElementById('night-indicator').innerText = "شب " + nightNumber;
+            showPassScreen(true);
+        }
+
+        function startNightTurn() {
+            var p = players[currentIndex];
+            document.getElementById('night-player-name').innerText = p.name;
+
+            // Build Target List
+            var list = document.getElementById('target-list');
+            list.innerHTML = "";
+
+            // Add default Next button behavior back for Mafia case
+            var nextBtn = document.querySelector('#night-screen .action-btn');
+            nextBtn.classList.add('hidden'); // Hide default button initially, we control flow
+
+            if (p.roleKey === 'mafia') {
+                if (nightNumber === 1) {
+                     list.innerHTML = "<div style='color:#ef4444; font-weight:bold; margin-bottom:20px;'>شب معارفه (Headstart)<br>شما امشب شلیک ندارید.</div>";
+                     
+                     var btn = document.createElement('button');
+                     btn.className = 'target-btn';
+                     btn.innerText = "تایید و رد شدن";
+                     btn.onclick = function() { nextNight(); };
+                     list.appendChild(btn);
+                } else {
+                     list.innerHTML = "<div style='color:#ef4444; font-weight:bold; margin-bottom:10px;'>شلیک شب " + nightNumber + "</div>";
+                     for (var i = 0; i < players.length; i++) {
+                        if (i === currentIndex) continue; 
+                        
+                        var target = players[i];
+                        var btn = document.createElement('button');
+                        btn.className = 'target-btn';
+                        btn.innerText = "شلیک به " + target.name;
+                        btn.style.borderColor = "#ef4444";
+                        
+                        // Closure for click
+                        (function(tgt) {
+                            btn.onclick = function() { recordMafiaKill(tgt); };
+                        })(target);
+
+                        list.appendChild(btn);
+                    }
+                }
+            } else {
+                // Cops
+                for (var i = 0; i < players.length; i++) {
+                    if (i === currentIndex) continue;
+                    
+                    var target = players[i];
+                    var btn = document.createElement('button');
+                    btn.className = 'target-btn';
+                    btn.innerText = target.name;
+                    
+                    (function(tgt) {
+                        btn.onclick = function() { processInvestigation(p, tgt); };
+                    })(target);
+
+                    list.appendChild(btn);
+                }
+            }
+
+            showScreen('night-screen');
+        }
+
+        function recordMafiaKill(target) {
+             var logEl = document.getElementById('mafia-kill-log');
+             logEl.innerHTML += "شب " + nightNumber + ": شلیک به <strong>" + target.name + "</strong><br>";
+             
+             var resBox = document.getElementById('result-box');
+             resBox.innerText = "شلیک ثبت شد";
+             resBox.className = "result-box mafia-text";
+             resBox.style.borderColor = "#ef4444";
+             
+             showScreen('result-screen');
+        }
+
+        function processInvestigation(cop, target) {
+            var result = "";
+            var copType = cop.roleKey;
+            var targetIsMafia = (target.roleKey === 'mafia');
+
+            // Logic based on Dethy Wiki
+            if (copType === 'sane') {
+                // Reliable: Truth
+                result = targetIsMafia ? "مافیا" : "شهروند";
+            } else if (copType === 'insane') {
+                // Inverse: Opposite
+                result = targetIsMafia ? "شهروند" : "مافیا";
+            } else if (copType === 'paranoid') {
+                // Cynical: Always Mafia
+                result = "مافیا";
+            } else if (copType === 'naive') {
+                // Naive: Always Town
+                result = "شهروند";
+            }
+
+            var resBox = document.getElementById('result-box');
+            resBox.innerText = result;
+            
+            if (result === "مافیا") {
+                resBox.className = "result-box mafia-text";
+                resBox.style.borderColor = "#ef4444";
+            } else {
+                resBox.className = "result-box town-text";
+                resBox.style.borderColor = "#22c55e";
+            }
+
+            showScreen('result-screen');
+        }
+
+        function finishResult() {
+            nextNight();
+        }
+
+        function nextNight() {
+            currentIndex++;
+            if (currentIndex >= 5) {
+                // End of Night
+                showScreen('phase-menu');
+            } else {
+                showPassScreen(true);
+            }
+        }
+
+        // --- Utils ---
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'pass-screen', 'reveal-screen', 'phase-menu', 'night-screen', 'result-screen'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function toggleGodView() {
+            var el = document.getElementById('god-view');
+            if (el.classList.contains('hidden')) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+    </script>
+</body>
+</html>
+

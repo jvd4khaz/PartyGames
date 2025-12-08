@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bang! The Dice Game</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #ff6b35;
+            --sheriff-color: #FFD700;
+            --deputy-color: #4CAF50;
+            --outlaw-color: #F44336;
+            --renegade-color: #9C27B0;
+            --btn-color: #ff6b35;
+            --btn-text: #0a192f;
+            --border-radius: 8px;
+            --dice-bg: #233554;
+            --dice-border: #303C55;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        h3 { font-size: 1rem; margin: 8px 0; color: var(--text-primary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+        
+        /* Player Count Buttons - Mobile Friendly */
+        .player-count-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 10px 0;
+        }
+        .player-count-btn {
+            min-height: 70px;
+            font-size: 2rem;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 15px;
+            touch-action: manipulation;
+        }
+        .player-count-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        .player-count-btn:active {
+            transform: scale(0.95);
+        }
+        .player-count-btn.selected {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+        }
+        
+        @media (max-width: 480px) {
+            .player-count-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .player-count-btn {
+                min-height: 80px;
+                font-size: 2.2rem;
+            }
+        }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .secondary-btn:active { transform: scale(0.98); background: rgba(255, 107, 53, 0.1); }
+
+        .hidden { display: none !important; }
+
+        /* Role Display */
+        .role-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin: 5px;
+        }
+        .role-sheriff {
+            background: var(--sheriff-color);
+            color: #000;
+        }
+        .role-deputy {
+            background: var(--deputy-color);
+            color: white;
+        }
+        .role-outlaw {
+            background: var(--outlaw-color);
+            color: white;
+        }
+        .role-renegade {
+            background: var(--renegade-color);
+            color: white;
+        }
+
+        /* Player List */
+        .player-list {
+            margin: 15px 0;
+        }
+        .player-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            text-align: left;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .player-item.dead {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        .player-item.current-turn {
+            border-left-color: var(--sheriff-color);
+            background: rgba(255, 215, 0, 0.1);
+        }
+        .player-item.drag-over {
+            border-left-color: var(--accent-color);
+            background: rgba(255, 107, 53, 0.2);
+            border-left-width: 6px;
+            transform: scale(1.02);
+        }
+        .player-item.drag-over-attack {
+            border-left-color: var(--outlaw-color);
+            background: rgba(244, 67, 54, 0.2);
+        }
+        .player-item.drag-over-heal {
+            border-left-color: var(--deputy-color);
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .player-item.invalid-drop {
+            border-left-color: #666;
+            opacity: 0.5;
+        }
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        .player-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 3px 0;
+        }
+        .health-bar {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .health-segment {
+            width: calc((100% - 4px * (var(--max-health) - 1)) / var(--max-health));
+            min-width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            transition: all 0.3s;
+        }
+        .health-segment.lost {
+            background: rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.1);
+            opacity: 0.3;
+        }
+        .health-segment.low-health {
+            background: linear-gradient(135deg, #F44336, #EF5350);
+            border-color: rgba(244, 67, 54, 0.5);
+        }
+
+        /* Dice Area */
+        .dice-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .dice {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background: var(--dice-bg);
+            border: 2px solid var(--dice-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+            user-select: none;
+        }
+        .dice:active {
+            cursor: grabbing;
+        }
+        .dice.held {
+            border-color: var(--sheriff-color);
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .dice.resolved {
+            opacity: 0.3;
+            border-color: #666;
+            cursor: not-allowed;
+        }
+        .dice.locked {
+            border-color: #FF6F00;
+            background: rgba(255, 111, 0, 0.2);
+            box-shadow: 0 0 10px rgba(255, 111, 0, 0.4);
+            cursor: not-allowed;
+        }
+        .dice.dragging {
+            opacity: 0.7;
+            transform: scale(1.1);
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.8);
+        }
+        .dice.selected {
+            border-color: var(--accent-color);
+            background: rgba(255, 107, 53, 0.3);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        .player-item.selectable {
+            cursor: pointer;
+            border: 3px solid var(--accent-color);
+            background: rgba(255, 107, 53, 0.15);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+            transition: all 0.2s;
+        }
+        .player-item.selectable:active {
+            transform: scale(0.98);
+            background: rgba(255, 107, 53, 0.25);
+        }
+        .dice-symbol {
+            font-size: 2rem;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        .dice-symbol.number {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+
+        /* Game Status */
+        .game-status {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            text-align: center;
+            margin: 5px;
+        }
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Arrow Tokens */
+        .arrow-display {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .arrow-token {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #FF9800;
+            border: 2px solid #FF6F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .arrow-token.taken {
+            background: rgba(255, 152, 0, 0.3);
+            border-color: rgba(255, 111, 0, 0.5);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .action-buttons button {
+            flex: 1;
+        }
+
+        /* Target Selection */
+        .target-list {
+            margin: 15px 0;
+        }
+        .target-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .target-item:active {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: var(--accent-color);
+            transform: scale(0.98);
+        }
+        .target-item.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Character Ability */
+        .character-ability {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            border-left: 3px solid var(--accent-color);
+            text-align: left;
+        }
+
+        /* Log */
+        .game-log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .log-entry {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 2px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Win Screen */
+        .win-screen {
+            text-align: center;
+            padding: 20px;
+        }
+        .win-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .win-sheriff { color: var(--sheriff-color); }
+        .win-deputy { color: var(--deputy-color); }
+        .win-outlaw { color: var(--outlaw-color); }
+        .win-renegade { color: var(--renegade-color); }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .container { 
+            animation: fadeIn 0.3s ease-out; 
+        }
+
+        /* Guide Styles */
+        .guide-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .guide-title {
+            font-size: 1.3rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .rebus-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .rebus-symbol {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            min-width: 60px;
+            text-align: center;
+        }
+        .rebus-content {
+            flex: 1;
+        }
+        .rebus-title {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        .rebus-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .dice-guide-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .dice-guide-card {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--accent-color);
+        }
+        .dice-guide-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+        .dice-guide-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .dice-guide-effect {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        .flow-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .flow-text {
+            flex: 1;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .guide-warning {
+            background: rgba(244, 67, 54, 0.2);
+            border-left: 4px solid var(--outlaw-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .guide-info {
+            background: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        /* Win Banner */
+        .win-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 25, 47, 0.98);
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 4px solid;
+            animation: slideDown 0.5s ease-out;
+        }
+        .win-banner.hidden {
+            display: none;
+        }
+        .win-banner.win-sheriff {
+            border-bottom-color: var(--sheriff-color);
+        }
+        .win-banner.win-deputy {
+            border-bottom-color: var(--deputy-color);
+        }
+        .win-banner.win-outlaw {
+            border-bottom-color: var(--outlaw-color);
+        }
+        .win-banner.win-renegade {
+            border-bottom-color: var(--renegade-color);
+        }
+        .win-banner-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .win-banner-message {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>Bang! The Dice Game</h1>
+        <p>Wild West Dice Rolling Game</p>
+
+        <div class="setup-info">
+            <strong>Game Overview:</strong><br>
+            • Sheriff (revealed) and Deputies vs Outlaws and Renegade<br>
+            • Roll dice up to 3 times per turn<br>
+            • Sheriff wins by eliminating all Outlaws and Renegade<br>
+            • Outlaws win by eliminating the Sheriff<br>
+            • Renegade wins by being last player standing<br>
+            • Supports 3-8 players
+        </div>
+
+        <div class="input-group">
+            <label style="margin-bottom: 15px; display: block; font-size: 1.1rem;">Number of Players:</label>
+            <div class="player-count-buttons">
+                <button class="player-count-btn" data-count="3" onclick="selectPlayerCount(3)">3</button>
+                <button class="player-count-btn" data-count="4" onclick="selectPlayerCount(4)">4</button>
+                <button class="player-count-btn" data-count="5" onclick="selectPlayerCount(5)">5</button>
+                <button class="player-count-btn" data-count="6" onclick="selectPlayerCount(6)">6</button>
+                <button class="player-count-btn" data-count="7" onclick="selectPlayerCount(7)">7</button>
+                <button class="player-count-btn" data-count="8" onclick="selectPlayerCount(8)">8</button>
+            </div>
+            <input type="hidden" id="player-count" value="4">
+        </div>
+
+        <div class="input-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="vanilla-mode" style="width: 20px; height: 20px; cursor: pointer;">
+                <span>Use Vanilla Characters (No Special Abilities)</span>
+            </label>
+        </div>
+
+        <button class="action-btn" onclick="startGame()">Start Game</button>
+        <button class="secondary-btn" onclick="showGuide()">📖 View Guide</button>
+    </div>
+
+    <!-- Role Assignment Screen -->
+    <div id="role-screen" class="container hidden">
+        <h2>Player <span id="current-player-num">1</span> - Look at Your Role</h2>
+        <div id="role-display"></div>
+        <button class="action-btn" onclick="nextPlayerRole()">I've Seen My Role</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h2>Bang! The Dice Game</h2>
+        
+        <div class="game-status">
+            <div class="status-item">
+                <div class="status-label">Current Turn</div>
+                <div class="status-value" id="current-turn-player">-</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Arrows</div>
+                <div class="status-value" id="arrow-count">9</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Rolls Left</div>
+                <div class="status-value" id="rolls-left">3</div>
+            </div>
+        </div>
+
+        <div id="player-list" class="player-list"></div>
+
+        <div id="dice-area" class="hidden">
+            <h3>Your Dice - Drag onto players to resolve</h3>
+            <div class="dice-container" id="dice-container"></div>
+            <div class="action-buttons">
+                <button class="secondary-btn" onclick="rollDice()">Roll Dice</button>
+                <button class="action-btn" onclick="endTurn()">End Turn</button>
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                <strong>How to resolve:</strong><br>
+                • Drag <strong>1</strong> dice → Attack player at distance 1 (adjacent)<br>
+                • Drag <strong>2</strong> dice → Attack player at distance 2<br>
+                • Drag <strong>🍺</strong> dice → Heal any player<br>
+                • <strong>🏹</strong> and <strong>⚙️</strong> resolve automatically<br>
+                • <strong>💣</strong> cannot be dragged (resolves automatically)<br>
+                <em>Players are shown from your perspective in a circle</em>
+            </div>
+        </div>
+
+        <div id="target-selection" class="hidden">
+            <h3>Select Target</h3>
+            <div id="target-list" class="target-list"></div>
+        </div>
+
+        <div id="action-buttons-area" class="hidden">
+            <button class="action-btn" onclick="startTurn()">Start Your Turn</button>
+        </div>
+
+        <div class="game-log" id="game-log">
+            <div class="log-entry">Game started!</div>
+        </div>
+        
+        <button class="secondary-btn" onclick="showGuide()" style="margin-top: 15px;">📖 View Guide</button>
+    </div>
+
+    <!-- Win Banner (overlay on game screen) -->
+    <div id="win-banner" class="win-banner hidden">
+        <div class="win-banner-title" id="win-banner-title">Game Over</div>
+        <div class="win-banner-message" id="win-banner-message"></div>
+        <button class="action-btn" onclick="resetGame()" style="max-width: 300px; margin: 0 auto;">New Game</button>
+    </div>
+
+    <!-- Win Screen -->
+    <div id="win-screen" class="container hidden">
+        <div class="win-screen">
+            <h1 class="win-title" id="win-title">Game Over</h1>
+            <p id="win-message"></p>
+            <button class="action-btn" onclick="resetGame()">New Game</button>
+        </div>
+    </div>
+
+    <!-- Guide Screen -->
+    <div id="guide-screen" class="container hidden">
+        <h1>📖 Bang! The Dice Game Guide</h1>
+        <div id="guide-content" style="text-align: left; max-height: 80vh; overflow-y: auto; padding: 10px;">
+            <!-- Guide content will be inserted here -->
+        </div>
+        <button class="action-btn" onclick="hideGuide()" style="margin-top: 15px;">Back to Game</button>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            players: [],
+            currentPlayerIndex: 0,
+            dice: [],
+            heldDice: [],
+            resolvedDice: [], // Track which dice indices have been resolved
+            lockedDice: [], // Track which dice are locked (dynamite during roll phase)
+            rollsLeft: 3,
+            arrows: 9,
+            playerArrows: {},
+            gamePhase: 'setup',
+            pendingAction: null,
+            gameEnded: false,
+            elGringoHitThisTurn: false // Track if El Gringo was hit this turn (for arrow ability)
+        };
+
+        // Characters with starting health (Bang! The Dice Game)
+        // Health values from official rules (guide.md)
+        // Note: Some characters requiring complex UI interactions are temporarily disabled
+        const characters = [
+            // { name: "Bart Cassidy", health: 8, ability: "Take arrow instead of losing life (except Indians/Dynamite)" }, // Needs UI choice
+            { name: "Black Jack", health: 8, ability: "You may re-roll Dynamite dice (unless 3+ Dynamite)" },
+            { name: "Calamity Janet", health: 8, ability: "Can use 1 as 2 and vice versa" },
+            { name: "El Gringo", health: 7, ability: "Attacker takes arrow when hitting you" },
+            { name: "Jesse Jones", health: 9, ability: "Beer heals 2 if health ≤ 4" },
+            { name: "Jourdonnais", health: 7, ability: "Never loses more than 1 life to Indians" },
+            // { name: "Kit Carlson", health: 7, ability: "For each Gatling dice, discard one arrow from any player" }, // Needs target selection
+            { name: "Lucky Duke", health: 8, ability: "One extra re-roll (4 total)" },
+            { name: "Paul Regret", health: 9, ability: "Never loses life to Gatling Gun" },
+            // { name: "Pedro Ramirez", health: 8, ability: "When losing life, may discard one arrow" }, // Needs UI choice
+            { name: "Rose Doolan", health: 9, ability: "Can use 1/2 for players one place further" },
+            // { name: "Sid Ketchum", health: 8, ability: "At start of turn, any player gains 1 life" }, // Needs target selection
+            // { name: "Slab the Killer", health: 8, ability: "Can use Beer to double a 1 or 2 Bullseye" }, // Needs UI choice
+            { name: "Suzy Lafayette", health: 8, ability: "If no 1 or 2 rolled, gain 2 life" },
+            { name: "Vulture Sam", health: 9, ability: "Gain 2 life when another player eliminated" },
+            { name: "Willy the Kid", health: 8, ability: "Only needs 2 Gatling to activate" }
+        ];
+
+        // Vanilla characters (no special abilities) - all have health 8
+        const vanillaCharacters = [
+            { name: "Outlaw Joe", health: 8, ability: "No special ability" },
+            { name: "Sheriff Tom", health: 8, ability: "No special ability" },
+            { name: "Deputy Bill", health: 8, ability: "No special ability" },
+            { name: "Renegade Sam", health: 8, ability: "No special ability" },
+            { name: "Gunslinger", health: 8, ability: "No special ability" },
+            { name: "Bounty Hunter", health: 8, ability: "No special ability" },
+            { name: "Marshall", health: 8, ability: "No special ability" },
+            { name: "Desperado", health: 8, ability: "No special ability" },
+            { name: "Bandit", health: 8, ability: "No special ability" },
+            { name: "Cowboy", health: 8, ability: "No special ability" },
+            { name: "Ranger", health: 8, ability: "No special ability" },
+            { name: "Vigilante", health: 8, ability: "No special ability" },
+            { name: "Drifter", health: 8, ability: "No special ability" },
+            { name: "Gambler", health: 8, ability: "No special ability" },
+            { name: "Outlaw", health: 8, ability: "No special ability" },
+            { name: "Lawman", health: 8, ability: "No special ability" }
+        ];
+
+        // Dice symbols
+        const diceSymbols = {
+            'bang': '1',
+            'doublebang': '2',
+            'beer': '🍺',
+            'gatling': '⚙️',
+            'arrow': '🏹',
+            'dynamite': '💣'
+        };
+
+        function selectPlayerCount(count) {
+            // Update hidden input
+            document.getElementById('player-count').value = count;
+            
+            // Update button styles
+            document.querySelectorAll('.player-count-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.dataset.count) === count) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+        
+        function startGame() {
+            const playerCount = parseInt(document.getElementById('player-count').value);
+            if (playerCount < 3 || playerCount > 8) {
+                // This shouldn't happen with button selection, but handle gracefully
+                return;
+            }
+
+            // Assign roles
+            const roles = assignRoles(playerCount);
+            
+            // Check if vanilla mode is enabled
+            const useVanilla = document.getElementById('vanilla-mode').checked;
+            const charPool = useVanilla ? vanillaCharacters : characters;
+            const shuffledChars = [...charPool].sort(() => Math.random() - 0.5);
+            
+            gameState.players = [];
+            for (let i = 0; i < playerCount; i++) {
+                const char = shuffledChars[i];
+                gameState.players.push({
+                    name: char.name, // Use character name instead of "Player X"
+                    role: roles[i],
+                    character: char.name,
+                    ability: char.ability,
+                    health: char.health,
+                    maxHealth: char.health,
+                    arrows: 0,
+                    isDead: false
+                });
+            }
+
+            // Sheriff gets +2 health (from guide.md: "two additional bullets")
+            const sheriffIndex = gameState.players.findIndex(p => p.role === 'sheriff');
+            if (sheriffIndex !== -1) {
+                gameState.players[sheriffIndex].health += 2;
+                gameState.players[sheriffIndex].maxHealth += 2;
+            }
+
+            gameState.currentPlayerIndex = 0;
+            gameState.playerArrows = {};
+            gameState.gamePhase = 'role';
+            gameState.players.forEach((p, i) => {
+                gameState.playerArrows[i] = 0;
+            });
+
+            showRoleScreen();
+        }
+
+        function assignRoles(playerCount) {
+            // Role distribution from guide.md (lines 15-19)
+            let roles = ['sheriff'];
+            let outlaws = 0;
+            let renegades = 0;
+            let deputies = 0;
+            
+            if (playerCount === 4) {
+                // 1 Sheriff, 1 Renegade, 2 Outlaws
+                renegades = 1;
+                outlaws = 2;
+            } else if (playerCount === 5) {
+                // 1 Sheriff, 1 Renegade, 2 Outlaws, 1 Deputy
+                renegades = 1;
+                outlaws = 2;
+                deputies = 1;
+            } else if (playerCount === 6) {
+                // 1 Sheriff, 1 Renegade, 3 Outlaws, 1 Deputy
+                renegades = 1;
+                outlaws = 3;
+                deputies = 1;
+            } else if (playerCount === 7) {
+                // 1 Sheriff, 1 Renegade, 3 Outlaws, 2 Deputies
+                renegades = 1;
+                outlaws = 3;
+                deputies = 2;
+            } else if (playerCount === 8) {
+                // 1 Sheriff, 2 Renegades, 3 Outlaws, 2 Deputies
+                renegades = 2;
+                outlaws = 3;
+                deputies = 2;
+            } else {
+                // Fallback for 3 players (not in guide, but handle gracefully)
+                outlaws = 2;
+            }
+
+            for (let i = 0; i < outlaws; i++) roles.push('outlaw');
+            for (let i = 0; i < deputies; i++) roles.push('deputy');
+            for (let i = 0; i < renegades; i++) roles.push('renegade');
+
+            // Shuffle all except sheriff (first)
+            const rest = roles.slice(1).sort(() => Math.random() - 0.5);
+            return [roles[0], ...rest];
+        }
+
+        function showRoleScreen() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('role-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('win-screen').classList.add('hidden');
+
+            const player = gameState.players[gameState.currentPlayerIndex];
+            document.getElementById('current-player-num').textContent = gameState.currentPlayerIndex + 1;
+            
+            let roleDisplay = `
+                <div class="player-item">
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-info">
+                        <span class="role-badge role-${player.role}">${player.role.toUpperCase()}</span>
+                    </div>
+                    <div class="player-info">Character: <strong>${player.character}</strong></div>
+                    <div class="player-info">Health: <strong>${player.health}</strong></div>
+                    <div class="character-ability">${player.ability}</div>
+                    ${player.role === 'sheriff' ? '<div class="player-info" style="color: var(--sheriff-color); margin-top: 10px;"><strong>You are the Sheriff (revealed to all)</strong></div>' : ''}
+                </div>
+            `;
+            document.getElementById('role-display').innerHTML = roleDisplay;
+        }
+
+        function nextPlayerRole() {
+            gameState.currentPlayerIndex++;
+            if (gameState.currentPlayerIndex < gameState.players.length) {
+                showRoleScreen();
+            } else {
+                startGameplay();
+            }
+        }
+
+        function startGameplay() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('role-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('win-screen').classList.add('hidden');
+
+            gameState.currentPlayerIndex = 0;
+            gameState.gamePhase = 'gameplay';
+            updateGameDisplay();
+            showActionButtons();
+        }
+
+        function getDistance(fromIndex, toIndex, totalPlayers) {
+            if (fromIndex === toIndex) return 0;
+            
+            // Rule: Don't count eliminated players when calculating distance
+            // We need to count only alive players between fromIndex and toIndex
+            const aliveIndices = [];
+            for (let i = 0; i < totalPlayers; i++) {
+                if (!gameState.players[i].isDead) {
+                    aliveIndices.push(i);
+                }
+            }
+            
+            // Find positions in alive players list
+            const fromAliveIndex = aliveIndices.indexOf(fromIndex);
+            const toAliveIndex = aliveIndices.indexOf(toIndex);
+            
+            if (fromAliveIndex === -1 || toAliveIndex === -1) return 0;
+            
+            // Calculate distance in circular arrangement of alive players
+            const aliveCount = aliveIndices.length;
+            const forward = (toAliveIndex - fromAliveIndex + aliveCount) % aliveCount;
+            const backward = (fromAliveIndex - toAliveIndex + aliveCount) % aliveCount;
+            return Math.min(forward, backward);
+        }
+
+        function getEffectiveDistance(attackerIndex, targetIndex, attackerCharacter, targetCharacter) {
+            // Use alive players count for distance calculation (eliminated players don't count)
+            let distance = getDistance(attackerIndex, targetIndex, gameState.players.length);
+            
+            // Character abilities that modify distance
+            // Rose Doolan: You see others at distance -1 (from card game, helps with targeting)
+            if (attackerCharacter === 'Rose Doolan') {
+                distance = Math.max(1, distance - 1);
+            }
+            
+            // Note: Paul Regret's dice game ability is Gatling immunity, not distance modifier
+            
+            return distance;
+        }
+
+        function updateGameDisplay() {
+            const playerList = document.getElementById('player-list');
+            playerList.innerHTML = '';
+
+            const currentPlayerIndex = gameState.currentPlayerIndex;
+            const totalPlayers = gameState.players.length;
+            
+            // Reorder players: current player first, then clockwise around the circle
+            const reorderedPlayers = [];
+            for (let i = 0; i < totalPlayers; i++) {
+                const index = (currentPlayerIndex + i) % totalPlayers;
+                reorderedPlayers.push({ player: gameState.players[index], originalIndex: index });
+            }
+
+            reorderedPlayers.forEach(({ player, originalIndex }, displayIndex) => {
+                const isCurrentPlayer = originalIndex === currentPlayerIndex;
+                const attacker = gameState.players[currentPlayerIndex];
+                const baseDistance = getDistance(currentPlayerIndex, originalIndex, totalPlayers);
+                const distance = getEffectiveDistance(currentPlayerIndex, originalIndex, attacker.character, player.character);
+                
+                let roleDisplay = '';
+                if (player.role === 'sheriff') {
+                    roleDisplay = `<span class="role-badge role-sheriff">SHERIFF</span>`;
+                } else if (player.isDead || gameState.gameEnded) {
+                    // Reveal role if dead or game ended
+                    roleDisplay = `<span class="role-badge role-${player.role}">${player.role.toUpperCase()}</span>`;
+                }
+                // No "Role Hidden" text for living non-sheriff players (unless game ended)
+
+                // Character ability and distance indicators (rebus style) - after player name
+                let nameSuffix = '';
+                // Show character ability indicators (rebus style) - made clearer and more self-explanatory
+                if (player.character === 'Rose Doolan') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Can use 1/2 for players one place further">1→2🎯</span>`;
+                } else if (player.character === 'Paul Regret') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Never loses life to Gatling Gun">⚙️❌</span>`;
+                } else if (player.character === 'Black Jack') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="You may re-roll Dynamite (unless 3+)">💣↻</span>`;
+                } else if (player.character === 'Jourdonnais') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="You may re-roll Dynamite, max 1 damage from Indians">💣↻🛡️1</span>`;
+                } else if (player.character === 'Calamity Janet') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Can use 1 as 2 and vice versa">1↔2</span>`;
+                } else if (player.character === 'Willy the Kid') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Only needs 2 Gatling to activate">⚙️⚙️</span>`;
+                } else if (player.character === 'Lucky Duke') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="One extra re-roll (4 total)">🎲×4</span>`;
+                } else if (player.character === 'Jesse Jones') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Beer heals 2 if health ≤ 4">🍺×2</span>`;
+                } else if (player.character === 'Suzy Lafayette') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="If no 1 or 2 rolled, gain 2 life">❌1❌2❤️❤️</span>`;
+                } else if (player.character === 'Vulture Sam') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Gain 2 life when another player eliminated">🦅❤️❤️</span>`;
+                } else if (player.character === 'El Gringo') {
+                    nameSuffix += `<span style="font-size: 1.1rem; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Attacker takes arrow when hitting you">🏹⬅️</span>`;
+                }
+                
+                // Distance indicator (only for non-current players) - rebus style
+                if (!isCurrentPlayer && !player.isDead) {
+                    nameSuffix += `<span style="font-size: 1.1rem; color: var(--accent-color); font-weight: bold; margin-left: 6px; display: inline-flex; align-items: center; gap: 2px;" title="Distance: ${distance}">📏${distance}</span>`;
+                }
+
+                // Create rebus-style visual indicators
+                // Health indicator (heart emoji) - rebus style
+                let healthRow = `<div style="display: flex; align-items: center; gap: 4px; margin: 4px 0;" title="Health: ${player.health}/${player.maxHealth}">${'❤️'.repeat(player.health)}${'🤍'.repeat(player.maxHealth - player.health)}</div>`;
+                
+                // Arrows indicator - rebus style (under health for easy comparison)
+                // Only show if player has arrows
+                let arrowsRow = '';
+                if (player.arrows > 0) {
+                    const arrowCount = Math.min(player.arrows, 5);
+                    const extraArrows = player.arrows > 5 ? player.arrows - 5 : 0;
+                    arrowsRow = `<div style="display: flex; align-items: center; gap: 4px; margin: 4px 0;" title="${player.arrows} arrows">${'🏹'.repeat(arrowCount)}${extraArrows > 0 ? `<span style="font-size: 0.9rem; color: var(--accent-color);">+${extraArrows}</span>` : ''}</div>`;
+                }
+                // Don't show anything if no arrows
+
+                const playerDiv = document.createElement('div');
+                playerDiv.className = `player-item ${player.isDead ? 'dead' : ''} ${isCurrentPlayer ? 'current-turn' : ''}`;
+                playerDiv.dataset.playerIndex = originalIndex;
+                playerDiv.dataset.distance = distance;
+                playerDiv.innerHTML = `
+                    <div class="player-name">${player.name} ${isCurrentPlayer ? '👈 (YOU)' : ''}${nameSuffix}</div>
+                    ${roleDisplay ? `<div class="player-info" style="margin: 4px 0;">${roleDisplay}</div>` : ''}
+                    ${healthRow}
+                    ${arrowsRow}
+                `;
+                
+                // Make player items droppable (desktop) and tappable (mobile)
+                if (!player.isDead && gameState.gamePhase === 'gameplay') {
+                    // Drag and drop (desktop)
+                    playerDiv.addEventListener('dragover', handlePlayerDragOver);
+                    playerDiv.addEventListener('drop', handlePlayerDrop);
+                    playerDiv.addEventListener('dragleave', handlePlayerDragLeave);
+                    playerDiv.addEventListener('dragenter', handlePlayerDragEnter);
+                    
+                    // Tap to apply selected dice (mobile-friendly)
+                    if (selectedDiceIndex !== null) {
+                        const isValidTarget = canUseDiceOnPlayer(selectedDiceIndex, originalIndex);
+                        if (isValidTarget) {
+                            playerDiv.classList.add('selectable');
+                            playerDiv.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                if (selectedDiceIndex !== null) {
+                                    const success = resolveDiceOnPlayer(selectedDiceIndex, originalIndex);
+                                    if (success) {
+                                        selectedDiceIndex = null;
+                                        selectedDiceSymbol = null;
+                                        displayDice();
+                                        updateGameDisplay();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+                
+                playerList.appendChild(playerDiv);
+            });
+
+            document.getElementById('current-turn-player').textContent = 
+                gameState.players[gameState.currentPlayerIndex]?.name || '-';
+            document.getElementById('arrow-count').textContent = gameState.arrows;
+            document.getElementById('rolls-left').textContent = gameState.rollsLeft;
+        }
+
+        function showActionButtons() {
+            document.getElementById('dice-area').classList.add('hidden');
+            document.getElementById('target-selection').classList.add('hidden');
+            document.getElementById('action-buttons-area').classList.remove('hidden');
+        }
+
+        function startTurn() {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            if (player.isDead) {
+                nextPlayer();
+                return;
+            }
+
+            // Lucky Duke: One extra re-roll (4 total instead of 3)
+            gameState.rollsLeft = player.character === 'Lucky Duke' ? 4 : 3;
+            gameState.dice = [];
+            gameState.heldDice = [];
+            gameState.resolvedDice = [];
+            gameState.lockedDice = []; // Reset locked dice at start of turn
+            gameState.pendingAction = null;
+            gameState.elGringoHitThisTurn = false; // Reset El Gringo hit tracking
+            selectedDiceIndex = null; // Clear dice selection
+            selectedDiceSymbol = null;
+
+            document.getElementById('action-buttons-area').classList.add('hidden');
+            document.getElementById('dice-area').classList.remove('hidden');
+            document.getElementById('target-selection').classList.add('hidden');
+
+            addLog(`${player.name} starts their turn`);
+            rollDice();
+            autoResolveSpecialDice();
+        }
+
+        function rollDice() {
+            if (gameState.rollsLeft <= 0) {
+                addLog('⚠️ No rolls left! Please resolve your dice.');
+                return;
+            }
+
+            const symbols = Object.keys(diceSymbols);
+            const newDice = [];
+            
+            // Rule: Dynamite is locked for the whole roll phase (cannot be re-rolled)
+            // Exception: Black Jack and Jourdonnais can re-roll dynamite
+            const player = gameState.players[gameState.currentPlayerIndex];
+            const canRerollDynamite = player.character === 'Black Jack' || player.character === 'Jourdonnais';
+            
+            for (let i = 0; i < 5; i++) {
+                // Keep held dice (but dynamite cannot be held)
+                if (gameState.heldDice[i] && gameState.heldDice[i] !== 'dynamite') {
+                    newDice[i] = gameState.heldDice[i];
+                }
+                // Keep locked dice (dynamite that was rolled, unless character can re-roll it)
+                else if (gameState.lockedDice[i] && gameState.dice[i] && !canRerollDynamite) {
+                    newDice[i] = gameState.dice[i]; // Keep the locked dynamite
+                }
+                // For Black Jack/Jourdonnais: can re-roll dynamite if < 3 total
+                else if (canRerollDynamite && gameState.dice[i] === 'dynamite') {
+                    const currentDynamiteCount = gameState.dice.filter(d => d === 'dynamite').length;
+                    if (currentDynamiteCount < 3) {
+                        // Allow re-roll
+                        newDice[i] = symbols[Math.floor(Math.random() * symbols.length)];
+                    } else {
+                        // 3+ dynamite, keep it (will explode)
+                        newDice[i] = 'dynamite';
+                    }
+                }
+                // Roll new die
+                else {
+                    newDice[i] = symbols[Math.floor(Math.random() * symbols.length)];
+                }
+            }
+            
+            // Lock any dynamite that was rolled (for next re-roll)
+            gameState.lockedDice = [];
+            newDice.forEach((d, i) => {
+                if (d === 'dynamite' && !canRerollDynamite) {
+                    gameState.lockedDice[i] = true;
+                }
+            });
+
+            // Clear resolved dice on re-roll (new dice at these positions are not resolved)
+            // Only keep resolved status for dice that are being held (but held dice shouldn't be resolved anyway)
+            gameState.resolvedDice = [];
+
+            gameState.dice = newDice;
+            gameState.rollsLeft--;
+
+            displayDice();
+            addLog(`${gameState.players[gameState.currentPlayerIndex].name} rolls dice (${gameState.rollsLeft} rolls left)`);
+            
+            // Auto-resolve special dice (arrows, gatling, dynamite)
+            setTimeout(() => autoResolveSpecialDice(), 100);
+        }
+
+        function displayDice() {
+            const container = document.getElementById('dice-container');
+            container.innerHTML = '';
+
+            gameState.dice.forEach((symbol, index) => {
+                const dice = document.createElement('div');
+                const isResolved = gameState.resolvedDice.includes(index);
+                const isHeld = gameState.heldDice[index];
+                const isLocked = gameState.lockedDice[index]; // Dynamite locked during roll phase
+                const canDrag = !isResolved && symbol !== 'dynamite';
+                
+                const isSelected = selectedDiceIndex === index;
+                dice.className = `dice ${isHeld ? 'held' : ''} ${isResolved ? 'resolved' : ''} ${isLocked ? 'locked' : ''} ${isSelected ? 'selected' : ''}`;
+                dice.draggable = canDrag;
+                dice.dataset.diceIndex = index;
+                dice.dataset.symbol = symbol;
+                
+                const isNumber = symbol === 'bang' || symbol === 'doublebang';
+                dice.innerHTML = `<div class="dice-symbol ${isNumber ? 'number' : ''}">${diceSymbols[symbol]}</div>`;
+                
+                if (!isResolved && symbol !== 'dynamite') {
+                    // Tap to select dice (mobile-friendly)
+                    dice.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (selectedDiceIndex === index) {
+                            // Deselect
+                            selectedDiceIndex = null;
+                            selectedDiceSymbol = null;
+                            displayDice();
+                            updateGameDisplay();
+                        } else {
+                            // Select this dice
+                            selectedDiceIndex = index;
+                            selectedDiceSymbol = symbol;
+                            displayDice();
+                            updateGameDisplay();
+                            addLog(`Selected ${diceSymbols[symbol]} - Tap a player to use it`);
+                        }
+                    });
+                    // Long press or double-click to hold (for desktop)
+                    dice.addEventListener('dblclick', () => toggleHoldDice(index));
+                    // Drag and drop (for desktop)
+                    dice.addEventListener('dragstart', handleDiceDragStart);
+                    dice.addEventListener('dragend', handleDiceDragEnd);
+                }
+                
+                container.appendChild(dice);
+            });
+        }
+
+        function toggleHoldDice(index) {
+            const symbol = gameState.dice[index];
+            const player = gameState.players[gameState.currentPlayerIndex];
+            
+            // Check character abilities for dynamite
+            if (symbol === 'dynamite') {
+                const dynamiteCount = gameState.dice.filter(d => d === 'dynamite').length;
+                // Black Jack and Jourdonnais can re-roll dynamite (but not hold it if 3+)
+                if ((player.character === 'Black Jack' || player.character === 'Jourdonnais') && dynamiteCount < 3) {
+                    // Can re-roll but not hold
+                    addLog('💣 Dynamite cannot be held, but you can re-roll it!');
+                    return;
+                } else {
+                    addLog('💣 Dynamite cannot be held!');
+                    return;
+                }
+            }
+
+            if (gameState.heldDice[index]) {
+                delete gameState.heldDice[index];
+            } else {
+                gameState.heldDice[index] = gameState.dice[index];
+            }
+            displayDice();
+        }
+
+        function autoResolveSpecialDice() {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            const dice = gameState.dice;
+
+            // Check for 3+ dynamite
+            // Black Jack: Can re-roll dynamite if < 3, but if 3+ are rolled (even across multiple rolls), it explodes
+            const dynamiteCount = dice.filter((d, i) => d === 'dynamite' && !gameState.resolvedDice.includes(i)).length;
+            if (dynamiteCount >= 3) {
+                // Mark all dynamite as resolved
+                dice.forEach((d, i) => {
+                    if (d === 'dynamite' && !gameState.resolvedDice.includes(i)) {
+                        gameState.resolvedDice.push(i);
+                    }
+                });
+                player.health--;
+                addLog(`${player.name} rolled 3+ Dynamite! Loses 1 health and turn ends.`);
+                checkPlayerDeath();
+                displayDice();
+                updateGameDisplay();
+                setTimeout(() => nextPlayer(), 2000);
+                return;
+            }
+            
+            // For Black Jack: Dynamite dice are not locked (can be re-rolled if < 3)
+            // They're not marked as resolved, so they can be re-rolled on next roll
+
+            // Auto-resolve arrows
+            const arrowCount = dice.filter((d, i) => d === 'arrow' && !gameState.resolvedDice.includes(i)).length;
+            if (arrowCount > 0) {
+                resolveArrows(arrowCount);
+                displayDice();
+            }
+
+            // Auto-resolve gatling (3+ normally, 2+ for Willy the Kid)
+            const gatlingCount = dice.filter((d, i) => d === 'gatling' && !gameState.resolvedDice.includes(i)).length;
+            const requiredGatling = player.character === 'Willy the Kid' ? 2 : 3;
+            if (gatlingCount >= requiredGatling) {
+                resolveGatling();
+                displayDice();
+            }
+            
+            // Check if turn should auto-end after auto-resolving special dice
+            setTimeout(() => checkAutoEndTurn(), 200);
+        }
+
+        function canUseDiceOnPlayer(diceIndex, targetPlayerIndex) {
+            // Check if dice can be used on this player (for tap-to-select system)
+            const symbol = gameState.dice[diceIndex];
+            const target = gameState.players[targetPlayerIndex];
+            const attacker = gameState.players[gameState.currentPlayerIndex];
+
+            if (gameState.resolvedDice.includes(diceIndex)) {
+                return false; // Already resolved
+            }
+
+            if (symbol === 'bang' || symbol === 'doublebang') {
+                // Attack - check distance
+                if (targetPlayerIndex === gameState.currentPlayerIndex) {
+                    return false; // Can't attack yourself
+                }
+                if (target.isDead) {
+                    return false; // Can't attack dead players
+                }
+
+                const requiredDistance = symbol === 'bang' ? 1 : 2;
+                const actualDistance = getEffectiveDistance(
+                    gameState.currentPlayerIndex, 
+                    targetPlayerIndex, 
+                    attacker.character, 
+                    target.character
+                );
+                
+                // Rose Doolan: Can use 1/2 for players one place further
+                if (attacker.character === 'Rose Doolan') {
+                    if (symbol === 'bang') {
+                        return (actualDistance === 1 || actualDistance === 2);
+                    } else if (symbol === 'doublebang') {
+                        return (actualDistance === 2 || actualDistance === 3);
+                    }
+                } else if (attacker.character === 'Calamity Janet') {
+                    // Calamity Janet: Can use 1 as 2 and vice versa
+                    return (actualDistance === 1 || actualDistance === 2);
+                } else {
+                    // Normal rules or special rule for 2-3 players
+                    const alivePlayers = gameState.players.filter(p => !p.isDead).length;
+                    if (symbol === 'bang') {
+                        return actualDistance === 1;
+                    } else if (symbol === 'doublebang') {
+                        if (alivePlayers <= 3) {
+                            return actualDistance === 1; // Treats as "1"
+                        } else {
+                            return actualDistance === 2;
+                        }
+                    }
+                }
+            } else if (symbol === 'beer') {
+                // Heal
+                if (target.health >= target.maxHealth) {
+                    return false; // Already at max health
+                }
+                if (target.isDead) {
+                    return false; // Can't heal dead players
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        function resolveDiceOnPlayer(diceIndex, targetPlayerIndex) {
+            const symbol = gameState.dice[diceIndex];
+            const target = gameState.players[targetPlayerIndex];
+            const attacker = gameState.players[gameState.currentPlayerIndex];
+
+            if (gameState.resolvedDice.includes(diceIndex)) {
+                return false; // Already resolved
+            }
+
+            if (symbol === 'bang' || symbol === 'doublebang') {
+                // Attack - check distance
+                if (targetPlayerIndex === gameState.currentPlayerIndex) {
+                    return false; // Can't attack yourself
+                }
+                if (target.isDead) {
+                    return false; // Can't attack dead players
+                }
+
+                const requiredDistance = symbol === 'bang' ? 1 : 2;
+                const actualDistance = getEffectiveDistance(
+                    gameState.currentPlayerIndex, 
+                    targetPlayerIndex, 
+                    attacker.character, 
+                    target.character
+                );
+                
+                // Rose Doolan: Can use 1/2 for players one place further
+                // "1" can hit distance 1 or 2, "2" can hit distance 2 or 3
+                if (attacker.character === 'Rose Doolan') {
+                    if (symbol === 'bang') {
+                        if (actualDistance !== 1 && actualDistance !== 2) {
+                            return false;
+                        }
+                    } else if (symbol === 'doublebang') {
+                        if (actualDistance !== 2 && actualDistance !== 3) {
+                            return false;
+                        }
+                    }
+                } else if (attacker.character === 'Calamity Janet') {
+                    // Calamity Janet: Can use 1 as 2 and vice versa
+                    // "1" can hit distance 1 or 2, "2" can hit distance 1 or 2
+                    if (actualDistance !== 1 && actualDistance !== 2) {
+                        return false;
+                    }
+                } else {
+                    // Normal rules: "1" dice can hit distance 1, "2" dice can ONLY hit distance 2
+                    // Special rule: If only 2-3 players left, "2" dice treats as "1"
+                    const alivePlayers = gameState.players.filter(p => !p.isDead).length;
+                    if (symbol === 'bang') {
+                        if (actualDistance !== 1) {
+                            return false; // "1" dice can only hit distance 1
+                        }
+                    } else if (symbol === 'doublebang') {
+                        if (alivePlayers <= 3) {
+                            // If 2-3 players left, "2" dice treats as "1" (can hit distance 1)
+                            if (actualDistance !== 1) {
+                                return false;
+                            }
+                        } else {
+                            // Normal: "2" dice can only hit distance 2 (exactly)
+                            if (actualDistance !== 2) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                // Both "1" and "2" dice cause 1 damage (per guide.md)
+                const damage = 1;
+                
+                // El Gringo: Attacker takes arrow when hitting El Gringo
+                // If hit with several Bulls Eyes simultaneously, they only take one arrow
+                if (target.character === 'El Gringo' && !target.isDead && !gameState.elGringoHitThisTurn) {
+                    if (gameState.arrows > 0) {
+                        attacker.arrows++;
+                        gameState.arrows--;
+                        gameState.elGringoHitThisTurn = true; // Mark that El Gringo was hit this turn
+                        addLog(`${attacker.name} takes an arrow for attacking El Gringo!`);
+                    }
+                }
+                
+                target.health -= damage;
+                gameState.resolvedDice.push(diceIndex);
+                addLog(`${attacker.name} attacks ${target.name} (distance ${actualDistance}) for ${damage} damage!`);
+                checkPlayerDeath(targetPlayerIndex);
+                displayDice();
+                updateGameDisplay();
+                
+                // Check if turn should auto-end
+                setTimeout(() => checkAutoEndTurn(), 100);
+                return true;
+            } else if (symbol === 'beer') {
+                // Heal
+                if (target.health >= target.maxHealth) {
+                    return false; // Already at max health
+                }
+                if (target.isDead) {
+                    return false; // Can't heal dead players
+                }
+
+                // Jesse Jones: Beer heals 2 if health ≤ 4
+                let healAmount = 1;
+                if (target.character === 'Jesse Jones' && target.health <= 4) {
+                    healAmount = 2;
+                }
+                
+                target.health = Math.min(target.health + healAmount, target.maxHealth);
+                gameState.resolvedDice.push(diceIndex);
+                addLog(`${attacker.name} heals ${target.name} for ${healAmount} health!${healAmount === 2 ? ' (Jesse Jones ability)' : ''}`);
+                displayDice();
+                updateGameDisplay();
+                
+                // Check if turn should auto-end
+                setTimeout(() => checkAutoEndTurn(), 100);
+                return true;
+            }
+
+            return false;
+        }
+
+        function checkAutoEndTurn() {
+            // Check if all actionable dice are resolved
+            const unresolved = gameState.dice.filter((d, i) => 
+                !gameState.resolvedDice.includes(i) && 
+                (d === 'bang' || d === 'doublebang' || d === 'beer')
+            );
+
+            if (unresolved.length === 0) {
+                // Check Suzy Lafayette ability: If no 1 or 2 rolled, gain 2 life
+                const player = gameState.players[gameState.currentPlayerIndex];
+                if (player.character === 'Suzy Lafayette' && !player.isDead) {
+                    const hasBullseye = gameState.dice.some(d => d === 'bang' || d === 'doublebang');
+                    if (!hasBullseye && player.health < player.maxHealth) {
+                        const oldHealth = player.health;
+                        player.health = Math.min(player.health + 2, player.maxHealth);
+                        const gained = player.health - oldHealth;
+                        if (gained > 0) {
+                            addLog(`${player.name} gains ${gained} life! (Suzy Lafayette: no 1 or 2 rolled)`);
+                            updateGameDisplay();
+                        }
+                    }
+                }
+                
+                // All actionable dice are resolved, auto-end turn
+                addLog('All dice actions resolved. Turn ending automatically...');
+                setTimeout(() => nextPlayer(), 1500);
+                return true;
+            }
+            return false;
+        }
+
+        function endTurn() {
+            // Check if all actionable dice are resolved
+            const unresolved = gameState.dice.filter((d, i) => 
+                !gameState.resolvedDice.includes(i) && 
+                (d === 'bang' || d === 'doublebang' || d === 'beer')
+            );
+
+            if (unresolved.length > 0) {
+                addLog(`⚠️ You have ${unresolved.length} unresolved dice. Ending turn anyway...`);
+            }
+            checkSuzyLafayetteAbility();
+            nextPlayer();
+        }
+        
+        function checkSuzyLafayetteAbility() {
+            // Suzy Lafayette: If no 1 or 2 rolled, gain 2 life
+            const player = gameState.players[gameState.currentPlayerIndex];
+            if (player.character === 'Suzy Lafayette' && !player.isDead) {
+                const hasBullseye = gameState.dice.some(d => d === 'bang' || d === 'doublebang');
+                if (!hasBullseye && player.health < player.maxHealth) {
+                    const oldHealth = player.health;
+                    player.health = Math.min(player.health + 2, player.maxHealth);
+                    const gained = player.health - oldHealth;
+                    if (gained > 0) {
+                        addLog(`${player.name} gains ${gained} life! (Suzy Lafayette: no 1 or 2 rolled)`);
+                        updateGameDisplay();
+                    }
+                }
+            }
+        }
+
+        function resolveArrows(count) {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            // Mark arrow dice as resolved
+            let arrowsResolved = 0;
+            gameState.dice.forEach((d, i) => {
+                if (d === 'arrow' && !gameState.resolvedDice.includes(i) && arrowsResolved < count) {
+                    gameState.resolvedDice.push(i);
+                    arrowsResolved++;
+                }
+            });
+            
+            player.arrows += count;
+            gameState.arrows -= count;
+            addLog(`${player.name} takes ${count} arrow(s). Total arrows: ${player.arrows}`);
+
+            if (gameState.arrows <= 0) {
+                // Indian attack!
+                addLog('Indian Attack! All players lose health equal to their arrows!');
+                gameState.players.forEach((p, index) => {
+                    if (!p.isDead && p.arrows > 0) {
+                        // Jourdonnais: Never loses more than 1 life to Indians
+                        const damage = p.character === 'Jourdonnais' ? 1 : p.arrows;
+                        p.health -= damage;
+                        addLog(`${p.name} loses ${damage} health from arrows!${p.character === 'Jourdonnais' ? ' (Jourdonnais ability: max 1 damage)' : ''}`);
+                        p.arrows = 0;
+                        checkPlayerDeath(index);
+                    }
+                });
+                gameState.arrows = 9;
+                gameState.players.forEach((p, i) => {
+                    gameState.playerArrows[i] = 0;
+                });
+                
+                // Check if turn should auto-end after Indian attack
+                setTimeout(() => checkAutoEndTurn(), 300);
+            } else {
+                // Check if turn should auto-end after arrows resolved
+                setTimeout(() => checkAutoEndTurn(), 200);
+            }
+        }
+
+        function resolveGatling() {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            // Mark gatling dice as resolved (need 3+ normally, 2+ for Willy the Kid)
+            const requiredGatling = player.character === 'Willy the Kid' ? 2 : 3;
+            let gatlingCount = 0;
+            gameState.dice.forEach((d, i) => {
+                if (d === 'gatling' && !gameState.resolvedDice.includes(i) && gatlingCount < requiredGatling) {
+                    gameState.resolvedDice.push(i);
+                    gatlingCount++;
+                }
+            });
+            
+            addLog(`${player.name} uses Gatling Gun! All other players lose 1 health!`);
+            
+            // Discard all arrows FIRST (before El Gringo ability triggers)
+            const hadArrows = player.arrows > 0;
+            player.arrows = 0;
+            gameState.arrows = 9;
+            if (hadArrows) {
+                addLog(`${player.name} discards all arrows.`);
+            }
+            
+            gameState.players.forEach((p, index) => {
+                if (index !== gameState.currentPlayerIndex && !p.isDead) {
+                    // Paul Regret: Never loses life to Gatling Gun
+                    if (p.character === 'Paul Regret') {
+                        addLog(`${p.name} is immune to Gatling Gun! (Paul Regret ability)`);
+                    } else {
+                        p.health--;
+                        addLog(`${p.name} loses 1 health from Gatling Gun!`);
+                        checkPlayerDeath(index);
+                    }
+                    
+                    // El Gringo: Attacker takes arrow when hitting El Gringo
+                    // This happens AFTER arrows are discarded, so arrow goes to center pile first
+                    if (p.character === 'El Gringo' && !p.isDead) {
+                        if (gameState.arrows > 0) {
+                            player.arrows++;
+                            gameState.arrows--;
+                            addLog(`${player.name} takes an arrow for attacking El Gringo!`);
+                        }
+                    }
+                }
+            });
+            
+            // Check if turn should auto-end
+            setTimeout(() => checkAutoEndTurn(), 200);
+        }
+
+        function showTargetSelection(actionType) {
+            document.getElementById('dice-area').classList.add('hidden');
+            document.getElementById('target-selection').classList.remove('hidden');
+
+            const targetList = document.getElementById('target-list');
+            targetList.innerHTML = '';
+
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const action = gameState.pendingAction;
+
+            if (actionType === 'attack') {
+                gameState.players.forEach((target, index) => {
+                    if (index === gameState.currentPlayerIndex || target.isDead) return;
+                    
+                    const targetDiv = document.createElement('div');
+                    targetDiv.className = 'target-item';
+                    targetDiv.innerHTML = `
+                        <div class="player-name">${target.name}</div>
+                        <div class="player-info">Health: ${target.health}</div>
+                    `;
+                    targetDiv.onclick = () => resolveAttack(index);
+                    targetList.appendChild(targetDiv);
+                });
+            } else if (actionType === 'beer') {
+                gameState.players.forEach((target, index) => {
+                    if (target.isDead) return;
+                    if (target.health >= target.maxHealth) {
+                        const targetDiv = document.createElement('div');
+                        targetDiv.className = 'target-item disabled';
+                        targetDiv.innerHTML = `
+                            <div class="player-name">${target.name}</div>
+                            <div class="player-info">Health: ${target.health}/${target.maxHealth} (Full)</div>
+                        `;
+                        targetList.appendChild(targetDiv);
+                        return;
+                    }
+                    
+                    const targetDiv = document.createElement('div');
+                    targetDiv.className = 'target-item';
+                    targetDiv.innerHTML = `
+                        <div class="player-name">${target.name}</div>
+                        <div class="player-info">Health: ${target.health}/${target.maxHealth}</div>
+                    `;
+                    targetDiv.onclick = () => resolveBeer(index);
+                    targetList.appendChild(targetDiv);
+                });
+            }
+        }
+
+        function resolveAttack(targetIndex) {
+            const attacker = gameState.players[gameState.currentPlayerIndex];
+            const target = gameState.players[targetIndex];
+            const action = gameState.pendingAction;
+
+            // Mark attack dice as resolved
+            let bangResolved = 0;
+            let doublebangResolved = 0;
+            gameState.dice.forEach((d, i) => {
+                if (!gameState.resolvedDice.includes(i)) {
+                    if (d === 'bang' && bangResolved < action.bangCount) {
+                        gameState.resolvedDice.push(i);
+                        bangResolved++;
+                    } else if (d === 'doublebang' && doublebangResolved < action.doublebangCount) {
+                        gameState.resolvedDice.push(i);
+                        doublebangResolved++;
+                    }
+                }
+            });
+
+            target.health -= action.count;
+            addLog(`${attacker.name} attacks ${target.name} for ${action.count} damage!`);
+            
+            checkPlayerDeath(targetIndex);
+            gameState.pendingAction = null;
+            
+            // Check for more actions
+            checkRemainingActions();
+        }
+
+        function resolveBeer(targetIndex) {
+            const healer = gameState.players[gameState.currentPlayerIndex];
+            const target = gameState.players[targetIndex];
+            const action = gameState.pendingAction;
+
+            const healAmount = Math.min(action.count, target.maxHealth - target.health);
+            
+            // Mark beer dice as resolved
+            let beerResolved = 0;
+            gameState.dice.forEach((d, i) => {
+                if (d === 'beer' && !gameState.resolvedDice.includes(i) && beerResolved < healAmount) {
+                    gameState.resolvedDice.push(i);
+                    beerResolved++;
+                }
+            });
+            
+            target.health += healAmount;
+            addLog(`${healer.name} heals ${target.name} for ${healAmount} health!`);
+            
+            gameState.pendingAction = null;
+            checkRemainingActions();
+        }
+
+        function checkRemainingActions() {
+            // Check if there are more unresolved actions
+            const dice = gameState.dice;
+            const counts = {
+                bang: 0,
+                doublebang: 0,
+                beer: 0
+            };
+
+            // Only count unresolved dice
+            dice.forEach((d, i) => {
+                if (!gameState.resolvedDice.includes(i)) {
+                    if (d === 'bang') counts.bang++;
+                    else if (d === 'doublebang') counts.doublebang++;
+                    else if (d === 'beer') counts.beer++;
+                }
+            });
+
+            const totalAttacks = counts.bang + counts.doublebang;
+            const totalBeer = counts.beer;
+
+            if (totalAttacks > 0 && gameState.pendingAction?.type !== 'attack') {
+                gameState.pendingAction = {
+                    type: 'attack',
+                    count: totalAttacks,
+                    range: counts.doublebang > 0 ? 2 : 1,
+                    bangCount: counts.bang,
+                    doublebangCount: counts.doublebang
+                };
+                showTargetSelection('attack');
+            } else if (totalBeer > 0 && gameState.pendingAction?.type !== 'beer') {
+                gameState.pendingAction = {
+                    type: 'beer',
+                    count: totalBeer
+                };
+                showTargetSelection('beer');
+            } else {
+                // Turn over
+                nextPlayer();
+            }
+        }
+
+        function checkPlayerDeath(playerIndex) {
+            const player = gameState.players[playerIndex];
+            if (player.health <= 0 && !player.isDead) {
+                player.isDead = true;
+                player.health = 0;
+                addLog(`${player.name} is eliminated! Role: ${player.role.toUpperCase()}`);
+                
+                // Vulture Sam: Gain 2 life when another player eliminated
+                gameState.players.forEach((p, index) => {
+                    if (index !== playerIndex && !p.isDead && p.character === 'Vulture Sam') {
+                        const oldHealth = p.health;
+                        p.health = Math.min(p.health + 2, p.maxHealth);
+                        const gained = p.health - oldHealth;
+                        if (gained > 0) {
+                            addLog(`${p.name} gains ${gained} life from elimination! (Vulture Sam ability)`);
+                        }
+                    }
+                });
+                
+                checkWinCondition();
+            }
+        }
+
+        function nextPlayer() {
+            do {
+                gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            } while (gameState.players[gameState.currentPlayerIndex].isDead && 
+                     gameState.players.some(p => !p.isDead));
+
+            updateGameDisplay();
+            showActionButtons();
+        }
+
+        function checkWinCondition() {
+            const sheriff = gameState.players.find(p => p.role === 'sheriff');
+            const outlaws = gameState.players.filter(p => p.role === 'outlaw');
+            const renegades = gameState.players.filter(p => p.role === 'renegade');
+            const alivePlayers = gameState.players.filter(p => !p.isDead);
+            
+            // Check if everyone is dead - Outlaws win
+            if (alivePlayers.length === 0) {
+                showWinBanner('outlaw', 'Outlaws win! Everyone is eliminated!');
+                return;
+            }
+
+            // Check if Sheriff is eliminated
+            if (sheriff.isDead) {
+                const aliveRenegades = renegades.filter(p => !p.isDead);
+                
+                // Special rule: If 8-player game and 2 renegades are left together, Outlaws win
+                if (gameState.players.length === 8 && aliveRenegades.length === 2 && alivePlayers.length === 2) {
+                    showWinBanner('outlaw', 'Outlaws win! Two Renegades left together!');
+                    return;
+                }
+                
+                // If a Renegade is the only one alive, Renegade wins
+                if (aliveRenegades.length === 1 && alivePlayers.length === 1) {
+                    showWinBanner('renegade', 'Renegade wins! Last player standing!');
+                    return;
+                }
+                
+                // Otherwise, Outlaws win
+                showWinBanner('outlaw', 'Outlaws win! The Sheriff has been eliminated!');
+                return;
+            }
+
+            // Check if all Outlaws and Renegades are eliminated - Law wins
+            const aliveOutlaws = outlaws.filter(p => !p.isDead);
+            const aliveRenegades = renegades.filter(p => !p.isDead);
+            
+            if (aliveOutlaws.length === 0 && aliveRenegades.length === 0) {
+                showWinBanner('sheriff', 'Law wins! All Outlaws and Renegades eliminated!');
+                return;
+            }
+
+            // Check if Renegade is last player standing (with Sheriff dead or not)
+            if (aliveRenegades.length === 1 && alivePlayers.length === 1) {
+                showWinBanner('renegade', 'Renegade wins! Last player standing!');
+                return;
+            }
+        }
+
+        function showWinBanner(winner, message) {
+            // Reveal all roles when game ends
+            gameState.gameEnded = true;
+            updateGameDisplay(); // This will show all roles now
+            
+            // Hide dice area and action buttons
+            document.getElementById('dice-area').classList.add('hidden');
+            document.getElementById('action-buttons-area').classList.add('hidden');
+            document.getElementById('target-selection').classList.add('hidden');
+            
+            // Show win banner overlay
+            const banner = document.getElementById('win-banner');
+            banner.classList.remove('hidden');
+            banner.className = `win-banner win-${winner}`;
+            
+            const winTitle = document.getElementById('win-banner-title');
+            winTitle.textContent = `${winner.toUpperCase()} WINS!`;
+            // Set color based on winner
+            const colorMap = {
+                'sheriff': '#FFD700',
+                'deputy': '#4CAF50',
+                'outlaw': '#F44336',
+                'renegade': '#9C27B0'
+            };
+            winTitle.style.color = colorMap[winner] || '#e6f1ff';
+            document.getElementById('win-banner-message').textContent = message;
+            
+            // Keep game screen visible - don't hide it
+            // Players can see the board and all revealed roles
+        }
+
+        function resetGame() {
+            // Hide win banner
+            document.getElementById('win-banner').classList.add('hidden');
+            
+            gameState = {
+                players: [],
+                currentPlayerIndex: 0,
+                dice: [],
+                heldDice: [],
+                resolvedDice: [],
+                rollsLeft: 3,
+                arrows: 9,
+                playerArrows: {},
+                gamePhase: 'setup',
+                pendingAction: null,
+                gameEnded: false
+            };
+            document.getElementById('game-log').innerHTML = '<div class="log-entry">Game started!</div>';
+            startGame();
+        }
+
+        function addLog(message) {
+            const log = document.getElementById('game-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = message;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Drag and Drop Handlers (for desktop)
+        let draggedDiceIndex = null;
+        let draggedDiceSymbol = null;
+        
+        // Tap-to-Select System (for mobile)
+        let selectedDiceIndex = null;
+        let selectedDiceSymbol = null;
+
+        function handleDiceDragStart(e) {
+            draggedDiceIndex = parseInt(e.target.dataset.diceIndex);
+            draggedDiceSymbol = e.target.dataset.symbol;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+        }
+
+        function handleDiceDragEnd(e) {
+            e.target.classList.remove('dragging');
+            // Remove all drag-over classes from players
+            document.querySelectorAll('.player-item').forEach(item => {
+                item.classList.remove('drag-over', 'drag-over-attack', 'drag-over-heal', 'invalid-drop');
+            });
+        }
+
+        function handlePlayerDragEnter(e) {
+            e.preventDefault();
+            if (draggedDiceIndex === null) return;
+            
+            const targetIndex = parseInt(e.currentTarget.dataset.playerIndex);
+            const target = gameState.players[targetIndex];
+            const symbol = draggedDiceSymbol;
+            const distance = parseInt(e.currentTarget.dataset.distance);
+
+            if (target.isDead) {
+                e.currentTarget.classList.add('invalid-drop');
+                return;
+            }
+
+            if (symbol === 'bang' || symbol === 'doublebang') {
+                const attacker = gameState.players[gameState.currentPlayerIndex];
+                const effectiveDistance = getEffectiveDistance(
+                    gameState.currentPlayerIndex, 
+                    targetIndex, 
+                    attacker.character, 
+                    target.character
+                );
+                
+                if (targetIndex === gameState.currentPlayerIndex) {
+                    e.currentTarget.classList.add('invalid-drop');
+                } else if (symbol === 'bang' && effectiveDistance !== 1) {
+                    e.currentTarget.classList.add('invalid-drop');
+                } else if (symbol === 'doublebang' && effectiveDistance !== 2) {
+                    e.currentTarget.classList.add('invalid-drop');
+                } else {
+                    e.currentTarget.classList.add('drag-over', 'drag-over-attack');
+                }
+            } else if (symbol === 'beer') {
+                if (target.health >= target.maxHealth) {
+                    e.currentTarget.classList.add('invalid-drop');
+                } else {
+                    e.currentTarget.classList.add('drag-over', 'drag-over-heal');
+                }
+            }
+        }
+
+        function handlePlayerDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handlePlayerDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over', 'drag-over-attack', 'drag-over-heal', 'invalid-drop');
+        }
+
+        function handlePlayerDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over', 'drag-over-attack', 'drag-over-heal', 'invalid-drop');
+
+            if (draggedDiceIndex === null) return;
+
+            const targetIndex = parseInt(e.currentTarget.dataset.playerIndex);
+            const success = resolveDiceOnPlayer(draggedDiceIndex, targetIndex);
+
+            if (!success) {
+                addLog('Cannot resolve that dice on that target.');
+            }
+
+            draggedDiceIndex = null;
+            draggedDiceSymbol = null;
+        }
+
+        function showGuide() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('role-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('win-screen').classList.add('hidden');
+            document.getElementById('guide-screen').classList.remove('hidden');
+
+            const guideContent = document.getElementById('guide-content');
+            guideContent.innerHTML = `
+                <!-- Roles -->
+                <div class="guide-section">
+                    <div class="guide-title">👥 Roles & Objectives</div>
+                    <div class="rebus-item">
+                        <div class="rebus-symbol">⭐</div>
+                        <div class="rebus-content">
+                            <div class="rebus-title"><span class="role-badge role-sheriff">SHERIFF</span></div>
+                            <div class="rebus-desc">Revealed to all • Starts with +1 health<br>Win: Eliminate all Outlaws and Renegade</div>
+                        </div>
+                    </div>
+                    <div class="rebus-item">
+                        <div class="rebus-symbol">🛡️</div>
+                        <div class="rebus-content">
+                            <div class="rebus-title"><span class="role-badge role-deputy">DEPUTY</span></div>
+                            <div class="rebus-desc">Hidden role • Works with Sheriff<br>Win: Same as Sheriff</div>
+                        </div>
+                    </div>
+                    <div class="rebus-item">
+                        <div class="rebus-symbol">🔴</div>
+                        <div class="rebus-content">
+                            <div class="rebus-title"><span class="role-badge role-outlaw">OUTLAW</span></div>
+                            <div class="rebus-desc">Hidden role • Works together<br>Win: Eliminate the Sheriff</div>
+                        </div>
+                    </div>
+                    <div class="rebus-item">
+                        <div class="rebus-symbol">💜</div>
+                        <div class="rebus-content">
+                            <div class="rebus-title"><span class="role-badge role-renegade">RENEGADE</span></div>
+                            <div class="rebus-desc">Hidden role • Works alone<br>Win: Be the last player standing</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dice Symbols -->
+                <div class="guide-section">
+                    <div class="guide-title">🎲 Dice Symbols</div>
+                    <div class="dice-guide-grid">
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon" style="font-size: 3rem; font-weight: bold;">1</div>
+                            <div class="dice-guide-name">BANG!</div>
+                            <div class="dice-guide-effect">Attack player 1 space away</div>
+                        </div>
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon" style="font-size: 3rem; font-weight: bold;">2</div>
+                            <div class="dice-guide-name">DOUBLE BANG!</div>
+                            <div class="dice-guide-effect">Attack player 2 spaces away</div>
+                        </div>
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon">🍺</div>
+                            <div class="dice-guide-name">BEER</div>
+                            <div class="dice-guide-effect">Heal 1 health (you or another)</div>
+                        </div>
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon">⚙️</div>
+                            <div class="dice-guide-name">GATLING</div>
+                            <div class="dice-guide-effect">3+ = Attack all opponents</div>
+                        </div>
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon">🏹</div>
+                            <div class="dice-guide-name">ARROW</div>
+                            <div class="dice-guide-effect">Take arrow token<br>⚠️ Last arrow = Attack!</div>
+                        </div>
+                        <div class="dice-guide-card">
+                            <div class="dice-guide-icon">💣</div>
+                            <div class="dice-guide-name">DYNAMITE</div>
+                            <div class="dice-guide-effect">Cannot hold<br>3+ = Lose 1 health & turn</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Turn Flow -->
+                <div class="guide-section">
+                    <div class="guide-title">🔄 Turn Flow</div>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div class="flow-text"><strong>Roll Dice</strong> - Roll all 5 dice (up to 3 times per turn)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div class="flow-text"><strong>Hold Dice</strong> - Tap dice to hold (except Dynamite 💣)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div class="flow-text"><strong>Re-roll</strong> - Roll again or resolve (max 3 rolls total)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div class="flow-text"><strong>Resolve Actions</strong> - Attacks, Beer, Arrows, Gatling, etc.</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">5</div>
+                        <div class="flow-text"><strong>Next Player</strong> - Turn passes clockwise</div>
+                    </div>
+                </div>
+
+                <!-- Special Rules -->
+                <div class="guide-section">
+                    <div class="guide-title">⚠️ Special Rules</div>
+                    <div class="guide-warning">
+                        <strong>💣 3+ Dynamite</strong><br>
+                        Lose 1 health immediately • Your turn ends • Cannot be prevented
+                    </div>
+                    <div class="guide-info">
+                        <strong>🏹 Arrow Attack</strong><br>
+                        When last arrow token is taken: All players lose health equal to their arrow count • All arrows reset (9 total)
+                    </div>
+                    <div class="guide-info">
+                        <strong>⚙️ Gatling Gun</strong><br>
+                        3+ Gatling symbols: All other players lose 1 health • You discard all your arrows • Arrows return to center
+                    </div>
+                    <div class="guide-info">
+                        <strong>🍺 Beer Healing</strong><br>
+                        Can heal yourself or any other player • Cannot exceed maximum health
+                    </div>
+                </div>
+
+                 <!-- Character Abilities -->
+                 <div class="guide-section">
+                     <div class="guide-title">🎭 Character Abilities (Dice Game)</div>
+                     <div class="guide-info" style="margin-bottom: 15px;">
+                         <strong>Note:</strong> Most character abilities from the card game don't apply to the dice game. Only distance modifiers and Dynamite re-rolling abilities work.
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">🎲</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Black Jack</div>
+                             <div class="rebus-desc">💣 → 🎲 You may re-roll Dynamite dice (unless 3+ Dynamite)</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">🛡️</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Jourdonnais</div>
+                             <div class="rebus-desc">💣 → 🎲 You may re-roll Dynamite dice</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">👁️</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Paul Regret</div>
+                             <div class="rebus-desc">👁️ +1 Players see you at distance +1</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">👁️</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Rose Doolan</div>
+                             <div class="rebus-desc">👁️ -1 You see others at distance -1</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">—</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Other Characters</div>
+                             <div class="rebus-desc">No special abilities in the dice game (card game abilities don't apply)</div>
+                         </div>
+                     </div>
+                 </div>
+
+                 <!-- Quick Tips -->
+                 <div class="guide-section">
+                     <div class="guide-title">💡 Quick Tips</div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">🎯</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Target Selection</div>
+                             <div class="rebus-desc">Outlaws: Focus on Sheriff. Deputies: Protect Sheriff. Renegade: Balance both sides.</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">🏹</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Arrow Management</div>
+                             <div class="rebus-desc">Track arrows carefully! Indian attack can eliminate multiple players. Use Gatling to clear your arrows.</div>
+                         </div>
+                     </div>
+                     <div class="rebus-item">
+                         <div class="rebus-symbol">💣</div>
+                         <div class="rebus-content">
+                             <div class="rebus-title">Dynamite Risk</div>
+                             <div class="rebus-desc">Dynamite cannot be held. If you have 2 Dynamite, be careful on your final roll!</div>
+                         </div>
+                     </div>
+                 </div>
+            `;
+        }
+
+        function hideGuide() {
+            document.getElementById('guide-screen').classList.add('hidden');
+            // Return to appropriate screen
+            if (gameState.players.length === 0) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+            } else if (gameState.gamePhase === 'role') {
+                document.getElementById('role-screen').classList.remove('hidden');
+            } else if (gameState.gamePhase === 'gameplay') {
+                document.getElementById('game-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('setup-screen').classList.remove('hidden');
+            }
+        }
+        
+        // Initialize player count selection on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                selectPlayerCount(4); // Default to 4 players
+            });
+        } else {
+            selectPlayerCount(4); // Already loaded
+        }
+    </script>
+</body>
+</html>

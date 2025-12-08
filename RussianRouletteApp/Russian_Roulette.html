@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مافیا رولت روسی</title>
+    <style>
+        :root {
+            --bg-color: #1c1917; /* Warm Dark */
+            --card-bg: #292524;
+            --text-primary: #e7e5e4;
+            --text-secondary: #a8a29e;
+            --accent-color: #f59e0b; /* Amber/Orange for Danger */
+            --mafia-color: #ef4444;
+            --town-color: #22c55e;
+            --btn-color: #f59e0b;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 0.5rem 0; font-weight: 900; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #44403c;
+            border: 1px solid #57534e;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        /* Buttons */
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: #1c1917;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            width: 100%;
+            margin-top: 10px;
+        }
+        button.action-btn:active { transform: scale(0.95); }
+        button.secondary-btn {
+            background-color: #44403c;
+            color: #d6d3d1;
+            border: 1px solid #57534e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        /* Game UI */
+        .gun-chamber {
+            width: 120px;
+            height: 120px;
+            border: 8px solid #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px;
+            position: relative;
+            background: radial-gradient(circle, #333 0%, #111 100%);
+        }
+        .chamber-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .player-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .dead { text-decoration: line-through; opacity: 0.5; }
+        
+        .hidden { display: none !important; }
+
+        /* Role Reveal */
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .role-title { font-size: 2rem; font-weight: 900; color: var(--accent-color); }
+
+        /* Select Box */
+        select {
+            width: 100%;
+            padding: 12px;
+            background-color: #44403c;
+            color: white;
+            border: 1px solid #57534e;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        /* Animations */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        
+        .shake-anim {
+            animation: shake 0.5s;
+            animation-iteration-count: 1;
+        }
+
+        @keyframes flash {
+            0% { background-color: transparent; }
+            10% { background-color: rgba(239, 68, 68, 0.8); } /* Red Flash */
+            100% { background-color: transparent; }
+        }
+        
+        .flash-anim {
+            animation: flash 0.3s;
+        }
+
+        .big-result-text {
+            font-size: 2rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 12px;
+            display: block;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>مافیا رولت روسی</h1>
+        <p>تنظیمات بازی</p>
+        
+        <div class="role-item" style="border-right: 4px solid var(--accent-color); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="role-name">👥 تعداد کل:</div>
+            <div class="role-controls" style="display:flex; gap:10px; align-items:center;">
+                <button class="secondary-btn" onclick="updateTotal(-1)">-</button>
+                <div class="count-badge" id="count-total" style="font-size:1.2rem; font-weight:bold;">7</div>
+                <button class="secondary-btn" onclick="updateTotal(1)">+</button>
+            </div>
+        </div>
+
+        <div class="role-item" style="border-right: 4px solid var(--mafia-color); margin-bottom:20px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="role-name">👹 تعداد مافیا:</div>
+            <div class="role-controls" style="display:flex; gap:10px; align-items:center;">
+                <button class="secondary-btn" onclick="updateMafia(-1)">-</button>
+                <div class="count-badge" id="count-mafia" style="font-size:1.2rem; font-weight:bold;">2</div>
+                <button class="secondary-btn" onclick="updateMafia(1)">+</button>
+            </div>
+        </div>
+        
+        <div class="role-item" style="border-right: 4px solid #3b82f6; margin-bottom:20px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; display:none; justify-content:space-between; align-items:center;">
+            <div class="role-name">⚖️ تعادل شانس:</div>
+            <div class="role-controls" style="display:flex; gap:10px; align-items:center;">
+                <label style="display:flex; align-items:center; cursor:pointer;">
+                    <input type="checkbox" id="balanced-odds-check" checked style="width:20px; height:20px; margin-left:10px;">
+                    <span style="font-size:0.9rem;">فعال (شانس کمتر برای مافیا)</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="setup-info">
+            <strong>قوانین:</strong><br>
+            • شب و رأی‌گیری وجود ندارد.<br>
+            • هر کس می‌تواند تفنگ را بردارد و به دیگری شلیک کند.<br>
+            • شانس شلیک: بار اول ۱/۶، سپس ۱/۵، ۱/۴ و ...<br>
+            • اگر شلیک موفق باشد (بنگ!)، تفنگ ریست می‌شود.<br>
+            • هر بازیکن در هر دور فقط یک بار می‌تواند شلیک کند.
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
+            <div style="font-weight: bold;">اسامی بازیکنان:</div>
+            <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
+        </div>
+
+        <div id="player-inputs">
+            <!-- Inputs generated by JS -->
+        </div>
+
+        <!-- Saved Players Section -->
+        <div id="saved-players-section" style="margin-top: 20px; text-align: right;">
+            <div style="font-size: 0.9rem; color: #aaa; margin-bottom: 8px;">
+                بازیکنان ذخیره شده:
+            </div>
+            <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;">
+                <!-- Chips -->
+            </div>
+            <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#ef4444; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">حذف تاریخچه</button>
+        </div>
+
+        <button class="action-btn" onclick="startDistribution()">توزیع نقش‌ها</button>
+    </div>
+
+    <!-- 2. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <h2>گوشی را بدهید به:</h2>
+        <h1 id="pass-target-name" style="color: var(--accent-color);"></h1>
+        <div style="font-size: 4rem; margin: 20px;">🕵️‍♂️</div>
+        <button class="action-btn" onclick="revealRole()">مشاهده نقش</button>
+    </div>
+
+    <!-- 3. Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <h2 id="reveal-player-name"></h2>
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color:#ccc; margin-top:10px;">...</div>
+        </div>
+        <button class="action-btn" style="background:#444" onclick="nextDistribute()">نفر بعدی</button>
+    </div>
+
+    <!-- 4. Game Screen -->
+    <div id="game-screen" class="container hidden">
+        <h1>فاز روز (شلیک آزاد)</h1>
+        
+        <div style="display:flex; justify-content:center; margin-bottom:10px;">
+            <div style="text-align:center;">
+                <div class="gun-chamber" style="border-color:var(--text-primary); width:120px; height:120px; margin:10px auto;">
+                    <div class="chamber-text" id="prob-display" style="color:var(--accent-color); font-size:1.5rem;">1/6</div>
+                </div>
+                <p style="color:var(--text-secondary); font-size:0.9rem; margin:0;">شانس شلیک</p>
+            </div>
+        </div>
+        
+        <!-- Shooter Selection UI -->
+        <div id="shooter-selection-ui" class="setup-info" style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-color);">
+            <h3>🔫 چه کسی شلیک می‌کند؟</h3>
+            <p style="font-size:0.8rem; color:#ccc;">روی نام خود کلیک کنید:</p>
+            <div id="shooter-list" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+                <!-- Buttons for alive players who haven't acted -->
+            </div>
+        </div>
+
+        <!-- Target Selection UI (Hidden initially) -->
+        <div id="target-selection-ui" class="setup-info hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--mafia-color);">
+            <h3>🎯 به چه کسی؟</h3>
+            <p id="shooter-name-display" style="color:var(--accent-color); font-weight:bold;"></p>
+            <div id="target-list" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+                <!-- Buttons for alive players except shooter -->
+            </div>
+            <button class="secondary-btn" onclick="cancelShot()" style="margin-top:15px; width:100%;">انصراف</button>
+        </div>
+
+        <div id="action-result" style="margin-top:10px; font-weight:bold; min-height: 24px;"></div>
+
+        <div style="width:100%; margin-top:20px; text-align:right;">
+            <h3>وضعیت بازیکنان:</h3>
+            <div id="players-status-list"></div>
+        </div>
+        
+        <div style="margin-top:30px; border-top:1px solid #444; padding-top:10px; width:100%;">
+             <button class="secondary-btn" onclick="toggleGodView()">دفترچه گاد</button>
+             <button class="secondary-btn" style="color:#ef4444; border-color:#ef4444;" onclick="if(confirm('بازی جدید؟')) location.reload()">خروج</button>
+        </div>
+        
+        <div id="god-view" class="hidden" style="background:#111; padding:10px; margin-top:10px; border-radius:8px; text-align:right; font-size:0.9rem;"></div>
+    </div>
+
+    <script>
+        // --- Config ---
+        var totalPlayers = 7;
+        var mafiaCount = 2;
+        var selectedShooterId = null;
+        var savedPlayers = [];
+        var balancedOdds = true;
+        
+        // --- State ---
+        var players = []; // {name, role, alive, hasActed}
+        var currentIndex = 0;
+        var chambersLeft = 6; 
+
+        // --- Init ---
+        window.onload = function() {
+            loadSavedPlayers();
+            updateInputFields();
+        };
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('mafia_russian_roulette_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">نامی ذخیره نشده</span>';
+                return;
+            }
+
+            for (var i = 0; i < savedPlayers.length; i++) {
+                (function(name) {
+                    var chip = document.createElement('div');
+                    chip.className = 'player-chip';
+                    chip.innerText = name;
+                    chip.onclick = function() { fillInput(name); };
+                    container.appendChild(chip);
+                })(savedPlayers[i]);
+            }
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
+        }
+
+        function clearSavedPlayers() {
+            if (confirm('آیا مطمئن هستید؟')) {
+                savedPlayers = [];
+                localStorage.removeItem('mafia_russian_roulette_players');
+                renderSavedList();
+            }
+        }
+
+        function updateTotal(delta) {
+            var newVal = totalPlayers + delta;
+            if (newVal < 3) return; // Min 3
+            totalPlayers = newVal;
+            document.getElementById('count-total').innerText = totalPlayers;
+            
+            // Adjust mafia if needed (max half of players roughly)
+            if(mafiaCount >= totalPlayers) {
+                mafiaCount = Math.floor(totalPlayers / 2);
+                document.getElementById('count-mafia').innerText = mafiaCount;
+            }
+            updateInputFields();
+        }
+
+        function updateMafia(delta) {
+            var newVal = mafiaCount + delta;
+            if (newVal < 1) return;
+            if (newVal >= totalPlayers) return; // Cannot have all mafia
+            mafiaCount = newVal;
+            document.getElementById('count-mafia').innerText = mafiaCount;
+        }
+
+        function updateInputFields() {
+            var container = document.getElementById('player-inputs');
+            
+            // Save existing values
+            var currentInputs = document.querySelectorAll('.player-input');
+            var values = [];
+            for(var i=0; i<currentInputs.length; i++) values.push(currentInputs[i].value);
+
+            container.innerHTML = "";
+            for(var i=0; i<totalPlayers; i++) {
+                var inp = document.createElement('input');
+                inp.className = 'player-input';
+                inp.placeholder = 'بازیکن ' + (i+1);
+                if(values[i]) inp.value = values[i];
+                container.appendChild(inp);
+            }
+        }
+
+        // --- Setup ---
+        function startDistribution() {
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for(var i=0; i<inputs.length; i++) {
+                var val = inputs[i].value.trim();
+                if (val) {
+                    names.push(val);
+                    // Save logic
+                    if (savedPlayers.indexOf(val) === -1) savedPlayers.push(val);
+                } else {
+                    names.push(inputs[i].placeholder);
+                }
+            }
+            
+            localStorage.setItem('mafia_russian_roulette_players', JSON.stringify(savedPlayers));
+            
+            // Roles
+            var deck = [];
+            for(var i=0; i<mafiaCount; i++) deck.push('mafia');
+            for(var i=0; i<(totalPlayers-mafiaCount); i++) deck.push('town');
+            shuffle(deck);
+
+            players = [];
+            var godHtml = "";
+            for(var i=0; i<totalPlayers; i++) {
+                players.push({
+                    id: i,
+                    name: names[i],
+                    role: deck[i],
+                    alive: true,
+                    hasActed: false
+                });
+                
+                var roleName = (deck[i] === 'mafia') ? 'مافیا' : 'شهروند';
+                var color = (deck[i] === 'mafia') ? '#ef4444' : '#22c55e';
+                godHtml += "<div style='color:"+color+"'>" + names[i] + ": " + roleName + "</div>";
+            }
+            document.getElementById('god-view').innerHTML = godHtml;
+            
+            // Initial Chamber Calculation
+            calculateChambers();
+
+            currentIndex = 0;
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function calculateChambers() {
+            var livingCount = players.filter(function(p){ return p.alive; }).length;
+            var livingMafia = players.filter(function(p){ return p.alive && p.role === 'mafia'; }).length;
+            
+            // Formula: Total Living - 0.5 * Living Mafia
+            chambersLeft = Math.max(1, livingCount - (0.5 * livingMafia));
+        }
+
+        function updatePassScreen() {
+            document.getElementById('pass-target-name').innerText = players[currentIndex].name;
+        }
+
+        function revealRole() {
+            var p = players[currentIndex];
+            document.getElementById('reveal-player-name').innerText = p.name;
+            var t = document.getElementById('role-title');
+            var d = document.getElementById('role-desc');
+            
+            if(p.role === 'mafia') {
+                t.innerText = "مافیا";
+                t.style.color = "#ef4444";
+                
+                var partners = players.filter(function(pl){ return pl.role==='mafia' && pl.id !== p.id; });
+                var partnerText = "";
+                if(partners.length > 0) {
+                    partnerText = "<br><br>یار شما: <span style='color:#ef4444; font-weight:bold; font-size:1.3rem;'>" + partners[0].name + "</span>";
+                } else {
+                    partnerText = "<br><br>(شما تنها مافیا هستید)";
+                }
+                
+                d.innerHTML = "شما مافیا هستید. شهروندان را حذف کنید." + partnerText;
+                
+            } else {
+                t.innerText = "شهروند";
+                t.style.color = "#22c55e";
+                d.innerText = "شما شهروند هستید. مافیا را پیدا کنید و با تفنگ حذف کنید.";
+            }
+            
+            showScreen('reveal-screen');
+        }
+
+        function nextDistribute() {
+            currentIndex++;
+            if(currentIndex >= totalPlayers) {
+                startGame();
+            } else {
+                showScreen('pass-screen');
+                updatePassScreen();
+            }
+        }
+
+        // --- Game Logic ---
+        function startGame() {
+            showScreen('game-screen');
+            renderGameUI();
+        }
+
+        function renderGameUI() {
+            // Prob Display
+            // Round to 1 decimal if needed, but keep it clean.
+            // e.g. 4.5 -> "4.5"
+            var chamberDisplay = Number.isInteger(chambersLeft) ? chambersLeft : chambersLeft.toFixed(1).replace('.0', '');
+            document.getElementById('prob-display').innerHTML = "1/" + chamberDisplay;
+            
+            var aliveCount = 0;
+            var actedCount = 0;
+
+            players.forEach(function(p) {
+                if(!p.alive) return;
+                aliveCount++;
+                if(p.hasActed) actedCount++;
+            });
+
+            // Reset acted if everyone has acted
+            if(actedCount >= aliveCount && aliveCount > 0) {
+                players.forEach(function(p){ if(p.alive) p.hasActed = false; });
+            }
+
+            // 1. Render Shooters (Who can shoot?)
+            var shooterList = document.getElementById('shooter-list');
+            shooterList.innerHTML = "";
+            
+            players.forEach(function(p) {
+                if(p.alive && !p.hasActed) {
+                    var btn = document.createElement('button');
+                    btn.className = 'secondary-btn';
+                    btn.style.minWidth = "80px";
+                    btn.innerText = p.name;
+                    btn.onclick = function() { selectShooter(p.id); };
+                    shooterList.appendChild(btn);
+                }
+            });
+
+            // Hide/Reset Target UI
+            document.getElementById('target-selection-ui').classList.add('hidden');
+            document.getElementById('shooter-selection-ui').classList.remove('hidden');
+            selectedShooterId = null;
+
+            // Render Status List
+            var list = document.getElementById('players-status-list');
+            list.innerHTML = "";
+            players.forEach(function(p) {
+                var div = document.createElement('div');
+                div.className = "player-list-item " + (p.alive ? "" : "dead");
+                
+                var roleSpan = "";
+                if(!p.alive) roleSpan = " (" + (p.role==='mafia'?'مافیا':'شهروند') + ")";
+                
+                div.innerHTML = "<span>" + p.name + roleSpan + "</span>" + 
+                                "<span>" + (p.alive ? (p.hasActed ? "✅ شلیک کرده" : "⏳") : "💀") + "</span>";
+                list.appendChild(div);
+            });
+        }
+
+        function selectShooter(id) {
+            selectedShooterId = id;
+            var shooter = players.find(function(p){ return p.id == id; });
+            
+            document.getElementById('shooter-selection-ui').classList.add('hidden');
+            
+            var targetUI = document.getElementById('target-selection-ui');
+            targetUI.classList.remove('hidden');
+            
+            document.getElementById('shooter-name-display').innerText = shooter.name + " در حال هدف‌گیری...";
+            
+            var targetList = document.getElementById('target-list');
+            targetList.innerHTML = "";
+            
+            players.forEach(function(p) {
+                if(p.alive && p.id != id) {
+                    var btn = document.createElement('button');
+                    btn.className = 'secondary-btn';
+                    btn.style.minWidth = "80px";
+                    btn.style.borderColor = "#ef4444";
+                    btn.style.color = "#ef4444";
+                    btn.innerText = p.name;
+                    btn.onclick = function() { pullTrigger(p.id); };
+                    targetList.appendChild(btn);
+                }
+            });
+        }
+
+        function cancelShot() {
+            selectedShooterId = null;
+            document.getElementById('target-selection-ui').classList.add('hidden');
+            document.getElementById('shooter-selection-ui').classList.remove('hidden');
+        }
+
+        function pullTrigger(targetId) {
+            if(selectedShooterId === null || targetId === null) return;
+
+            var shooter = players.find(function(p){ return p.id == selectedShooterId; });
+            var target = players.find(function(p){ return p.id == targetId; });
+
+            // Logic: 1/chambersLeft chance
+            // chambersLeft can be float
+            
+            var hit = false;
+            // Using Math.random() < 1/chambersLeft
+            if (Math.random() < (1.0 / chambersLeft)) {
+                hit = true;
+            }
+            
+            var resultBox = document.getElementById('action-result');
+            
+            shooter.hasActed = true;
+
+            if(hit) {
+                // BANG
+                // Visuals
+                document.body.classList.add('flash-anim');
+                setTimeout(function(){ document.body.classList.remove('flash-anim'); }, 300);
+                
+                document.getElementById('game-screen').classList.add('shake-anim');
+                setTimeout(function(){ document.getElementById('game-screen').classList.remove('shake-anim'); }, 500);
+
+                // Sound
+                playBangSound();
+
+                resultBox.innerHTML = "<div class='big-result-text' style='background:rgba(239,68,68,0.2); border:2px solid #ef4444; color:#ef4444;'>💥 بنگ!<br><span style='font-size:1.2rem; color:white; font-weight:normal;'>" + target.name + " کشته شد.</span></div>";
+                target.alive = false;
+                
+                // Reset Gun
+                calculateChambers();
+                
+            } else {
+                // Click
+                playClickSound();
+                
+                resultBox.innerHTML = "<div class='big-result-text' style='background:rgba(255,255,255,0.05); border:2px solid #555; color:#aaa;'>💨 چک! (پوچ)<br><span style='font-size:1rem; font-weight:normal;'>" + shooter.name + " شانس آورد.</span></div>";
+                
+                // Decrease chambers
+                if(chambersLeft > 1) chambersLeft -= 1;
+            }
+
+            renderGameUI();
+            checkWin();
+        }
+
+        // --- Audio ---
+        // Simple oscillator beeps to avoid external files, but distinct enough.
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playClickSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            var oscillator = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playBangSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Noise buffer for explosion
+            var bufferSize = audioCtx.sampleRate * 0.5; // 0.5 seconds
+            var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            var data = buffer.getChannelData(0);
+            for (var i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            var noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            
+            var noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 1000;
+
+            var noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(1, audioCtx.currentTime);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            
+            noise.start();
+        }
+
+        function checkWin() {
+            var mafiaAlive = 0;
+            var townAlive = 0;
+            players.forEach(function(p) {
+                if(p.alive) {
+                    if(p.role === 'mafia') mafiaAlive++;
+                    else townAlive++;
+                }
+            });
+
+            var msg = "";
+            if(mafiaAlive === 0) {
+                msg = "تبریک! شهروندان برنده شدند 🎉 (همه مافیاها حذف شدند)";
+            } else if(townAlive === 0) {
+                msg = "متاسفانه مافیا برنده شد 👹 (همه شهروندان حذف شدند)";
+            }
+
+            if(msg) {
+                setTimeout(function() { alert(msg); }, 500);
+            }
+        }
+
+        // --- Utils ---
+        function showScreen(id) {
+            var screens = ['setup-screen', 'pass-screen', 'reveal-screen', 'game-screen'];
+            screens.forEach(function(s){ document.getElementById(s).classList.add('hidden'); });
+            document.getElementById(id).classList.remove('hidden');
+        }
+        
+        function toggleGodView() {
+            var g = document.getElementById('god-view');
+            g.classList.toggle('hidden');
+        }
+
+        function shuffle(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+    </script>
+</body>
+</html>

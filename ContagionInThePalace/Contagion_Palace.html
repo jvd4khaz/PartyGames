@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contagion in the Palace</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --accent-color: #9C27B0; /* Purple for Royal */
+            --king-color: #FFD700;
+            --assassin-color: #F44336;
+            --guard-color: #2196F3;
+            --btn-color: #9C27B0;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 24px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 1rem 0; font-weight: 900; color: var(--king-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+
+        /* Role Builder */
+        .role-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        .role-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .role-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-minus { background-color: #444; }
+        .btn-plus { background-color: var(--btn-color); }
+        .btn-minus:active, .btn-plus:active { transform: scale(0.9); }
+
+        .count-badge {
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        .player-chip:active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(0.95);
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #252525;
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .total-info {
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+            transition: transform 0.1s;
+        }
+
+        button.action-btn:active { transform: scale(0.95); }
+        button.action-btn:disabled {
+            background-color: #555;
+            color: #888;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Screens */
+        .hidden { display: none !important; }
+        
+        .role-card {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .role-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .role-desc {
+            font-size: 1.1rem;
+            color: #DDD;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .king-info {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--king-color);
+            border-radius: 8px;
+            color: var(--king-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: slideUp 0.5s ease-out 0.2s backwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container" style="padding-bottom: 100px;">
+        <h1>Contagion in the Palace</h1>
+        <p>Configure the roles for your group.</p>
+
+        <div class="role-item" style="border-left: 4px solid var(--king-color);">
+            <div class="role-name">👑 King</div>
+            <div class="role-controls">
+                <button class="ctrl-btn btn-minus" onclick="updateCount('king', -1)">-</button>
+                <div class="count-badge" id="count-king">1</div>
+                <button class="ctrl-btn btn-plus" onclick="updateCount('king', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="role-item" style="border-left: 4px solid var(--assassin-color);">
+            <div class="role-name">🗡️ Assassin</div>
+            <div class="role-controls">
+                <button class="ctrl-btn btn-minus" onclick="updateCount('assassin', -1)">-</button>
+                <div class="count-badge" id="count-assassin">1</div>
+                <button class="ctrl-btn btn-plus" onclick="updateCount('assassin', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="role-item" style="border-left: 4px solid var(--guard-color);">
+            <div class="role-name">🛡️ Guard</div>
+            <div class="role-controls">
+                <button class="ctrl-btn btn-minus" onclick="updateCount('guard', -1)">-</button>
+                <div class="count-badge" id="count-guard">4</div>
+                <button class="ctrl-btn btn-plus" onclick="updateCount('guard', 1)">+</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; margin-top: 20px;">
+            <div style="font-weight: bold;">Player Names (Optional):</div>
+            <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">Clear Inputs</button>
+        </div>
+        
+        <div id="player-inputs-container">
+            <!-- Inputs will be generated here based on player count -->
+        </div>
+
+        <!-- Saved Players Section -->
+        <div id="saved-players-section" style="margin-top: 20px; text-align: left; width: 100%;">
+            <div style="font-size: 0.9rem; color: #aaa; margin-bottom: 8px;">
+                Saved Players (Tap to add):
+            </div>
+            <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-start;">
+                <!-- Chips will be injected here -->
+            </div>
+            <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#F44336; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">Clear History</button>
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div id="bottom-bar" class="bottom-bar">
+        <div class="total-info">
+            <div style="color: #888;">Total Players</div>
+            <div id="total-players" style="color: white; font-weight: bold; font-size: 1.4rem;">6</div>
+        </div>
+        <button class="action-btn" id="start-btn" onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- 2. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            Player <span id="player-num-pass">1</span> of <span id="total-game-players">6</span>
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>Pass to <span id="player-idx" style="color: var(--accent-color); font-size: 1.5rem;">Player 1</span></h2>
+        <p>Please hand the device to this player.</p>
+        <button class="action-btn" style="width: 100%; margin-top: 20px;" onclick="revealRole()">Reveal Role</button>
+    </div>
+
+    <!-- 3. Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888;">
+            <span id="player-name-reveal">Player 1</span>
+        </div>
+        
+        <div id="role-card-container" class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" class="role-desc">...</div>
+            <div id="king-identity" class="king-info hidden">...</div>
+        </div>
+
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">Memorize your role and hide it.</p>
+        <button id="next-btn" class="action-btn" style="width: 100%; background-color: #444;" onclick="nextPlayer()">Hide & Next</button>
+    </div>
+
+    <!-- 4. End Screen -->
+    <div id="end-screen" class="container hidden">
+        <div style="font-size: 5rem; margin-bottom: 20px;">🏰</div>
+        <h1>All Roles Distributed</h1>
+        <p>Return the device to the moderator (or place in center).</p>
+        
+        <div class="role-card" style="text-align: left;">
+            <h3 style="margin-top: 0;">Game Summary:</h3>
+            <div id="game-summary" style="font-size: 0.9rem; line-height: 1.8;"></div>
+        </div>
+
+        <button class="action-btn" style="background-color: var(--assassin-color);" onclick="resetGame()">Restart Game (Same Names)</button>
+        <button class="action-btn" style="background-color: #444; margin-top: 10px;" onclick="newSetup()">New Setup</button>
+    </div>
+
+    <script>
+        // --- State ---
+        var counts = {
+            king: 1,
+            assassin: 1,
+            guard: 4
+        };
+        
+        var gameRoles = []; // Array of role objects
+        var currentPlayerIndex = 0;
+        var kingIndexes = []; // Array of player indexes (0-based) who are Kings
+        var savedPlayers = [];
+        var playerNames = [];
+
+        // --- Init ---
+        window.onload = function() {
+            loadSavedPlayers();
+            updateUI();
+        };
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('contagion_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">No saved names</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
+        }
+
+        function clearSavedPlayers() {
+            if (confirm('Clear saved player history?')) {
+                savedPlayers = [];
+                localStorage.removeItem('contagion_players');
+                renderSavedList();
+            }
+        }
+
+        function updateCount(role, delta) {
+            var newVal = counts[role] + delta;
+            if (newVal < 0) newVal = 0;
+            counts[role] = newVal;
+            
+            document.getElementById('count-' + role).innerText = newVal;
+            updateUI();
+        }
+
+        function updateUI() {
+            var total = counts.king + counts.assassin + counts.guard;
+            document.getElementById('total-players').innerText = total;
+            
+            var startBtn = document.getElementById('start-btn');
+            if (total < 2 || counts.king < 1) {
+                startBtn.disabled = true;
+                startBtn.style.opacity = 0.5;
+            } else {
+                startBtn.disabled = false;
+                startBtn.style.opacity = 1;
+            }
+
+            // Update Player Inputs
+            var container = document.getElementById('player-inputs-container');
+            var currentInputs = document.querySelectorAll('.player-input');
+            var currentValues = [];
+            for(var i=0; i<currentInputs.length; i++) currentValues.push(currentInputs[i].value);
+
+            container.innerHTML = '';
+            for (var i = 0; i < total; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "Player " + (i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+        }
+
+        // --- Game Logic ---
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function startGame() {
+            // Get Names
+            var inputs = document.querySelectorAll('.player-input');
+            playerNames = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                playerNames.push(val);
+                
+                // Save unique names
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            localStorage.setItem('contagion_players', JSON.stringify(savedPlayers));
+            renderSavedList();
+
+            // 1. Create role deck
+            gameRoles = [];
+            
+            for (var i = 0; i < counts.king; i++) {
+                gameRoles.push({ type: 'king', name: 'King', color: '#FFD700', icon: '👑' });
+            }
+            for (var i = 0; i < counts.assassin; i++) {
+                gameRoles.push({ type: 'assassin', name: 'Assassin', color: '#F44336', icon: '🗡️' });
+            }
+            for (var i = 0; i < counts.guard; i++) {
+                gameRoles.push({ type: 'guard', name: 'Guard', color: '#2196F3', icon: '🛡️' });
+            }
+
+            // 2. Shuffle
+            shuffleArray(gameRoles);
+
+            // 3. Identify Kings
+            kingIndexes = [];
+            for (var i = 0; i < gameRoles.length; i++) {
+                if (gameRoles[i].type === 'king') {
+                    kingIndexes.push(i);
+                }
+            }
+
+            // 4. Start Flow
+            currentPlayerIndex = 0;
+            document.getElementById('total-game-players').innerText = gameRoles.length;
+            
+            // UI Transition
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function updatePassScreen() {
+            var pNum = currentPlayerIndex + 1;
+            var name = playerNames[currentPlayerIndex];
+            document.getElementById('player-num-pass').innerText = pNum;
+            document.getElementById('player-idx').innerText = name;
+        }
+
+        function revealRole() {
+            var role = gameRoles[currentPlayerIndex];
+            var name = playerNames[currentPlayerIndex];
+
+            document.getElementById('player-name-reveal').innerText = name;
+            
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            var kingInfoEl = document.getElementById('king-identity');
+
+            titleEl.innerText = role.icon + ' ' + role.name;
+            titleEl.style.color = role.color;
+
+            kingInfoEl.classList.add('hidden');
+
+            if (role.type === 'king') {
+                descEl.innerText = "You are the King. Survive the infection.";
+            } else if (role.type === 'assassin') {
+                descEl.innerText = "You are the Assassin. Identify the King and kill them when you are eliminated.";
+            } else if (role.type === 'guard') {
+                descEl.innerText = "You are a Guard. Protect the King.";
+                
+                // Reveal King(s)
+                kingInfoEl.classList.remove('hidden');
+                var kingNames = [];
+                for (var i = 0; i < kingIndexes.length; i++) {
+                    kingNames.push(playerNames[kingIndexes[i]]);
+                }
+                
+                if (kingNames.length === 1) {
+                    kingInfoEl.innerText = "The King is " + kingNames[0];
+                } else {
+                    kingInfoEl.innerText = "The Kings are: " + kingNames.join(", ");
+                }
+            }
+
+            // Update Next Button Text
+            var nextBtn = document.getElementById('next-btn');
+            if (currentPlayerIndex === gameRoles.length - 1) {
+                nextBtn.innerText = "Finish Distribution";
+                nextBtn.style.backgroundColor = "#4CAF50";
+            } else {
+                nextBtn.innerText = "Hide & Next Player";
+                nextBtn.style.backgroundColor = "#444";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= gameRoles.length) {
+                finishGame();
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function finishGame() {
+            // Generate Summary
+            var html = "";
+            html += "Total Players: " + gameRoles.length + "<br>";
+            html += "King(s): " + counts.king + "<br>";
+            html += "Assassin(s): " + counts.assassin + "<br>";
+            html += "Guards: " + counts.guard + "<br><br>";
+            html += "<em>The game begins now!</em>";
+            
+            document.getElementById('game-summary').innerHTML = html;
+            showScreen('end-screen');
+        }
+
+        function resetGame() {
+            if(confirm("Restart game with the same setup?")) {
+                 startGame();
+            }
+        }
+        
+        function newSetup() {
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('bottom-bar').classList.remove('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('pass-screen').classList.add('hidden');
+            document.getElementById('reveal-screen').classList.add('hidden');
+        }
+
+        function showScreen(id) {
+            var screens = ['pass-screen', 'reveal-screen', 'end-screen'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>

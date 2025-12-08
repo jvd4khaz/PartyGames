@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سازنده سناریو مافیا</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --accent-color: #FF5722;
+            --mafia-color: #F44336;
+            --citizen-color: #4CAF50;
+            --indep-color: #FFEB3B;
+            --btn-color: #2196F3;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.5rem; margin: 0 0 1rem 0; font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        
+        /* Selection Grid */
+        .role-category {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .cat-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+            color: var(--text-secondary);
+        }
+
+        .role-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .role-name {
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+        
+        .role-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ctrl-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-minus { background-color: #444; }
+        .btn-plus { background-color: var(--btn-color); }
+
+        .count-badge {
+            font-size: 1.1rem;
+            width: 25px;
+            text-align: center;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #252525;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .total-info {
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+        }
+
+        button.action-btn:disabled {
+            background-color: #555;
+            color: #888;
+            box-shadow: none;
+        }
+
+        /* Game Screens */
+        .hidden { display: none !important; }
+        
+        .role-reveal {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin: 20px 0;
+            color: white;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .team-reveal { font-size: 1.2rem; margin-bottom: 20px; font-weight: bold; }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Color Utils */
+        .mafia-text { color: var(--mafia-color); }
+        .citizen-text { color: var(--citizen-color); }
+        .indep-text { color: var(--indep-color); }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--btn-color); border-color: transparent; }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        .player-chip:active {
+            background: var(--btn-color);
+            border-color: var(--btn-color);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Builder Screen -->
+    <div id="builder-screen" class="container" style="padding-bottom: 80px;">
+        <h1>ساخت سناریو</h1>
+        
+        <!-- Mafia Roles -->
+        <div class="role-category">
+            <div class="cat-title mafia-text">تیم مافیا</div>
+            <div id="mafia-list"></div>
+        </div>
+
+        <!-- Citizen Roles -->
+        <div class="role-category">
+            <div class="cat-title citizen-text">تیم شهروند</div>
+            <div id="citizen-list"></div>
+        </div>
+
+        <!-- Independent/Other -->
+        <div class="role-category">
+            <div class="cat-title indep-text">مستقل / سایر</div>
+            <div id="other-list"></div>
+        </div>
+
+        <!-- Player Names Section -->
+        <div id="names-section" class="role-category hidden" style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+            <div class="cat-title" style="color: white; display:flex; justify-content:space-between;">
+                <span>اسامی بازیکنان (اختیاری)</span>
+                <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
+            </div>
+            <div id="player-inputs-container"></div>
+            
+            <!-- Saved Players Chips -->
+            <div id="saved-players-section" style="margin-top: 15px; text-align: right;">
+                <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">تاریخچه اسامی:</div>
+                <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;"></div>
+                <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#F44336; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">حذف تاریخچه</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar for Builder -->
+    <div id="builder-bar" class="bottom-bar">
+        <div class="total-info">
+            <div>تعداد بازیکن: <span id="total-players" style="color: white; font-weight: bold;">0</span></div>
+            <div style="font-size: 0.8rem; color: #888;">ترکیب خود را بسازید</div>
+        </div>
+        <button class="action-btn" id="start-btn" onclick="startGame()" disabled>شروع توزیع</button>
+    </div>
+
+    <!-- 2. Pass Phone Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            بازیکن <span id="player-num-pass"></span> از <span id="total-players-game"></span>
+        </div>
+        <div style="font-size: 4rem; margin: 20px;">📱</div>
+        <h2>نوبت بازیکن <span id="player-idx" style="color: var(--btn-color);">1</span></h2>
+        <p>گوشی را به این بازیکن بدهید.</p>
+        <button class="action-btn" style="width: 100%; background-color: var(--btn-color);" onclick="confirmIdentity()">مشاهده نقش</button>
+    </div>
+
+    <!-- 3. Reveal Role Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            بازیکن <span id="player-num-reveal"></span> از <span id="total-players-reveal"></span>
+        </div>
+        <p>نقش شما:</p>
+        <div id="role-display" class="role-reveal">...</div>
+        <div id="role-eng" style="font-size: 1rem; color: #888; margin-top: -15px; margin-bottom: 20px;">...</div>
+        <div id="team-display" class="team-reveal">...</div>
+        <p style="font-size: 0.9rem; opacity: 0.6;">به خاطر بسپارید و پنهان کنید.</p>
+        <button id="next-btn" class="action-btn" style="width: 100%; background-color: var(--citizen-color);" onclick="nextPlayer()">پنهان کردن و نفر بعدی</button>
+    </div>
+
+    <!-- 4. End Screen -->
+    <div id="end-screen" class="container hidden">
+        <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
+        <h1>پایان توزیع</h1>
+        <p>تمام نقش‌ها توزیع شدند.<br>گوشی را به راوی (گاد) برگردانید.</p>
+        <button class="action-btn" style="background-color: #F44336;" onclick="restartGame()">شروع بازی مجدد (Restart)</button>
+        <button class="action-btn" style="background-color: #2196F3; margin-top: 10px;" onclick="resetGame()">تنظیمات جدید</button>
+    </div>
+
+    <script>
+        // --- Role Definitions ---
+        var AVAILABLE_ROLES = {
+            mafia: [
+                { id: 'godfather', name: 'رئیس مافیا', eng: 'Boss / Godfather' },
+                { id: 'simple_mafia', name: 'مافیا ساده', eng: 'Simple Mafia' },
+                { id: 'nato', name: 'ناتو', eng: 'Nato' },
+                { id: 'hostage_taker', name: 'گروگان‌گیر', eng: 'Hostage Taker' },
+                { id: 'witch', name: 'جادوگر', eng: 'Witch' },
+                { id: 'executioner', name: 'جلاد', eng: 'Executioner' },
+                { id: 'informant', name: 'خبرچین', eng: 'Informant' }
+            ],
+            citizen: [
+                { id: 'citizen', name: 'شهروند ساده', eng: 'Simple Citizen' },
+                { id: 'doctor', name: 'پزشک', eng: 'Doctor' },
+                { id: 'detective', name: 'کارآگاه', eng: 'Detective' },
+                { id: 'sniper', name: 'اسنایپر / تک‌تیرانداز', eng: 'Sniper' },
+                { id: 'takavar', name: 'تکاور', eng: 'Commando' },
+                { id: 'guard', name: 'نگهبان', eng: 'Guard' },
+                { id: 'rifleman', name: 'تفنگدار', eng: 'Rifleman' },
+                { id: 'armored', name: 'زره‌پوش', eng: 'Armored' },
+                { id: 'heir', name: 'وارث', eng: 'Heir' },
+                { id: 'armorsmith', name: 'زره‌ساز', eng: 'Armorsmith' },
+                { id: 'herbalist', name: 'عطار', eng: 'Herbalist' },
+                { id: 'suspect', name: 'مظنون', eng: 'Suspect' },
+                { id: 'village_head', name: 'کدخدا', eng: 'Village Head' }
+            ],
+            other: [
+                { id: 'joker', name: 'جوکر', eng: 'Joker', team: 'INDEP' }
+            ]
+        };
+
+        // --- State ---
+        var selectedRoles = {}; // Map id -> count
+        var gameRoleList = [];
+        var playerNames = [];
+        var currentPlayerIndex = 0;
+        var savedPlayers = [];
+
+        // --- Init ---
+        window.onload = function() {
+            loadSavedPlayers();
+            renderBuilder();
+        };
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('mafia_flexible_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">نامی ذخیره نشده</span>';
+                return;
+            }
+
+            for (var i = 0; i < savedPlayers.length; i++) {
+                (function(name) {
+                    var chip = document.createElement('div');
+                    chip.className = 'player-chip';
+                    chip.innerText = name;
+                    chip.onclick = function() { fillInput(name); };
+                    container.appendChild(chip);
+                })(savedPlayers[i]);
+            }
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
+        }
+
+        function clearSavedPlayers() {
+            if (confirm('آیا مطمئن هستید؟')) {
+                savedPlayers = [];
+                localStorage.removeItem('mafia_flexible_players');
+                renderSavedList();
+            }
+        }
+
+        function renderBuilder() {
+            renderCategory('mafia-list', AVAILABLE_ROLES.mafia, 'MAFIA');
+            renderCategory('citizen-list', AVAILABLE_ROLES.citizen, 'CITIZEN');
+            renderCategory('other-list', AVAILABLE_ROLES.other, 'INDEP');
+        }
+
+        function renderCategory(elementId, roles, team) {
+            var container = document.getElementById(elementId);
+            var html = '';
+            for (var i = 0; i < roles.length; i++) {
+                var r = roles[i];
+                var count = selectedRoles[r.id] || 0;
+                
+                html += '<div class="role-item">';
+                html += '<div class="role-name">' + r.name + '</div>';
+                html += '<div class="role-controls">';
+                html += '<button class="ctrl-btn btn-minus" onclick="updateCount(\'' + r.id + '\', -1)">-</button>';
+                html += '<div class="count-badge" id="count-' + r.id + '">' + count + '</div>';
+                html += '<button class="ctrl-btn btn-plus" onclick="updateCount(\'' + r.id + '\', 1)">+</button>';
+                html += '</div></div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function updateCount(roleId, delta) {
+            var current = selectedRoles[roleId] || 0;
+            var newCount = current + delta;
+            if (newCount < 0) newCount = 0;
+            
+            selectedRoles[roleId] = newCount;
+            document.getElementById('count-' + roleId).innerText = newCount;
+            
+            updateTotal();
+        }
+
+        function updateTotal() {
+            var total = 0;
+            for (var key in selectedRoles) {
+                if (selectedRoles.hasOwnProperty(key)) {
+                    total += selectedRoles[key];
+                }
+            }
+            document.getElementById('total-players').innerText = total;
+            document.getElementById('start-btn').disabled = (total === 0);
+            
+            updateNameInputs(total);
+        }
+
+        function updateNameInputs(total) {
+            var section = document.getElementById('names-section');
+            var container = document.getElementById('player-inputs-container');
+            
+            if (total > 0) {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+                return;
+            }
+
+            // Preserve existing values
+            var currentInputs = document.querySelectorAll('.player-input');
+            var values = [];
+            for(var i=0; i<currentInputs.length; i++) values.push(currentInputs[i].value);
+
+            container.innerHTML = "";
+            for(var i=0; i<total; i++) {
+                var inp = document.createElement('input');
+                inp.className = 'player-input';
+                inp.placeholder = 'بازیکن ' + (i+1);
+                if(values[i]) inp.value = values[i];
+                container.appendChild(inp);
+            }
+        }
+
+        function getRoleObject(id) {
+            // Search in all categories
+            var cats = ['mafia', 'citizen', 'other'];
+            for (var i = 0; i < cats.length; i++) {
+                var list = AVAILABLE_ROLES[cats[i]];
+                for (var j = 0; j < list.length; j++) {
+                    if (list[j].id === id) {
+                        // Return copy with implied team if not set
+                        var obj = list[j];
+                        if (!obj.team) {
+                            if (cats[i] === 'mafia') obj.team = 'MAFIA';
+                            if (cats[i] === 'citizen') obj.team = 'CITIZEN';
+                        }
+                        return obj;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // --- Game Logic ---
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function startGame() {
+            // 1. Get Names & Save
+            var inputEls = document.querySelectorAll('.player-input');
+            playerNames = [];
+            for(var i=0; i<inputEls.length; i++) {
+                var val = inputEls[i].value.trim();
+                if(val) {
+                    playerNames.push(val);
+                    if(savedPlayers.indexOf(val) === -1) savedPlayers.push(val);
+                } else {
+                    playerNames.push(inputEls[i].placeholder);
+                }
+            }
+            localStorage.setItem('mafia_flexible_players', JSON.stringify(savedPlayers));
+
+            // 2. Build list
+            gameRoleList = [];
+            for (var id in selectedRoles) {
+                if (selectedRoles.hasOwnProperty(id)) {
+                    var count = selectedRoles[id];
+                    var roleDef = getRoleObject(id);
+                    if (roleDef) {
+                        for (var k = 0; k < count; k++) {
+                            gameRoleList.push(roleDef);
+                        }
+                    }
+                }
+            }
+
+            if (gameRoleList.length === 0) return;
+
+            shuffleArray(gameRoleList);
+            currentPlayerIndex = 0;
+
+            // Hide builder, show pass screen
+            document.getElementById('builder-screen').classList.add('hidden');
+            document.getElementById('builder-bar').classList.add('hidden'); // Hide bottom bar
+            
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function updatePassScreen() {
+            var total = gameRoleList.length;
+            var num = currentPlayerIndex + 1;
+            document.getElementById('player-num-pass').innerText = num;
+            document.getElementById('total-players-game').innerText = total;
+            document.getElementById('player-idx').innerText = playerNames[currentPlayerIndex]; // Use Name
+        }
+
+        function confirmIdentity() {
+            var roleObj = gameRoleList[currentPlayerIndex];
+            var playerName = playerNames[currentPlayerIndex];
+            
+            var roleEl = document.getElementById('role-display');
+            var engEl = document.getElementById('role-eng');
+            var teamEl = document.getElementById('team-display');
+            
+            roleEl.innerText = roleObj.name;
+            
+            // Show teammates for Mafia
+            var teammatesText = "";
+            if (roleObj.team === 'MAFIA') {
+                // Find other mafia
+                var teammates = [];
+                for(var i=0; i<gameRoleList.length; i++) {
+                    if(gameRoleList[i].team === 'MAFIA' && i !== currentPlayerIndex) {
+                        teammates.push(playerNames[i] + " (" + gameRoleList[i].name + ")");
+                    }
+                }
+                
+                if(teammates.length > 0) {
+                    teammatesText = "<br><span style='font-size:0.9rem; color:#FF5252; display:block; margin-top:10px;'>یاران شما:<br>" + teammates.join('<br>') + "</span>";
+                } else {
+                    teammatesText = "<br><span style='font-size:0.9rem; color:#FF5252; display:block; margin-top:10px;'>(شما تنها مافیا هستید)</span>";
+                }
+            }
+            
+            engEl.innerHTML = roleObj.eng + teammatesText;
+            
+            if (roleObj.team === 'MAFIA') {
+                roleEl.style.color = '#FF5252';
+                teamEl.innerText = "تیم مافیا";
+                teamEl.style.color = '#FF5252';
+            } else if (roleObj.team === 'CITIZEN') {
+                roleEl.style.color = '#69F0AE';
+                teamEl.innerText = "تیم شهروند";
+                teamEl.style.color = '#69F0AE';
+            } else {
+                // Independent/Joker
+                roleEl.style.color = '#FFEB3B';
+                teamEl.innerText = "مستقل / ساید سوم";
+                teamEl.style.color = '#FFEB3B';
+            }
+
+            // document.getElementById('player-num-reveal').innerText = currentPlayerIndex + 1; // Removed number
+            document.getElementById('player-num-reveal').innerText = playerName; // Show Name instead of Num
+            
+            document.getElementById('total-players-reveal').innerText = gameRoleList.length;
+            
+            var nextBtn = document.getElementById('next-btn');
+            if (currentPlayerIndex === gameRoleList.length - 1) {
+                nextBtn.innerText = "پایان توزیع";
+                nextBtn.style.backgroundColor = "#F44336";
+            } else {
+                nextBtn.innerText = "پنهان کردن و نفر بعدی";
+                nextBtn.style.backgroundColor = "#2196F3";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= gameRoleList.length) {
+                showScreen('end-screen');
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function resetGame() {
+            // Go back to builder
+            document.getElementById('builder-screen').classList.remove('hidden');
+            document.getElementById('builder-bar').classList.remove('hidden');
+            
+            // Hide others
+            document.getElementById('pass-screen').classList.add('hidden');
+            document.getElementById('reveal-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+        }
+
+        function restartGame() {
+            if (confirm("آیا بازی با همان تنظیمات مجدداً شروع شود؟")) {
+                // Reshuffle and start again
+                shuffleArray(gameRoleList);
+                currentPlayerIndex = 0;
+                
+                // Skip builder, go straight to pass
+                document.getElementById('builder-screen').classList.add('hidden');
+                document.getElementById('builder-bar').classList.add('hidden');
+                document.getElementById('end-screen').classList.add('hidden');
+                
+                showScreen('pass-screen');
+                updatePassScreen();
+            }
+        }
+
+        function showScreen(screenId) {
+            // Helper to toggle screens, keeping builder intact in background if needed
+            // But here we hid builder manually.
+            var ids = ['pass-screen', 'reveal-screen', 'end-screen'];
+            for (var i = 0; i < ids.length; i++) {
+                document.getElementById(ids[i]).classList.add('hidden');
+            }
+            var target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+
+             // Reset animation for reveal
+             if (screenId === 'reveal-screen') {
+                var roleEl = document.getElementById('role-display');
+                roleEl.style.animation = 'none';
+                roleEl.offsetHeight; /* trigger reflow */
+                roleEl.style.animation = 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            }
+        }
+    </script>
+</body>
+</html>
+

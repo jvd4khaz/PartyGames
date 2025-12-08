@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>معمای ۴ کارآگاه</title>
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Dark Slate */
+            --card-bg: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-color: #3b82f6; /* Blue for Cop */
+            --mafia-color: #ef4444;
+            --cop-color: #3b82f6;
+            --citizen-color: #22c55e;
+            --btn-color: #3b82f6;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; margin: 0 0 0.5rem 0; font-weight: 900; color: var(--accent-color); }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.6; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .role-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        .role-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .role-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-minus { background-color: #444; }
+        .btn-plus { background-color: var(--btn-color); }
+        .btn-minus:active, .btn-plus:active { transform: scale(0.9); }
+
+        .count-badge {
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Inputs */
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+
+        /* Saved Players Chips */
+        .player-chip {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            margin: 3px;
+            display: inline-block;
+        }
+        .player-chip:active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(0.95);
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1e293b;
+            padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        button.action-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.1s;
+        }
+        button.action-btn:active { transform: scale(0.95); }
+
+        /* Screens */
+        .hidden { display: none !important; }
+        
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .role-title { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
+
+        /* Night Action UI */
+        .target-btn {
+            width: 100%;
+            background: #334155;
+            border: 1px solid #475569;
+            color: white;
+            padding: 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .target-btn:active { background: var(--accent-color); }
+
+        .result-box {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .mafia-text { color: #ef4444; }
+        .town-text { color: #22c55e; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container" style="padding-bottom: 100px;">
+        <h1>معمای ۴ کارآگاه</h1>
+        <p>سناریوی مافیا و کارآگاهان (۳ نفر به بالا)</p>
+
+        <div class="role-item" style="border-right: 4px solid var(--accent-color);">
+            <div class="role-name">👥 تعداد بازیکنان</div>
+            <div class="role-controls">
+                <button class="ctrl-btn btn-minus" onclick="updateTotalCount(-1)">-</button>
+                <div class="count-badge" id="count-total">5</div>
+                <button class="ctrl-btn btn-plus" onclick="updateTotalCount(1)">+</button>
+            </div>
+        </div>
+
+        <div class="setup-info">
+            <strong>توزیع نقش‌ها:</strong><br>
+            • ۱ <span style="color:var(--mafia-color)">مافیا</span> (ثابت)<br>
+            • <span id="cop-count-display">۴</span> <span style="color:var(--cop-color)">کارآگاه</span> (از بین ۴ حالت)<br>
+            <span id="citizen-info" class="hidden">• <span id="citizen-count-display">0</span> <span style="color:var(--citizen-color)">شهروند ساده</span> (استعلام نمایشی)<br></span>
+            <br>
+            <em>نکته: کارآگاه‌ها به صورت تصادفی از بین ۴ حالت (معتبر، برعکس، بدبین، ساده‌لوح) انتخاب می‌شوند. اگر تعداد بازیکن کمتر از ۵ باشد، فقط تعدادی از کارآگاه‌ها در بازی هستند. اگر بیشتر از ۵ باشد، شهروند ساده اضافه می‌شود.</em>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
+            <div style="font-weight: bold;">اسامی بازیکنان (اختیاری):</div>
+            <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن ورودی‌ها</button>
+        </div>
+        
+        <div id="player-inputs-container">
+            <!-- Inputs will be generated here -->
+        </div>
+
+        <!-- Saved Players Section -->
+        <div id="saved-players-section" style="margin-top: 20px; text-align: right;">
+            <div style="font-size: 0.9rem; color: #aaa; margin-bottom: 8px;">
+                بازیکنان ذخیره شده (برای افزودن کلیک کنید):
+            </div>
+            <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;">
+                <!-- Chips will be injected here -->
+            </div>
+            <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#ef4444; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">حذف تاریخچه اسامی</button>
+        </div>
+    </div>
+
+    <!-- Setup Bottom Bar -->
+    <div id="setup-bar" class="bottom-bar">
+        <button class="action-btn" onclick="startDistribution()">توزیع نقش‌ها</button>
+    </div>
+
+    <!-- 2. Pass Screen (Shared) -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">
+            نوبت: <span id="player-name-pass"></span>
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>گوشی را بدهید به:</h2>
+        <h1 id="pass-target-name" style="color: var(--accent-color);"></h1>
+        <button id="pass-action-btn" class="action-btn" style="margin-top: 20px;" onclick="revealContent()">مشاهده</button>
+    </div>
+
+    <!-- 3. Role Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <h2 id="reveal-player-name"></h2>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color: #ccc; font-size: 0.95rem; line-height: 1.6;">...</div>
+        </div>
+
+        <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 20px;">نقش را به خاطر بسپارید.</p>
+        <button class="action-btn" style="background-color: #334155;" onclick="proceedToFirstAction()">انجام استعلام / تایید</button>
+    </div>
+
+        <!-- 4. Distribution End / Phase Menu -->
+    <div id="phase-menu" class="container hidden">
+        <h1>فاز بازی</h1>
+        <p id="phase-indicator" style="font-weight:bold; color:var(--accent-color);">روز</p>
+        
+        <!-- Public Roles Announcement (for < 4 Detectives) -->
+        <div id="public-roles-box" class="setup-info hidden" style="border: 1px solid var(--accent-color); background: rgba(59, 130, 246, 0.1);">
+            <h3>📢 نقش‌های موجود در بازی</h3>
+            <p id="public-roles-text" style="color: #fff; line-height: 1.8;"></p>
+        </div>
+
+        <!-- Elimination Section -->
+        <div id="elimination-section" class="setup-info" style="border: 1px solid #ef4444;">
+            <h3>🔥 حذف بازیکن (رأی‌گیری روز)</h3>
+            <p style="font-size:0.8rem;">یک نفر را انتخاب کنید تا از بازی خارج شود:</p>
+            <div id="elimination-list" style="display:flex; flex-wrap:wrap; gap:5px;">
+                <!-- Buttons generated here -->
+            </div>
+        </div>
+
+        <div style="margin: 20px 0; width: 100%; border-top: 1px solid #334155;"></div>
+
+        <p>پس از حذف، برای شب جدید گوشی را بچرخانید.</p>
+        <button id="start-night-btn" class="action-btn" style="margin-bottom: 15px;" onclick="startNight()">شروع شب جدید</button>
+        
+        <div class="setup-info" style="text-align: center;">
+            <h3>نتایج واقعی (مخصوص راوی/گاد)</h3>
+            <button onclick="toggleGodView()" style="background:none; border:1px solid #555; color:#aaa; padding:5px 10px; border-radius:4px;">نمایش/مخفی</button>
+            <div id="god-view" class="hidden" style="text-align: right; margin-top: 10px; font-size: 0.85rem;"></div>
+            <div id="mafia-kill-log" style="text-align: right; margin-top: 10px; font-size: 0.85rem; color: #ef4444;"></div>
+        </div>
+        
+        <button class="action-btn" style="background-color: #ef4444; margin-top: 20px;" onclick="restartGame()">بازی مجدد (با همین اسامی)</button>
+        <button class="action-btn" style="background-color: #334155; margin-top: 10px;" onclick="location.reload()">خروج / تنظیمات جدید</button>
+    </div>
+
+    <!-- 5. Night Action Screen -->
+    <div id="night-screen" class="container hidden">
+        <h2 id="night-player-name"></h2>
+        <p>یک نفر را برای استعلام انتخاب کنید:</p>
+        
+        <div id="target-list" style="width: 100%;">
+            <!-- Target Buttons -->
+        </div>
+
+        <button class="action-btn" style="background-color: #334155; margin-top: 10px;" onclick="nextNight()">رد شدن / نفر بعدی</button>
+    </div>
+
+    <!-- 6. Result Screen -->
+    <div id="result-screen" class="container hidden">
+        <h2>نتیجه استعلام</h2>
+        <p>وضعیت بازیکن انتخاب شده:</p>
+        
+        <div id="result-box" class="result-box">
+            ...
+        </div>
+
+        <button class="action-btn" onclick="finishResult()">تایید و نفر بعدی</button>
+    </div>
+
+    <script>
+        // --- Constants ---
+        var ROLE_DEFS = {
+            mafia: { name: 'مافیا', color: '#ef4444', desc: 'شما تنها مافیا هستید. سعی کنید شناسایی نشوید.' },
+            sane: { name: 'کارآگاه', realType: 'sane', color: '#3b82f6', desc: 'شما کارآگاه هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            insane: { name: 'کارآگاه', realType: 'insane', color: '#3b82f6', desc: 'شما کارآگاه هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            paranoid: { name: 'کارآگاه', realType: 'paranoid', color: '#3b82f6', desc: 'شما کارآگاه هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            naive: { name: 'کارآگاه', realType: 'naive', color: '#3b82f6', desc: 'شما کارآگاه هستید. هر شب می‌توانید استعلام یک نفر را بگیرید.' },
+            citizen: { name: 'شهروند ساده', realType: 'citizen', color: '#22c55e', desc: 'شما شهروند ساده هستید. در شب تظاهر به استعلام کنید تا شناسایی نشوید.' }
+        };
+
+        // --- State ---
+        var totalPlayers = 5;
+        var playerNames = [];
+        var players = []; // { id, name, roleKey, roleObj, alive }
+        var currentIndex = 0;
+        var isNightPhase = false;
+        var isDistributionPhase = true;
+        var nightNumber = 0;
+        var savedPlayers = [];
+        var activeCopTypes = []; // To track which cops are in play
+
+        // --- Init ---
+        window.onload = function() {
+            loadSavedPlayers();
+            updateUI();
+        };
+
+        function updateTotalCount(delta) {
+            var newVal = totalPlayers + delta;
+            if (newVal < 3) newVal = 3; // Min 3 players: 1 Mafia, 2 Cops
+            totalPlayers = newVal;
+            document.getElementById('count-total').innerText = totalPlayers;
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update Logic Display
+            // Rule: 1 Mafia. Rest are Town.
+            // Town fill order: Unique Cops (up to 4) -> Citizens
+            var mafiaCount = 1;
+            var townCount = totalPlayers - 1;
+            var copCount = Math.min(townCount, 4);
+            var citizenCount = Math.max(0, townCount - 4);
+
+            document.getElementById('cop-count-display').innerText = copCount;
+            
+            var citInfo = document.getElementById('citizen-info');
+            var citCountDisp = document.getElementById('citizen-count-display');
+            
+            if (citizenCount > 0) {
+                citInfo.classList.remove('hidden');
+                citCountDisp.innerText = citizenCount;
+            } else {
+                citInfo.classList.add('hidden');
+            }
+
+            // Update Inputs
+            var container = document.getElementById('player-inputs-container');
+            
+            // Preserve existing values
+            var currentInputs = document.querySelectorAll('.player-input');
+            var currentValues = [];
+            for(var i=0; i<currentInputs.length; i++) currentValues.push(currentInputs[i].value);
+
+            container.innerHTML = '';
+            for (var i = 0; i < totalPlayers; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "بازیکن " + (i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+        }
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('mafia_dethy_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#555; font-size:0.8rem;">هنوز نامی ذخیره نشده است</span>';
+                return;
+            }
+
+            // Reverse to show newest first or just standard
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value;
+                if (val === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function clearInputs() {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].value = '';
+            }
+        }
+
+        function clearSavedPlayers() {
+            if (confirm('آیا مطمئن هستید که می‌خواهید لیست اسامی ذخیره شده را پاک کنید؟')) {
+                savedPlayers = [];
+                localStorage.removeItem('mafia_dethy_players');
+                renderSavedList();
+            }
+        }
+
+        // --- Setup ---
+        function startDistribution() {
+            // Get Names
+            var inputs = document.querySelectorAll('.player-input');
+            playerNames = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                playerNames.push(val);
+                
+                // Save unique names
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            
+            // Persist
+            localStorage.setItem('mafia_dethy_players', JSON.stringify(savedPlayers));
+
+            // Assign Roles
+            // Logic: 1 Mafia. Rest Town.
+            // Town: Pick random min(townCount, 4) from Cop Types. Rest Citizen.
+            
+            var allCops = ['sane', 'insane', 'paranoid', 'naive'];
+            shuffleArray(allCops); // Randomize order of cops
+            
+            var deck = [];
+            deck.push('mafia');
+            
+            var townCount = totalPlayers - 1;
+            var copCount = Math.min(townCount, 4);
+            var citizenCount = townCount - copCount;
+            
+            activeCopTypes = [];
+            for (var i = 0; i < copCount; i++) {
+                deck.push(allCops[i]);
+                activeCopTypes.push(allCops[i]);
+            }
+            
+            for (var i = 0; i < citizenCount; i++) {
+                deck.push('citizen');
+            }
+            
+            shuffleArray(deck);
+
+            players = [];
+            var godHtml = "";
+            for (var j = 0; j < totalPlayers; j++) {
+                var rKey = deck[j];
+                var rObj = ROLE_DEFS[rKey];
+                players.push({
+                    id: j,
+                    name: playerNames[j],
+                    roleKey: rKey,
+                    roleObj: rObj,
+                    alive: true
+                });
+
+                // Build God View String
+                var realRoleName = rObj.name;
+                if (rKey === 'sane') realRoleName += " (معتبر)";
+                if (rKey === 'insane') realRoleName += " (برعکس)";
+                if (rKey === 'paranoid') realRoleName += " (بدبین/همیشه مافیا)";
+                if (rKey === 'naive') realRoleName += " (ساده‌لوح/همیشه شهر)";
+                if (rKey === 'citizen') realRoleName += " (نمایشی)";
+                
+                godHtml += "<strong>" + playerNames[j] + ":</strong> " + realRoleName + "<br>";
+            }
+            document.getElementById('god-view').innerHTML = godHtml;
+            
+            // Start Flow
+            currentIndex = 0;
+            isDistributionPhase = true;
+            nightNumber = 1; // Technically Night 1 happens during distribution
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('setup-bar').classList.add('hidden');
+            
+            showPassScreen(false); // false = distribution mode
+        }
+
+        function restartGame() {
+            // Keep names, reshuffle roles
+            if (!confirm('آیا بازی با همین اسامی مجدداً شروع شود؟')) return;
+            startDistribution();
+        }
+
+        // --- Distribution Flow ---
+        function showPassScreen(nightMode) {
+            // Find next alive player if night mode
+            if (nightMode) {
+                while (currentIndex < totalPlayers && !players[currentIndex].alive) {
+                    currentIndex++;
+                }
+                if (currentIndex >= totalPlayers) {
+                    showScreen('phase-menu');
+                    updatePhaseMenu();
+                    return;
+                }
+            }
+            
+            var p = players[currentIndex];
+            document.getElementById('player-name-pass').innerText = nightMode ? ("شب " + nightNumber + " - نوبت: " + p.name) : ("توزیع - نفر " + (currentIndex + 1));
+            document.getElementById('pass-target-name').innerText = p.name;
+            
+            var btn = document.getElementById('pass-action-btn');
+            // In Distribution (nightMode=false), we go to revealRole
+            // In Night (nightMode=true), we go straight to startNightTurn (Action)
+            btn.onclick = nightMode ? startNightTurn : revealRole;
+            btn.innerText = nightMode ? "شروع نوبت" : "مشاهده نقش";
+
+            showScreen('pass-screen');
+        }
+        
+        function revealRole() {
+            var p = players[currentIndex];
+            document.getElementById('reveal-player-name').innerText = p.name;
+            
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            
+            titleEl.innerText = p.roleObj.name;
+            titleEl.style.color = p.roleObj.color;
+            descEl.innerText = p.roleObj.desc;
+
+            var existingList = document.getElementById('inline-action-list');
+            if (existingList) existingList.remove();
+            
+            var oldBtn = document.querySelector('#reveal-screen .action-btn');
+            if(oldBtn) {
+                oldBtn.classList.remove('hidden');
+                // If in Distribution, button text changes or logic handles it
+                oldBtn.innerText = isDistributionPhase ? "انجام استعلام / تایید" : "نفر بعدی";
+            }
+
+            showScreen('reveal-screen');
+            
+            // Auto-trigger action list if distribution phase
+            if (isDistributionPhase) {
+                proceedToFirstAction();
+            }
+        }
+
+        function proceedToFirstAction() {
+            // Called from Role Reveal screen during distribution
+            // Immediately go to Action (Night 1 logic)
+            startNightTurn();
+        }
+
+        function nextDistribute() {
+            currentIndex++;
+            if (currentIndex >= totalPlayers) {
+                showScreen('phase-menu');
+                updatePhaseMenu();
+            } else {
+                showPassScreen(false);
+            }
+        }
+
+        // --- Night Flow ---
+        function startNight() {
+            currentIndex = 0;
+            isNightPhase = true;
+            isDistributionPhase = false;
+            nightNumber++;
+            // Skip dead players happens in showPassScreen logic
+            showPassScreen(true);
+        }
+        
+        function updatePhaseMenu() {
+            // Called when a phase ends (Distribution or Night)
+            document.getElementById('phase-indicator').innerText = "فاز روز (حذف)";
+            
+            // Announce Roles if < 4 Detectives
+            var pubBox = document.getElementById('public-roles-box');
+            if (activeCopTypes.length < 4) {
+                pubBox.classList.remove('hidden');
+                var roleNames = activeCopTypes.map(function(t) {
+                    if(t==='sane') return 'معتبر';
+                    if(t==='insane') return 'برعکس';
+                    if(t==='paranoid') return 'بدبین';
+                    if(t==='naive') return 'ساده‌لوح';
+                    return t;
+                });
+                document.getElementById('public-roles-text').innerText = "کارآگاه‌های این بازی: " + roleNames.join('، ');
+            } else {
+                pubBox.classList.add('hidden');
+            }
+
+            if(isDistributionPhase) {
+                 document.getElementById('phase-indicator').innerText += " - پایان معارفه";
+                 // Reset for game start
+                 isDistributionPhase = false;
+                 nightNumber = 1; // Next night will be 2? Or stay 1?
+                 // Usually Night 1 happened during distribution. Next is Day 1. Then Night 2.
+            } else {
+                 document.getElementById('phase-indicator').innerText = "روز " + nightNumber;
+            }
+
+            // Render Elimination List
+            var list = document.getElementById('elimination-list');
+            list.innerHTML = "";
+            
+            var livingCount = 0;
+            players.forEach(function(p) {
+                if(p.alive) {
+                    livingCount++;
+                    var btn = document.createElement('button');
+                    btn.className = 'secondary-btn'; 
+                    // Style needs to be defined or reuse existing
+                    btn.style = "background:#334155; color:#ddd; border:1px solid #555; padding:8px 16px; border-radius:8px; cursor:pointer;";
+                    btn.innerText = "💀 حذف " + p.name;
+                    btn.onclick = function() { eliminatePlayer(p); };
+                    list.appendChild(btn);
+                }
+            });
+            
+            if(livingCount === 0) return; // Should not happen
+        }
+        
+        function eliminatePlayer(player) {
+            if(!confirm("آیا " + player.name + " حذف شود؟")) return;
+            
+            player.alive = false;
+            
+            if(player.roleKey === 'mafia') {
+                alert("🎉 تبریک! مافیا (" + player.name + ") حذف شد. شهروندان برنده شدند!");
+                document.getElementById('phase-indicator').innerText = "پایان بازی - برد شهروندان";
+                document.getElementById('elimination-section').classList.add('hidden');
+                document.getElementById('start-night-btn').classList.add('hidden');
+            } else {
+                alert("😔 " + player.name + " شهروند بود. بازی ادامه دارد...");
+                updatePhaseMenu(); // Refresh list
+            }
+        }
+
+        function startNightTurn() {
+            var p = players[currentIndex];
+            document.getElementById('night-player-name').innerText = p.name;
+
+            // Build Target List
+            var list = document.getElementById('target-list');
+            list.innerHTML = "";
+
+            // Add default Next button behavior back for Mafia case
+            var nextBtn = document.querySelector('#night-screen .action-btn');
+            nextBtn.classList.add('hidden'); // Hide default button initially, we control flow
+
+            // Mafia Action Logic
+            if (p.roleKey === 'mafia') {
+                 // If Distribution Phase (Night 1) -> Headstart (No Kill)
+                 if (isDistributionPhase || nightNumber === 1) {
+                     // Direct Handling for Mafia in Distribution
+                     if (isDistributionPhase) {
+                         var revealScreen = document.getElementById('reveal-screen');
+                         var oldBtn = revealScreen.querySelector('.action-btn');
+                         if(oldBtn) oldBtn.classList.add('hidden');
+                         
+                         var inlineList = document.createElement('div');
+                         inlineList.id = "inline-action-list";
+                         inlineList.style.marginTop = "20px";
+                         
+                         var info = document.createElement('div');
+                         info.style.cssText = "color:#aaa; font-size:0.9rem; margin-bottom:20px;";
+                         info.innerText = "شما مافیا هستید (تک نفره). شب اول شلیک ندارید.";
+                         
+                         var btn = document.createElement('button');
+                         btn.className = 'target-btn';
+                         btn.innerText = "تایید و شروع بازی";
+                         btn.onclick = function() { recordMafiaKill(null); };
+                         
+                         inlineList.appendChild(info);
+                         inlineList.appendChild(btn);
+                         
+                         var existingList = document.getElementById('inline-action-list');
+                         if (existingList) existingList.remove();
+                         
+                         revealScreen.appendChild(inlineList);
+                         return;
+                     }
+                     
+                     list.innerHTML = "<div style='color:#ef4444; font-weight:bold; margin-bottom:10px;'>شب معارفه</div>";
+                     list.innerHTML += "<div style='color:#aaa; font-size:0.9rem; margin-bottom:20px;'>شما مافیا هستید (تک نفره). شب اول شلیک ندارید.</div>";
+                     
+                     var btn = document.createElement('button');
+                     btn.className = 'target-btn';
+                     btn.innerText = "تایید و شروع بازی";
+                     btn.onclick = function() { recordMafiaKill(null); }; // Null target for N1
+                     list.appendChild(btn);
+                 } else {
+                     // Regular Kill
+                    list.innerHTML = "<div style='color:#ef4444; font-weight:bold; margin-bottom:10px;'>شلیک شب " + nightNumber + "</div>";
+                    
+                    for (var i = 0; i < players.length; i++) {
+                        if (i === currentIndex || !players[i].alive) continue; // Skip self and dead
+                        
+                        var target = players[i];
+                        var btn = document.createElement('button');
+                        btn.className = 'target-btn';
+                        btn.innerText = "شلیک به " + target.name;
+                        btn.style.borderColor = "#ef4444";
+                        
+                        (function(tgt) {
+                            btn.onclick = function() { recordMafiaKill(tgt); };
+                        })(target);
+    
+                        list.appendChild(btn);
+                    }
+                 }
+            } else {
+            // Cops and Citizens Logic
+            var actionText = (p.roleKey === 'citizen') ? "یک نفر را برای رد گم کردن انتخاب کنید:" : "یک نفر را برای استعلام انتخاب کنید:";
+            // Inline Action List for Distribution Phase
+            if (isDistributionPhase) {
+                // Show directly in Reveal Screen
+                var inlineList = document.createElement('div');
+                inlineList.style.marginTop = "20px";
+                inlineList.innerHTML = "<div style='color:#ccc; margin-bottom:10px;'>" + actionText + "</div>";
+                
+                for (var i = 0; i < players.length; i++) {
+                    if (i === currentIndex || !players[i].alive) continue;
+                    
+                    var target = players[i];
+                    var btn = document.createElement('button');
+                    btn.className = 'target-btn';
+                    btn.innerText = target.name;
+                    
+                    (function(tgt) {
+                        btn.onclick = function() { 
+                            if (p.roleKey === 'citizen') {
+                                processCitizenAction(tgt);
+                            } else {
+                                processInvestigation(p, tgt); 
+                            }
+                        };
+                    })(target);
+
+                    inlineList.appendChild(btn);
+                }
+                
+                var revealScreen = document.getElementById('reveal-screen');
+                // Remove existing buttons/extra text if any
+                var oldBtn = revealScreen.querySelector('.action-btn');
+                if(oldBtn) oldBtn.classList.add('hidden');
+                
+                // Append new list if not already there
+                var existingList = document.getElementById('inline-action-list');
+                if (existingList) existingList.remove();
+                
+                inlineList.id = "inline-action-list";
+                revealScreen.appendChild(inlineList);
+                
+                return; // Stop here, don't switch to night screen
+            }
+
+            // Standard Night Phase (Separate Screen)
+            list.innerHTML = "<div style='color:#ccc; margin-bottom:10px;'>" + actionText + "</div>";
+
+                for (var i = 0; i < players.length; i++) {
+                    if (i === currentIndex) continue; // Can investigate dead players? Usually yes in Dethy to clear suspicion, but typically no. Let's show all to be safe or filter dead.
+                    // Dethy: Dead players reveal role usually. So no need to investigate.
+                    if (!players[i].alive) continue;
+
+                    var target = players[i];
+                    var btn = document.createElement('button');
+                    btn.className = 'target-btn';
+                    btn.innerText = target.name;
+                    
+                    (function(tgt) {
+                        btn.onclick = function() { 
+                            if (p.roleKey === 'citizen') {
+                                processCitizenAction(tgt);
+                            } else {
+                                processInvestigation(p, tgt); 
+                            }
+                        };
+                    })(target);
+
+                    list.appendChild(btn);
+                }
+            }
+
+            showScreen('night-screen');
+        }
+
+        function recordMafiaKill(target) {
+             var logEl = document.getElementById('mafia-kill-log');
+             var resBox = document.getElementById('result-box');
+
+             if (target === null) {
+                 // Night 1 Headstart
+                 resBox.innerText = "شب معارفه";
+                 resBox.innerHTML += "<div style='font-size:0.8rem; font-weight:normal; margin-top:10px;'>بازی شروع شد.</div>";
+                 resBox.className = "result-box town-text"; 
+                 resBox.style.borderColor = "#888";
+             } else {
+                 // Regular Night
+                 logEl.innerHTML += "شب " + nightNumber + ": شلیک به <strong>" + target.name + "</strong><br>";
+                 
+                 resBox.innerText = "شلیک ثبت شد";
+                 resBox.className = "result-box mafia-text";
+                 resBox.style.borderColor = "#ef4444";
+             }
+             
+             showScreen('result-screen');
+        }
+        
+        function processCitizenAction(target) {
+            // Fake Action
+            var resBox = document.getElementById('result-box');
+            // Clear result for Citizen (no green/red)
+            resBox.innerHTML = "عدم توانایی";
+            resBox.innerHTML += "<div style='font-size:1rem; font-weight:normal; margin-top:10px;'>شما شهروند ساده هستید و قابلیت استعلام ندارید.</div>";
+            resBox.innerHTML += "<div style='font-size:0.8rem; font-weight:normal; margin-top:10px; color:#aaa;'>انتخاب " + target.name + " ثبت شد (جهت رد گم کردن).</div>";
+            
+            resBox.className = "result-box"; // Remove town/mafia text classes
+            resBox.style.borderColor = "#94a3b8"; // Neutral Gray
+            resBox.style.color = "#e2e8f0"; // Neutral Text
+            
+            showScreen('result-screen');
+        }
+
+        function processInvestigation(cop, target) {
+            var result = "";
+            var copType = cop.roleKey;
+            var targetIsMafia = (target.roleKey === 'mafia');
+
+            // Logic based on Dethy Wiki
+            if (copType === 'sane') {
+                // Reliable: Truth
+                result = targetIsMafia ? "مافیا" : "شهروند";
+            } else if (copType === 'insane') {
+                // Inverse: Opposite
+                result = targetIsMafia ? "شهروند" : "مافیا";
+            } else if (copType === 'paranoid') {
+                // Cynical: Always Mafia
+                result = "مافیا";
+            } else if (copType === 'naive') {
+                // Naive: Always Town
+                result = "شهروند";
+            }
+
+            var resBox = document.getElementById('result-box');
+            resBox.innerText = result;
+            
+            if (result === "مافیا") {
+                resBox.className = "result-box mafia-text";
+                resBox.style.borderColor = "#ef4444";
+            } else {
+                resBox.className = "result-box town-text";
+                resBox.style.borderColor = "#22c55e";
+            }
+
+            showScreen('result-screen');
+        }
+
+        function finishResult() {
+            if (isDistributionPhase) {
+                nextDistribute();
+            } else {
+                nextNight();
+            }
+        }
+
+        function nextNight() {
+            currentIndex++;
+            // Find next alive player
+            while (currentIndex < totalPlayers && !players[currentIndex].alive) {
+                currentIndex++;
+            }
+            
+            if (currentIndex >= totalPlayers) {
+                // End of Night
+                showScreen('phase-menu');
+                updatePhaseMenu();
+            } else {
+                showPassScreen(true);
+            }
+        }
+
+        // --- Utils ---
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function showScreen(id) {
+            var screens = ['setup-screen', 'pass-screen', 'reveal-screen', 'phase-menu', 'night-screen', 'result-screen'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function toggleGodView() {
+            var el = document.getElementById('god-view');
+            if (el.classList.contains('hidden')) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+    </script>
+</body>
+</html>

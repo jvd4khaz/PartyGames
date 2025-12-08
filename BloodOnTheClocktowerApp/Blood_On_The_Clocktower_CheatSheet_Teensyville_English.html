@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood on the Clocktower Teensyville Role Summary - Printable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .distribution-table {
+            display: none;
+        }
+        
+        .distribution-compact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-bottom: 8px;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+        
+        .dist-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .dist-player {
+            font-weight: bold;
+            margin-right: 2px;
+        }
+        
+        .distribution-legend {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-bottom: 15px;
+            color: #aaa;
+        }
+        
+        .legend-item {
+            display: inline-flex;
+            gap: 8px;
+        }
+        
+        .townsfolk-count { color: #0277bd; font-weight: bold; }
+        .outsider-count { color: #00bcd4; font-weight: bold; }
+        .minion-count { color: #e65100; font-weight: bold; }
+        .demon-count { color: #d50000; font-weight: bold; }
+        
+        .cheat-sheet-section {
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+        
+        .cheat-sheet-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .cs-townsfolk-header {
+            background: rgba(2, 119, 189, 0.3);
+            color: #0277bd;
+            border: 2px solid #0277bd;
+        }
+        
+        .cs-outsider-header {
+            background: rgba(0, 188, 212, 0.3);
+            color: #00bcd4;
+            border: 2px solid #00bcd4;
+        }
+        
+        .cs-minion-header {
+            background: rgba(230, 81, 0, 0.3);
+            color: #e65100;
+            border: 2px solid #e65100;
+        }
+        
+        .cs-demon-header {
+            background: rgba(213, 0, 0, 0.3);
+            color: #d50000;
+            border: 2px solid #d50000;
+        }
+        
+        .cheat-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        @media print {
+            .cheat-sheet-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 3px;
+            }
+        }
+        
+        .cheat-sheet-card {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        
+        .role-townsfolk { border-top: 4px solid #0277bd; }
+        .role-outsider { border-top: 4px solid #00bcd4; }
+        .role-minion { border-top: 4px solid #e65100; }
+        .role-demon { border-top: 4px solid #d50000; }
+        
+        .cs-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .cs-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        
+        .cs-rebus {
+            font-size: 0.75rem;
+            color: #aaa;
+            line-height: 1.3;
+        }
+        
+        .win-conditions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .win-card {
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid;
+        }
+        
+        .win-good {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+        }
+        
+        .win-evil {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #f44336;
+        }
+        
+        .win-card h3 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .win-card p {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        
+        .win-good h3 { color: #4caf50; }
+        .win-evil h3 { color: #f44336; }
+        
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.25in;
+            }
+            
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+                font-size: 8pt;
+            }
+            
+            .container {
+                background: white;
+                padding: 0;
+                max-width: 100%;
+            }
+            
+            h1 {
+                color: black;
+                font-size: 16pt;
+                margin-bottom: 3px;
+                margin-top: 0;
+            }
+            
+            h2 {
+                font-size: 11pt;
+                margin-bottom: 2px;
+                margin-top: 0;
+            }
+            
+            .distribution-table {
+                display: none;
+            }
+            
+            .distribution-compact {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 2px 6px;
+                margin-bottom: 3px;
+                justify-content: center;
+                font-size: 8pt;
+            }
+            
+            .dist-row {
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                padding: 1px 4px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 2px;
+            }
+            
+            .dist-player {
+                font-weight: bold;
+                margin-right: 1px;
+            }
+            
+            .distribution-legend {
+                text-align: center;
+                font-size: 6pt;
+                margin-bottom: 4px;
+                color: #333;
+            }
+            
+            .legend-item {
+                display: inline-flex;
+                gap: 4px;
+            }
+            
+            .cheat-sheet-section {
+                margin-bottom: 3px;
+                page-break-inside: avoid;
+            }
+            
+            .cheat-sheet-header {
+                font-size: 9pt;
+                padding: 2px 4px;
+                margin-bottom: 2px;
+                border-width: 1px;
+                line-height: 1.2;
+            }
+            
+            .cheat-sheet-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 2px;
+            }
+            
+            .cheat-sheet-card {
+                background: white;
+                border: 1px solid #ccc;
+                border-radius: 2px;
+                padding: 3px;
+                page-break-inside: avoid;
+            }
+            
+            .cs-icon {
+                font-size: 1.4rem;
+                margin-bottom: 1px;
+            }
+            
+            .cs-name {
+                color: black;
+                font-size: 8pt;
+                margin-bottom: 1px;
+                font-weight: bold;
+                line-height: 1.1;
+            }
+            
+            .cs-rebus {
+                color: #333;
+                font-size: 7pt;
+                line-height: 1.2;
+            }
+            
+            .win-conditions {
+                gap: 4px;
+                margin: 4px 0;
+            }
+            
+            .win-card {
+                background: white !important;
+                border: 1px solid #333 !important;
+                padding: 3px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .win-card h3 {
+                font-size: 9pt;
+                margin-bottom: 2px;
+            }
+            
+            .win-card p {
+                font-size: 7pt;
+                margin: 0;
+                line-height: 1.2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Blood on the Clocktower Teensyville Role Summary</h1>
+        
+        <!-- Distribution Table -->
+        <h2 style="text-align: center; margin-bottom: 5px; color: #ff6b6b; font-size: 0.9rem;">Role Distribution by Player Count</h2>
+        <div class="distribution-compact">
+            <div class="dist-row"><span class="dist-player">5:</span> <span class="townsfolk-count">3</span> <span class="outsider-count">0</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">6:</span> <span class="townsfolk-count">3</span> <span class="outsider-count">1</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
+        </div>
+        <div class="distribution-legend">
+            <span class="legend-item"><span class="townsfolk-count">Townsfolk</span> <span class="outsider-count">Outsider</span> <span class="minion-count">Minion</span> <span class="demon-count">Demon</span></span>
+        </div>
+        
+        <!-- Townsfolk Section -->
+        <div class="cheat-sheet-section">
+            <div class="cheat-sheet-header cs-townsfolk-header">Townsfolk (Good Team)</div>
+            <div class="cheat-sheet-grid">
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">🧺</div>
+                    <div class="cs-name">Washerwoman</div>
+                    <div class="cs-rebus">Start: 1 of 2 Players = [Townsfolk]</div>
+                </div>
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">👨‍🍳</div>
+                    <div class="cs-name">Chef</div>
+                    <div class="cs-rebus">Start: # of Evil pairs</div>
+                </div>
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">🏹</div>
+                    <div class="cs-name">Slayer</div>
+                    <div class="cs-rebus">Day: Shot Demon? Demon dies</div>
+                </div>
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">🛡️</div>
+                    <div class="cs-name">Monk</div>
+                    <div class="cs-rebus">Night: Protect 1 player</div>
+                </div>
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">🔮</div>
+                    <div class="cs-name">Fortune Teller</div>
+                    <div class="cs-rebus">Night: Choose 2. Is one Demon? (Red herring)</div>
+                </div>
+                <div class="cheat-sheet-card role-townsfolk">
+                    <div class="cs-icon">⚰️</div>
+                    <div class="cs-name">Undertaker</div>
+                    <div class="cs-rebus">Night: Who died today? = [Role]</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Outsider Section -->
+        <div class="cheat-sheet-section">
+            <div class="cheat-sheet-header cs-outsider-header">Outsiders (Good Team)</div>
+            <div class="cheat-sheet-grid">
+                <div class="cheat-sheet-card role-outsider">
+                    <div class="cs-icon">🍺</div>
+                    <div class="cs-name">Drunk</div>
+                    <div class="cs-rebus">You are drunk. Ability fails/lies</div>
+                </div>
+                <div class="cheat-sheet-card role-outsider">
+                    <div class="cs-icon">😇</div>
+                    <div class="cs-name">Saint</div>
+                    <div class="cs-rebus">Day: Executed? Evil wins</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Minion Section -->
+        <div class="cheat-sheet-section">
+            <div class="cheat-sheet-header cs-minion-header">Minions (Evil Team)</div>
+            <div class="cheat-sheet-grid">
+                <div class="cheat-sheet-card role-minion">
+                    <div class="cs-icon">💃</div>
+                    <div class="cs-name">Scarlet Woman</div>
+                    <div class="cs-rebus">Passive: Imp dies? Become Imp</div>
+                </div>
+                <div class="cheat-sheet-card role-minion">
+                    <div class="cs-icon">☠️</div>
+                    <div class="cs-name">Poisoner</div>
+                    <div class="cs-rebus">Night: Poison 1 player (Ability malfunctions)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demon Section -->
+        <div class="cheat-sheet-section">
+            <div class="cheat-sheet-header cs-demon-header">Demons (Evil Team)</div>
+            <div class="cheat-sheet-grid">
+                <div class="cheat-sheet-card role-demon">
+                    <div class="cs-icon">👹</div>
+                    <div class="cs-name">Imp</div>
+                    <div class="cs-rebus">Night: Kill 1. Suicide? New Imp</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Winning Conditions -->
+        <div class="win-conditions">
+            <div class="win-card win-good">
+                <h3>Good Team Wins</h3>
+                <p>Execute the Demon</p>
+            </div>
+            <div class="win-card win-evil">
+                <h3>Evil Team Wins</h3>
+                <p>Only 2 players remain</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
