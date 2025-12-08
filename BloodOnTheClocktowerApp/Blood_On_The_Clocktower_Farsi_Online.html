@@ -387,6 +387,10 @@
         var ALL_MINIONS = ['Poisoner', 'Spy', 'Scarlet Woman', 'Baron'];
         var ALL_DEMONS = ['Imp'];
 
+        // API Configuration
+        // Change this to your server URL (e.g., 'http://localhost:3000' for local, or your deployed server URL)
+        var API_BASE_URL = window.location.origin; // Uses same origin as the page
+        
         // Game state
         var gameId = null;
         var isGameCreator = false; // Person who creates game (only for setup, then becomes regular player)
@@ -449,13 +453,13 @@
             gameState = JSON.parse(JSON.stringify(gameStateTemplate));
             gameState.playerCount = 7;
 
-            saveGameState();
+            saveGameState(); // Fire and forget for initial creation
             document.getElementById('display-game-id').innerText = gameId;
             showScreen('storyteller-setup');
             renderPlayerInputs();
         }
 
-        function joinGame() {
+        async function joinGame() {
             var id = document.getElementById('join-game-id').value.trim().toUpperCase();
             var name = document.getElementById('join-player-name').value.trim();
             
@@ -469,7 +473,7 @@
             isGameCreator = false;
 
             // Try to load game state
-            loadGameState();
+            await loadGameState();
             
             if (!gameState) {
                 alert('بازی یافت نشد');
@@ -500,23 +504,61 @@
             startPolling();
         }
 
-        function saveGameState() {
+        async function saveGameState() {
             if (!gameId || !gameState) return;
-            localStorage.setItem('botc_online_' + gameId, JSON.stringify(gameState));
+            
+            try {
+                const response = await fetch(API_BASE_URL + '/api/games/' + gameId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gameState: gameState })
+                });
+                
+                if (!response.ok) {
+                    // If game doesn't exist, create it
+                    if (response.status === 404) {
+                        await fetch(API_BASE_URL + '/api/games', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ gameId: gameId, gameState: gameState })
+                        });
+                    } else {
+                        console.error('Failed to save game state:', response.statusText);
+                    }
+                }
+            } catch (error) {
+                console.error('Error saving game state:', error);
+            }
         }
 
-        function loadGameState() {
+        async function loadGameState() {
             if (!gameId) return;
-            var stored = localStorage.getItem('botc_online_' + gameId);
-            if (stored) {
-                gameState = JSON.parse(stored);
+            
+            try {
+                const response = await fetch(API_BASE_URL + '/api/games/' + gameId);
+                if (response.ok) {
+                    gameState = await response.json();
+                } else if (response.status === 404) {
+                    gameState = null;
+                } else {
+                    console.error('Failed to load game state:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error loading game state:', error);
+                gameState = null;
             }
         }
 
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(function() {
-                loadGameState();
+            pollInterval = setInterval(async function() {
+                await loadGameState();
+                if (!gameState) return;
+                
                 if (isGameCreator && !gameState.gameStarted) {
                     // Game creator still in setup
                     updateSetupView();
@@ -533,7 +575,7 @@
             if (newCount >= 5 && newCount <= 15) {
                 gameState.playerCount = newCount;
                 document.getElementById('player-count-display').innerText = gameState.playerCount;
-                saveGameState();
+                saveGameState(); // Fire and forget
                 renderPlayerInputs();
             }
         }
@@ -559,7 +601,7 @@
             // This will be handled in showDistributionPhase if needed
         }
 
-        function startGame() {
+        async function startGame() {
             if (!gameState) return;
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
@@ -644,7 +686,7 @@
 
             gameState.gameStarted = true;
             gameState.distributionComplete = false;
-            saveGameState();
+            await saveGameState();
             
             // Creator also becomes a regular player
             isGameCreator = false;
@@ -700,9 +742,9 @@
             if (!player.roleRevealed) {
                 if (gameState.distributionComplete) {
                     // Distribution complete, show role
-                    player.roleRevealed = true;
-                    showPlayerRole(player);
-                    saveGameState();
+                player.roleRevealed = true;
+                showPlayerRole(player);
+                saveGameState(); // Fire and forget
                 } else {
                     // Still in distribution phase
                     document.getElementById('waiting-message').innerHTML = '<div class="pulsing">⏳ در انتظار شروع بازی...</div>';
@@ -721,7 +763,7 @@
                     gameState.isNightPhase = true;
                     gameState.currentDay = 1;
                     buildNightOrder();
-                    saveGameState();
+                    saveGameState(); // Fire and forget
                 }
             }
 
