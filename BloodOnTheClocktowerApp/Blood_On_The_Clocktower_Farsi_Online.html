@@ -253,9 +253,9 @@
         </div>
     </div>
 
-    <!-- 2. Storyteller Setup Screen -->
-    <div id="storyteller-setup" class="container hidden">
-        <h1>تنظیمات بازی</h1>
+    <!-- 2. Creator Lobby Screen -->
+    <div id="creator-lobby" class="container hidden">
+        <h1>لابی بازی</h1>
         <div class="game-id-display">
             <div>شناسه بازی:</div>
             <div id="display-game-id" style="font-size: 1.5rem; margin-top: 10px;"></div>
@@ -265,7 +265,7 @@
         </div>
 
         <div class="input-group">
-            <label>تعداد بازیکنان:</label>
+            <label>تعداد بازیکنان مورد نیاز:</label>
             <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
                 <button class="secondary-btn" onclick="updatePlayerCount(-1)" style="width: auto; padding: 10px 20px;">-</button>
                 <span id="player-count-display" style="font-size: 1.5rem; font-weight: bold;">7</span>
@@ -273,9 +273,39 @@
             </div>
         </div>
 
-        <div id="player-inputs-container"></div>
+        <div style="margin: 20px 0;">
+            <h2>بازیکنان پیوسته (<span id="joined-count">0</span> / <span id="required-count">7</span>)</h2>
+            <div id="joined-players-list" class="player-list" style="margin-top: 15px; min-height: 100px;">
+                <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                    در انتظار بازیکنان...
+                </div>
+            </div>
+        </div>
 
-        <button class="action-btn" onclick="startGame()">شروع بازی</button>
+        <button id="start-game-btn" class="action-btn" onclick="confirmStartGame()" disabled>
+            شروع بازی
+        </button>
+        <p id="start-game-hint" style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">
+            منتظر بمانید تا همه بازیکنان بپیوندند
+        </p>
+    </div>
+
+    <!-- 3. Player Waiting Screen -->
+    <div id="player-waiting" class="container hidden">
+        <h1>در انتظار شروع بازی</h1>
+        <div class="game-id-display">
+            <div>شناسه بازی:</div>
+            <div id="waiting-game-id" style="font-size: 1.5rem; margin-top: 10px;"></div>
+        </div>
+        <div style="margin: 20px 0;">
+            <div class="waiting-message">
+                <div class="pulsing">⏳ در انتظار شروع بازی توسط سازنده...</div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h3>بازیکنان پیوسته:</h3>
+                <div id="waiting-players-list" class="player-list" style="margin-top: 15px;"></div>
+            </div>
+        </div>
     </div>
 
 
@@ -406,7 +436,9 @@
         // Game state (shared by all)
         var gameStateTemplate = {
             playerCount: 7,
-            players: [],
+            joinedPlayers: [], // Array of {name: string, joinedAt: timestamp}
+            creatorName: '',
+            players: [], // Assigned after game starts
             currentDay: 1,
             isNightPhase: true,
             currentNightOrder: [],
@@ -479,6 +511,9 @@
             // Initialize game state
             gameState = JSON.parse(JSON.stringify(gameStateTemplate));
             gameState.playerCount = 7;
+            gameState.creatorName = name;
+            // Creator joins automatically
+            gameState.joinedPlayers = [{ name: name, joinedAt: Date.now() }];
 
             // Create game on server
             try {
@@ -504,13 +539,13 @@
             }
 
             document.getElementById('display-game-id').innerText = gameId;
-            showScreen('storyteller-setup');
-            renderPlayerInputs();
+            showScreen('creator-lobby');
+            startPolling();
+            updateCreatorLobby();
         }
 
         async function joinGame() {
             var id = document.getElementById('join-game-id').value.trim();
-            // Don't convert to uppercase - keep original case
             var name = document.getElementById('join-player-name').value.trim();
             
             if (!id || !name) {
@@ -531,28 +566,38 @@
                 return;
             }
 
-            // If game hasn't started, wait
-            if (!gameState.gameStarted) {
-                alert('بازی هنوز شروع نشده است. منتظر باشید تا بازی شروع شود.');
-                return;
-            }
-
-            // Find player index
-            playerIndex = -1;
-            for (var i = 0; i < gameState.players.length; i++) {
-                if (gameState.players[i].name === name) {
-                    playerIndex = i;
-                    break;
+            // Check if game has started
+            if (gameState.gameStarted) {
+                // Game already started, find player and show game view
+                playerIndex = -1;
+                for (var i = 0; i < gameState.players.length; i++) {
+                    if (gameState.players[i].name === name) {
+                        playerIndex = i;
+                        break;
+                    }
                 }
-            }
-
-            if (playerIndex === -1) {
-                alert('نام شما در لیست بازیکنان نیست. لطفا نام دقیقی که سازنده بازی وارد کرده است را استفاده کنید.');
+                if (playerIndex === -1) {
+                    alert('نام شما در لیست بازیکنان نیست.');
+                    return;
+                }
+                showPlayerView();
+                startPolling();
                 return;
             }
 
-            showPlayerView();
+            // Game not started - join lobby
+            var alreadyJoined = gameState.joinedPlayers.some(p => p.name === name);
+            if (!alreadyJoined) {
+                // Add player to joined list
+                gameState.joinedPlayers.push({ name: name, joinedAt: Date.now() });
+                await saveGameState();
+            }
+
+            // Show waiting screen
+            document.getElementById('waiting-game-id').innerText = gameId;
+            showScreen('player-waiting');
             startPolling();
+            updatePlayerWaiting();
         }
 
         async function saveGameState() {
@@ -616,11 +661,30 @@
                 if (!gameState) return;
                 
                 if (isGameCreator && !gameState.gameStarted) {
-                    // Game creator still in setup
-                    updateSetupView();
-                } else {
-                    // All players see the same view
-                    updatePlayerView();
+                    // Game creator in lobby
+                    updateCreatorLobby();
+                } else if (!isGameCreator && !gameState.gameStarted) {
+                    // Player waiting in lobby
+                    updatePlayerWaiting();
+                } else if (gameState.gameStarted) {
+                    // Game has started - show game view
+                    if (playerIndex === -1) {
+                        // Find player index
+                        for (var i = 0; i < gameState.players.length; i++) {
+                            if (gameState.players[i].name === playerName) {
+                                playerIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (playerIndex !== -1) {
+                        // Switch to game view if still in waiting/lobby screen
+                        var currentScreen = document.querySelector('.container:not(.hidden)');
+                        if (currentScreen && (currentScreen.id === 'player-waiting' || currentScreen.id === 'creator-lobby')) {
+                            showPlayerView();
+                        }
+                        updatePlayerView();
+                    }
                 }
             }, 1000); // Poll every second
         }
@@ -631,45 +695,107 @@
             if (newCount >= 5 && newCount <= 15) {
                 gameState.playerCount = newCount;
                 document.getElementById('player-count-display').innerText = gameState.playerCount;
+                document.getElementById('required-count').innerText = gameState.playerCount;
                 saveGameState(); // Fire and forget
-                renderPlayerInputs();
+                updateCreatorLobby();
             }
         }
 
-        function renderPlayerInputs() {
-            if (!gameState) return;
-            var container = document.getElementById('player-inputs-container');
-            container.innerHTML = '';
-            for (var i = 0; i < gameState.playerCount; i++) {
-                var input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'player-input';
-                input.placeholder = 'بازیکن ' + (i + 1);
-                input.id = 'player-input-' + i;
-                container.appendChild(input);
+        function updateCreatorLobby() {
+            if (!gameState || !isGameCreator) return;
+            
+            var joinedCount = gameState.joinedPlayers.length;
+            var requiredCount = gameState.playerCount;
+            
+            document.getElementById('joined-count').innerText = joinedCount;
+            document.getElementById('required-count').innerText = requiredCount;
+            
+            // Update joined players list
+            var listContainer = document.getElementById('joined-players-list');
+            if (joinedCount === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">در انتظار بازیکنان...</div>';
+            } else {
+                listContainer.innerHTML = '';
+                gameState.joinedPlayers.forEach(function(player) {
+                    var item = document.createElement('div');
+                    item.className = 'player-item';
+                    item.innerText = player.name;
+                    listContainer.appendChild(item);
+                });
+            }
+            
+            // Enable/disable start button
+            var startBtn = document.getElementById('start-game-btn');
+            var hint = document.getElementById('start-game-hint');
+            if (joinedCount >= requiredCount) {
+                startBtn.disabled = false;
+                hint.textContent = 'همه بازیکنان پیوسته‌اند. می‌توانید بازی را شروع کنید.';
+            } else {
+                startBtn.disabled = true;
+                hint.textContent = 'منتظر بمانید تا ' + (requiredCount - joinedCount) + ' بازیکن دیگر بپیوندد.';
             }
         }
 
-        function updateSetupView() {
-            // Update setup screen if game creator
-            if (!gameState) return;
-            var unrevealed = gameState.players.filter(p => !p.roleRevealed);
-            // This will be handled in showDistributionPhase if needed
+        function updatePlayerWaiting() {
+            if (!gameState || isGameCreator) return;
+            
+            // Update waiting players list
+            var listContainer = document.getElementById('waiting-players-list');
+            if (gameState.joinedPlayers.length === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">در انتظار...</div>';
+            } else {
+                listContainer.innerHTML = '';
+                gameState.joinedPlayers.forEach(function(player) {
+                    var item = document.createElement('div');
+                    item.className = 'player-item';
+                    item.innerText = player.name;
+                    listContainer.appendChild(item);
+                });
+            }
+            
+            // Show progress
+            var joinedCount = gameState.joinedPlayers.length;
+            var requiredCount = gameState.playerCount;
+            var statusText = 'بازیکنان: ' + joinedCount + ' / ' + requiredCount;
+            if (joinedCount >= requiredCount) {
+                statusText += ' - آماده برای شروع';
+            }
+            // Could add this to the waiting message if needed
+        }
+
+        async function confirmStartGame() {
+            if (!gameState || !isGameCreator) return;
+            
+            var joinedCount = gameState.joinedPlayers.length;
+            var requiredCount = gameState.playerCount;
+            
+            if (joinedCount < requiredCount) {
+                alert('هنوز ' + (requiredCount - joinedCount) + ' بازیکن دیگر باید بپیوندد.');
+                return;
+            }
+            
+            if (!confirm('آیا مطمئن هستید که می‌خواهید بازی را شروع کنید؟')) {
+                return;
+            }
+            
+            // Start the game - assign roles
+            await startGame();
         }
 
         async function startGame() {
             if (!gameState) return;
-            var inputs = document.querySelectorAll('.player-input');
-            var names = [];
-            for (var i = 0; i < inputs.length; i++) {
-                var val = inputs[i].value.trim() || inputs[i].placeholder;
-                names.push(val);
-            }
+            
+            // Use joined players' names
+            var names = gameState.joinedPlayers.map(p => p.name);
+            var actualPlayerCount = names.length;
+            
+            // Update player count to match actual joined players
+            gameState.playerCount = actualPlayerCount;
 
             // Assign roles
-            var dist = CHARACTER_DISTRIBUTION[gameState.playerCount];
+            var dist = CHARACTER_DISTRIBUTION[actualPlayerCount];
             if (!dist) {
-                alert('تعداد بازیکن نامعتبر');
+                alert('تعداد بازیکن نامعتبر: ' + actualPlayerCount);
                 return;
             }
 
@@ -708,7 +834,7 @@
 
             // Create players
             gameState.players = [];
-            for (var i = 0; i < gameState.playerCount; i++) {
+            for (var i = 0; i < actualPlayerCount; i++) {
                 var charName = selectedChars[i];
                 var charDef = CHARACTERS[charName];
                 var fakeCharDef = null;
@@ -747,7 +873,7 @@
             // Creator also becomes a regular player
             isGameCreator = false;
             showPlayerView();
-            startPolling();
+            // Polling already running
         }
 
         function shuffleArray(array) {
