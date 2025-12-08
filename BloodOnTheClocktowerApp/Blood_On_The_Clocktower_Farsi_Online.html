@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>خون بر برج ساعت - نسخه آنلاین</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #b71c1c;
+            --townsfolk-color: #0277bd;
+            --outsider-color: #00bcd4;
+            --minion-color: #e65100;
+            --demon-color: #d50000;
+            --good-color: #4CAF50;
+            --evil-color: #F44336;
+            --btn-color: #b71c1c;
+            --btn-text: #ffffff;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input, .text-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus, .text-input:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .player-select-btn {
+            background: linear-gradient(135deg, rgba(183, 28, 28, 0.2) 0%, rgba(183, 28, 28, 0.1) 100%);
+            color: var(--accent-color);
+            border: 3px solid var(--accent-color);
+            padding: 18px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin: 12px 0;
+            transition: all 0.3s;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-select-btn:hover {
+            background: linear-gradient(135deg, rgba(183, 28, 28, 0.3) 0%, rgba(183, 28, 28, 0.2) 100%);
+            transform: translateY(-2px);
+        }
+        .player-select-btn.dead {
+            opacity: 0.5;
+            border-color: #666;
+        }
+
+        .hidden { display: none !important; }
+
+        .role-card {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .role-title { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            margin-bottom: 10px; 
+        }
+        .role-townsfolk { color: var(--townsfolk-color); }
+        .role-outsider { color: var(--outsider-color); }
+        .role-minion { color: var(--minion-color); }
+        .role-demon { color: var(--demon-color); }
+
+        .game-id-display {
+            background: rgba(183, 28, 28, 0.2);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .phase-display {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.05);
+        }
+        .phase-night { background: rgba(26, 26, 46, 0.5); }
+        .phase-day { background: rgba(22, 33, 62, 0.5); }
+
+        .player-list {
+            text-align: right;
+            margin: 15px 0;
+        }
+        .player-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+        .player-item.dead {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .info-box {
+            background: rgba(2, 119, 189, 0.2);
+            border: 2px solid var(--townsfolk-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .waiting-message {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. Game Room Selection/Creation -->
+    <div id="room-screen" class="container">
+        <h1>🕰️ خون بر برج ساعت - نسخه آنلاین</h1>
+        <p>هر بازیکن از دستگاه خود استفاده می‌کند</p>
+        
+        <div id="create-game-section">
+            <h2>ایجاد بازی</h2>
+            <div class="input-group">
+                <label>نام شما:</label>
+                <input type="text" id="storyteller-name" class="text-input" placeholder="نام شما">
+            </div>
+            <button class="action-btn" onclick="createGame()">ایجاد بازی جدید</button>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">
+                شما نیز یک بازیکن خواهید بود - هیچ اطلاعات اضافی دریافت نمی‌کنید
+            </p>
+        </div>
+
+        <div style="margin: 30px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+            <h2>بازیکن: پیوستن به بازی</h2>
+            <div class="input-group">
+                <label>شناسه بازی:</label>
+                <input type="text" id="join-game-id" class="text-input" placeholder="شناسه بازی را وارد کنید">
+            </div>
+            <div class="input-group">
+                <label>نام شما:</label>
+                <input type="text" id="join-player-name" class="text-input" placeholder="نام شما">
+            </div>
+            <button class="action-btn" onclick="joinGame()">پیوستن به بازی</button>
+        </div>
+    </div>
+
+    <!-- 2. Storyteller Setup Screen -->
+    <div id="storyteller-setup" class="container hidden">
+        <h1>تنظیمات بازی</h1>
+        <div class="game-id-display">
+            <div>شناسه بازی:</div>
+            <div id="display-game-id" style="font-size: 1.5rem; margin-top: 10px;"></div>
+            <p style="font-size: 0.9rem; margin-top: 10px; color: var(--text-secondary);">
+                این شناسه را با بازیکنان به اشتراک بگذارید
+            </p>
+        </div>
+
+        <div class="input-group">
+            <label>تعداد بازیکنان:</label>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <button class="secondary-btn" onclick="updatePlayerCount(-1)" style="width: auto; padding: 10px 20px;">-</button>
+                <span id="player-count-display" style="font-size: 1.5rem; font-weight: bold;">7</span>
+                <button class="secondary-btn" onclick="updatePlayerCount(1)" style="width: auto; padding: 10px 20px;">+</button>
+            </div>
+        </div>
+
+        <div id="player-inputs-container"></div>
+
+        <button class="action-btn" onclick="startGame()">شروع بازی</button>
+    </div>
+
+
+    <!-- 4. Player View -->
+    <div id="player-view" class="container hidden">
+        <h1>خون بر برج ساعت</h1>
+        <div id="player-name-display" style="font-size: 1.2rem; color: var(--accent-color); margin: 10px 0;"></div>
+        
+        <div id="player-role-card" class="role-card hidden">
+            <div id="player-role-title" class="role-title"></div>
+            <div id="player-role-desc" style="margin-top: 10px;"></div>
+            <div id="player-role-extra" style="margin-top: 15px;"></div>
+        </div>
+
+        <div id="player-night-action" class="hidden">
+            <div class="info-box">
+                <h2 id="night-action-title"></h2>
+                <div id="night-action-content"></div>
+            </div>
+        </div>
+
+        <div id="player-day-view" class="hidden">
+            <div class="phase-display phase-day">
+                <h2 id="day-phase-title">فاز روز</h2>
+                <div id="day-phase-info" style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-around; margin: 15px 0;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">زنده</div>
+                            <div id="day-living-count" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">روز</div>
+                            <div id="day-current-day" style="font-size: 1.5rem; font-weight: bold;">1</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">اعدام‌ها</div>
+                            <div id="day-execution-count" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                        </div>
+                    </div>
+                    <div id="day-players-list" class="player-list" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="player-info-history" style="margin-top: 20px; text-align: right;"></div>
+
+        <div class="waiting-message hidden" id="waiting-message">
+            <div class="pulsing">⏳ در انتظار شروع بازی...</div>
+        </div>
+    </div>
+
+    <!-- Night Action Modal (for player) -->
+    <div id="night-action-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2 id="modal-night-title"></h2>
+            <div id="modal-night-content"></div>
+            <button class="action-btn" onclick="closeNightModal()">تایید</button>
+        </div>
+    </div>
+
+    <script>
+        // Character definitions (same as original)
+        var CHARACTER_DISTRIBUTION = {
+            5: { townsfolk: 3, outsiders: 0, minions: 1, demon: 1 },
+            6: { townsfolk: 3, outsiders: 1, minions: 1, demon: 1 },
+            7: { townsfolk: 5, outsiders: 0, minions: 1, demon: 1 },
+            8: { townsfolk: 5, outsiders: 1, minions: 1, demon: 1 },
+            9: { townsfolk: 5, outsiders: 2, minions: 1, demon: 1 },
+            10: { townsfolk: 7, outsiders: 0, minions: 2, demon: 1 },
+            11: { townsfolk: 7, outsiders: 1, minions: 2, demon: 1 },
+            12: { townsfolk: 7, outsiders: 2, minions: 2, demon: 1 },
+            13: { townsfolk: 9, outsiders: 0, minions: 3, demon: 1 },
+            14: { townsfolk: 9, outsiders: 1, minions: 3, demon: 1 },
+            15: { townsfolk: 9, outsiders: 2, minions: 3, demon: 1 }
+        };
+
+        var CHARACTERS = {
+            'Washerwoman': { name: 'رخت‌شوی', type: 'townsfolk', ability: 'در شب اول، متوجه می‌شوید که یکی از دو بازیکن مشخص، یک شخصیت شهروند خاص است.', nightOrder: 1 },
+            'Librarian': { name: 'کتابدار', type: 'townsfolk', ability: 'در شب اول، متوجه می‌شوید که یکی از دو بازیکن مشخص، یک شخصیت غریبه خاص است.', nightOrder: 2 },
+            'Investigator': { name: 'بازپرس', type: 'townsfolk', ability: 'در شب اول، متوجه می‌شوید که یکی از دو بازیکن مشخص، یک شخصیت خادم شیطان خاص است.', nightOrder: 3 },
+            'Chef': { name: 'آشپز', type: 'townsfolk', ability: 'در شب اول، متوجه می‌شوید چند جفت بازیکن شریر کنار هم نشسته‌اند.', nightOrder: 4 },
+            'Empath': { name: 'هم‌دل', type: 'townsfolk', ability: 'هر شب، متوجه می‌شوید چند بازیکن شریر در کنار شما نشسته‌اند.', nightOrder: 5 },
+            'Fortune Teller': { name: 'فال‌گیر', type: 'townsfolk', ability: 'هر شب، دو بازیکن را انتخاب می‌کنید و متوجه می‌شوید آیا یکی از آنها شیطان است یا خیر.', nightOrder: 6 },
+            'Undertaker': { name: 'مرده‌شوی', type: 'townsfolk', ability: 'هر روز، اگر کسی در روز قبل اعدام شده باشد، شخصیت او را می‌فهمید.', nightOrder: 7 },
+            'Monk': { name: 'راهب', type: 'townsfolk', ability: 'هر شب، یک بازیکن را انتخاب می‌کنید و آنها در آن شب نمی‌توانند بمیرند.', nightOrder: 8 },
+            'Ravenkeeper': { name: 'نگهبان زاغ', type: 'townsfolk', ability: 'اگر در شب بمیرید، یک بازیکن را انتخاب می‌کنید و شخصیت او را می‌فهمید.', nightOrder: 9 },
+            'Virgin': { name: 'باکره', type: 'townsfolk', ability: 'اولین باری که نامزد اعدام می‌شوید، اگر نامزدکننده شما یک شهروند باشد، به جای شما اعدام می‌شود.', nightOrder: 10 },
+            'Slayer': { name: 'سلاخ', type: 'townsfolk', ability: 'یک بار در طول بازی، در طول روز می‌توانید یک بازیکن را انتخاب کنید. اگر آنها شیطان باشند، فوراً می‌میرند.', nightOrder: 11 },
+            'Soldier': { name: 'سرباز', type: 'townsfolk', ability: 'شما نمی‌توانید در شب بمیرید.', nightOrder: 12 },
+            'Mayor': { name: 'شهردار', type: 'townsfolk', ability: 'اگر فقط ۳ بازیکن زنده باقی بماند و شما بمیرید، تیم خوب برنده می‌شود.', nightOrder: 13 },
+            'Butler': { name: 'پیشخدمت', type: 'outsider', ability: 'هر شب، یک بازیکن را انتخاب می‌کنید. فردا، باید همان‌طور که آنها رای می‌دهند رای دهید.', nightOrder: 14 },
+            'Drunk': { name: 'مست', type: 'outsider', ability: 'شما فکر می‌کنید یک شهروند هستید، اما در واقع یک غریبه هستید.', nightOrder: 15 },
+            'Recluse': { name: 'گوشه‌نشین', type: 'outsider', ability: 'شما ممکن است به عنوان شریر برای سایر توانایی‌ها ظاهر شوید.', nightOrder: 16 },
+            'Saint': { name: 'قدیس', type: 'outsider', ability: 'اگر شما اعدام شوید، تیم شریر فوراً برنده می‌شود.', nightOrder: 17 },
+            'Poisoner': { name: 'زهرآگین', type: 'minion', ability: 'هر شب، یک بازیکن را انتخاب می‌کنید و توانایی آنها خراب می‌شود.', nightOrder: 18 },
+            'Spy': { name: 'جاسوس', type: 'minion', ability: 'شما برای همه توانایی‌ها به عنوان بازیکن خوب ظاهر می‌شوید.', nightOrder: 19 },
+            'Scarlet Woman': { name: 'زن سرخ', type: 'minion', ability: 'اگر شیطان بمیرد و ۵ یا بیشتر بازیکن زنده باشند، شما تبدیل به شیطان می‌شوید.', nightOrder: 20 },
+            'Baron': { name: 'بارون', type: 'minion', ability: '۲ غریبه اضافی در بازی هستند.', nightOrder: null },
+            'Imp': { name: 'شیطان', type: 'demon', ability: 'هر شب، یک بازیکن را انتخاب می‌کنید و آنها می‌میرند.', nightOrder: 21 }
+        };
+
+        var ROLE_ICONS = {
+            'Washerwoman': '🧺', 'Librarian': '📚', 'Investigator': '🔍', 'Chef': '👨‍🍳',
+            'Empath': '👁️', 'Fortune Teller': '🔮', 'Undertaker': '⚰️', 'Monk': '🛡️',
+            'Ravenkeeper': '🐦‍⬛', 'Virgin': '👗', 'Slayer': '⚔️', 'Soldier': '💂',
+            'Mayor': '🗳️', 'Butler': '🛎️', 'Drunk': '🍺', 'Recluse': '🏚️',
+            'Saint': '😇', 'Poisoner': '☠️', 'Spy': '🕵️', 'Scarlet Woman': '💃',
+            'Baron': '👑', 'Imp': '👹'
+        };
+
+        var ALL_TOWNSFOLK = ['Washerwoman', 'Librarian', 'Investigator', 'Chef', 'Empath', 'Fortune Teller', 'Undertaker', 'Monk', 'Ravenkeeper', 'Virgin', 'Slayer', 'Soldier', 'Mayor'];
+        var ALL_OUTSIDERS = ['Butler', 'Drunk', 'Recluse', 'Saint'];
+        var ALL_MINIONS = ['Poisoner', 'Spy', 'Scarlet Woman', 'Baron'];
+        var ALL_DEMONS = ['Imp'];
+
+        // Game state
+        var gameId = null;
+        var isGameCreator = false; // Person who creates game (only for setup, then becomes regular player)
+        var playerName = null;
+        var playerIndex = -1;
+        var gameState = null;
+        var pollInterval = null;
+
+        // Game state (shared by all)
+        var gameStateTemplate = {
+            playerCount: 7,
+            players: [],
+            currentDay: 1,
+            isNightPhase: true,
+            currentNightOrder: [],
+            nightIndex: 0,
+            gameStarted: false,
+            distributionComplete: false,
+            executions: 0
+        };
+
+        // Initialize
+        window.onload = function() {
+            // Check URL parameters
+            var urlParams = new URLSearchParams(window.location.search);
+            var urlGameId = urlParams.get('gameId');
+            var urlPlayerName = urlParams.get('playerName');
+            
+            if (urlGameId && urlPlayerName) {
+                // Auto-join if URL parameters present
+                document.getElementById('join-game-id').value = urlGameId;
+                document.getElementById('join-player-name').value = urlPlayerName;
+                joinGame();
+            } else {
+                showScreen('room-screen');
+            }
+        };
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function generateGameId() {
+            return Math.floor(100 + Math.random() * 900).toString(); // 3-digit number (100-999)
+        }
+
+        function createGame() {
+            var name = document.getElementById('storyteller-name').value.trim();
+            if (!name) {
+                alert('لطفا نام خود را وارد کنید');
+                return;
+            }
+
+            gameId = generateGameId();
+            isGameCreator = true;
+            playerName = name;
+
+            // Initialize game state
+            gameState = JSON.parse(JSON.stringify(gameStateTemplate));
+            gameState.playerCount = 7;
+
+            saveGameState();
+            document.getElementById('display-game-id').innerText = gameId;
+            showScreen('storyteller-setup');
+            renderPlayerInputs();
+        }
+
+        function joinGame() {
+            var id = document.getElementById('join-game-id').value.trim().toUpperCase();
+            var name = document.getElementById('join-player-name').value.trim();
+            
+            if (!id || !name) {
+                alert('لطفا شناسه بازی و نام خود را وارد کنید');
+                return;
+            }
+
+            gameId = id;
+            playerName = name;
+            isGameCreator = false;
+
+            // Try to load game state
+            loadGameState();
+            
+            if (!gameState) {
+                alert('بازی یافت نشد');
+                return;
+            }
+
+            // If game hasn't started, wait
+            if (!gameState.gameStarted) {
+                alert('بازی هنوز شروع نشده است. منتظر باشید تا بازی شروع شود.');
+                return;
+            }
+
+            // Find player index
+            playerIndex = -1;
+            for (var i = 0; i < gameState.players.length; i++) {
+                if (gameState.players[i].name === name) {
+                    playerIndex = i;
+                    break;
+                }
+            }
+
+            if (playerIndex === -1) {
+                alert('نام شما در لیست بازیکنان نیست');
+                return;
+            }
+
+            showPlayerView();
+            startPolling();
+        }
+
+        function saveGameState() {
+            if (!gameId || !gameState) return;
+            localStorage.setItem('botc_online_' + gameId, JSON.stringify(gameState));
+        }
+
+        function loadGameState() {
+            if (!gameId) return;
+            var stored = localStorage.getItem('botc_online_' + gameId);
+            if (stored) {
+                gameState = JSON.parse(stored);
+            }
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(function() {
+                loadGameState();
+                if (isGameCreator && !gameState.gameStarted) {
+                    // Game creator still in setup
+                    updateSetupView();
+                } else {
+                    // All players see the same view
+                    updatePlayerView();
+                }
+            }, 1000); // Poll every second
+        }
+
+        function updatePlayerCount(delta) {
+            if (!gameState) return;
+            var newCount = gameState.playerCount + delta;
+            if (newCount >= 5 && newCount <= 15) {
+                gameState.playerCount = newCount;
+                document.getElementById('player-count-display').innerText = gameState.playerCount;
+                saveGameState();
+                renderPlayerInputs();
+            }
+        }
+
+        function renderPlayerInputs() {
+            if (!gameState) return;
+            var container = document.getElementById('player-inputs-container');
+            container.innerHTML = '';
+            for (var i = 0; i < gameState.playerCount; i++) {
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = 'بازیکن ' + (i + 1);
+                input.id = 'player-input-' + i;
+                container.appendChild(input);
+            }
+        }
+
+        function updateSetupView() {
+            // Update setup screen if game creator
+            if (!gameState) return;
+            var unrevealed = gameState.players.filter(p => !p.roleRevealed);
+            // This will be handled in showDistributionPhase if needed
+        }
+
+        function startGame() {
+            if (!gameState) return;
+            var inputs = document.querySelectorAll('.player-input');
+            var names = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                names.push(val);
+            }
+
+            // Assign roles
+            var dist = CHARACTER_DISTRIBUTION[gameState.playerCount];
+            if (!dist) {
+                alert('تعداد بازیکن نامعتبر');
+                return;
+            }
+
+            // Select characters (simplified - using all characters)
+            var selectedChars = [];
+            var townsfolkPool = ALL_TOWNSFOLK.slice();
+            var outsiderPool = ALL_OUTSIDERS.slice();
+            var minionPool = ALL_MINIONS.slice();
+            
+            shuffleArray(townsfolkPool);
+            shuffleArray(outsiderPool);
+            shuffleArray(minionPool);
+
+            // Check for Baron
+            var baronInPlay = false;
+            for (var i = 0; i < dist.minions; i++) {
+                if (minionPool[i] === 'Baron') baronInPlay = true;
+            }
+
+            var adjustedOutsiders = dist.outsiders + (baronInPlay ? 2 : 0);
+            var adjustedTownsfolk = dist.townsfolk - (baronInPlay ? 2 : 0);
+
+            // Select characters
+            for (var i = 0; i < adjustedTownsfolk; i++) {
+                selectedChars.push(townsfolkPool[i]);
+            }
+            for (var i = 0; i < adjustedOutsiders; i++) {
+                selectedChars.push(outsiderPool[i] || 'Drunk');
+            }
+            for (var i = 0; i < dist.minions; i++) {
+                selectedChars.push(minionPool[i]);
+            }
+            selectedChars.push('Imp');
+
+            shuffleArray(selectedChars);
+
+            // Create players
+            gameState.players = [];
+            for (var i = 0; i < gameState.playerCount; i++) {
+                var charName = selectedChars[i];
+                var charDef = CHARACTERS[charName];
+                var fakeCharDef = null;
+
+                if (charName === 'Drunk') {
+                    var availableTownsfolk = ALL_TOWNSFOLK.filter(t => selectedChars.indexOf(t) === -1);
+                    if (availableTownsfolk.length === 0) availableTownsfolk = ALL_TOWNSFOLK.slice();
+                    shuffleArray(availableTownsfolk);
+                    fakeCharDef = CHARACTERS[availableTownsfolk[0]];
+                }
+
+                gameState.players.push({
+                    name: names[i],
+                    character: charName,
+                    characterDef: charDef,
+                    fakeCharacterDef: fakeCharDef,
+                    alive: true,
+                    index: i,
+                    roleRevealed: false
+                });
+            }
+
+            // Find creator's player index
+            playerIndex = -1;
+            for (var i = 0; i < gameState.players.length; i++) {
+                if (gameState.players[i].name === playerName) {
+                    playerIndex = i;
+                    break;
+                }
+            }
+
+            gameState.gameStarted = true;
+            gameState.distributionComplete = false;
+            saveGameState();
+            
+            // Creator also becomes a regular player
+            isGameCreator = false;
+            showPlayerView();
+            startPolling();
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function buildNightOrder() {
+            if (!gameState) return;
+            gameState.currentNightOrder = [];
+            gameState.players.forEach(function(player) {
+                if (player.alive && player.characterDef.nightOrder) {
+                    gameState.currentNightOrder.push({
+                        order: player.characterDef.nightOrder,
+                        player: player,
+                        character: player.fakeCharacterDef || player.characterDef
+                    });
+                }
+            });
+            gameState.currentNightOrder.sort(function(a, b) {
+                return a.player.index - b.player.index;
+            });
+            gameState.nightIndex = 0;
+        }
+
+        function showPlayerView() {
+            showScreen('player-view');
+            document.getElementById('player-name-display').innerText = 'بازیکن: ' + playerName;
+            updatePlayerView();
+        }
+
+        function updatePlayerView() {
+            if (!gameState || !gameState.gameStarted) {
+                document.getElementById('waiting-message').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('waiting-message').classList.add('hidden');
+
+            var player = gameState.players[playerIndex];
+            if (!player) return;
+
+            // Show role if not revealed yet
+            if (!player.roleRevealed) {
+                if (gameState.distributionComplete) {
+                    // Distribution complete, show role
+                    player.roleRevealed = true;
+                    showPlayerRole(player);
+                    saveGameState();
+                } else {
+                    // Still in distribution phase
+                    document.getElementById('waiting-message').innerHTML = '<div class="pulsing">⏳ در انتظار شروع بازی...</div>';
+                    document.getElementById('waiting-message').classList.remove('hidden');
+                    return;
+                }
+            } else {
+                showPlayerRole(player);
+            }
+            
+            // Check if all players have seen their roles, then auto-start first night
+            if (!gameState.distributionComplete && gameState.gameStarted) {
+                var allRevealed = gameState.players.every(p => p.roleRevealed);
+                if (allRevealed) {
+                    gameState.distributionComplete = true;
+                    gameState.isNightPhase = true;
+                    gameState.currentDay = 1;
+                    buildNightOrder();
+                    saveGameState();
+                }
+            }
+
+            // Show night action if it's night and this player's turn
+            if (gameState.isNightPhase && gameState.currentNightOrder) {
+                document.getElementById('player-day-view').classList.add('hidden');
+                var currentAction = gameState.currentNightOrder[gameState.nightIndex];
+                if (currentAction && currentAction.player.index === playerIndex) {
+                    // It's this player's turn
+                    showNightAction(player, currentAction);
+                } else {
+                    // Not this player's turn - show waiting message
+                    document.getElementById('player-night-action').classList.add('hidden');
+                    document.getElementById('waiting-message').innerHTML = '<div class="pulsing">⏳ فاز شب - در انتظار نوبت شما...</div>';
+                    document.getElementById('waiting-message').classList.remove('hidden');
+                }
+            } else {
+                // Day phase - all players see the same information
+                document.getElementById('player-night-action').classList.add('hidden');
+                document.getElementById('waiting-message').classList.add('hidden');
+                document.getElementById('player-day-view').classList.remove('hidden');
+                updateDayView();
+            }
+        }
+
+        function updateDayView() {
+            if (!gameState) return;
+            
+            // Update day phase info - same for all players
+            document.getElementById('day-phase-title').innerText = 'روز ' + gameState.currentDay;
+            
+            var livingCount = gameState.players.filter(p => p.alive).length;
+            document.getElementById('day-living-count').innerText = livingCount;
+            document.getElementById('day-current-day').innerText = gameState.currentDay;
+            document.getElementById('day-execution-count').innerText = gameState.executions || 0;
+            
+            // Show player list - only names and alive/dead status (no roles)
+            var playersList = document.getElementById('day-players-list');
+            playersList.innerHTML = '';
+            gameState.players.forEach(function(p) {
+                var item = document.createElement('div');
+                item.className = 'player-item' + (p.alive ? '' : ' dead');
+                item.innerText = p.name + (p.alive ? ' (زنده)' : ' (مرده)');
+                playersList.appendChild(item);
+            });
+        }
+
+        function showPlayerRole(player) {
+            var charDef = player.fakeCharacterDef || player.characterDef;
+            var charKey = Object.keys(CHARACTERS).find(k => CHARACTERS[k].name === charDef.name);
+            var icon = ROLE_ICONS[charKey] || '❓';
+
+            document.getElementById('player-role-card').classList.remove('hidden');
+            document.getElementById('player-role-title').innerHTML = '<div style="font-size: 4rem; margin-bottom: 10px;">' + icon + '</div>' + charDef.name;
+            document.getElementById('player-role-title').className = 'role-title role-' + charDef.type;
+            document.getElementById('player-role-desc').innerText = charDef.ability;
+
+            // Show evil teammates
+            if (charDef.type === 'minion' || charDef.type === 'demon') {
+                var evilPlayers = gameState.players.filter(p => 
+                    (p.characterDef.type === 'minion' || p.characterDef.type === 'demon') && 
+                    p.index !== playerIndex
+                );
+                if (evilPlayers.length > 0) {
+                    var teamList = evilPlayers.map(p => p.name).join('، ');
+                    document.getElementById('player-role-extra').innerHTML = 
+                        '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px;">' +
+                        'هم‌تیمی‌های شریر شما: ' + teamList + '</div>';
+                }
+            }
+        }
+
+        function showNightAction(player, nightAction) {
+            document.getElementById('player-night-action').classList.remove('hidden');
+            document.getElementById('night-action-title').innerText = nightAction.character.name;
+            
+            // This is a simplified version - in full implementation, each character would have specific UI
+            var content = '<p>' + nightAction.character.ability + '</p>';
+            content += '<p style="margin-top: 15px; color: var(--text-secondary);">در انتظار قصه‌گو...</p>';
+            document.getElementById('night-action-content').innerHTML = content;
+        }
+
+        function closeNightModal() {
+            document.getElementById('night-action-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+
