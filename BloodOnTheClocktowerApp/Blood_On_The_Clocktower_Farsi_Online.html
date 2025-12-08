@@ -225,6 +225,19 @@
         <div id="server-status" style="background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; border-radius: 8px; padding: 10px; margin: 10px 0; font-size: 0.85rem;">
             <div>وضعیت سرور: <span id="server-status-text">در حال بررسی...</span></div>
             <div>آدرس سرور: <span id="server-url-text"></span></div>
+            <div id="file-protocol-warning" style="margin-top: 10px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid #f44336; border-radius: 4px; display: none;">
+                <strong>⚠️ توجه:</strong> شما فایل را مستقیماً باز کرده‌اید. لطفا از طریق سرور باز کنید:
+                <br><code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px; margin-top: 5px; display: inline-block;">http://localhost:3000/BloodOnTheClocktowerApp/Blood_On_The_Clocktower_Farsi_Online.html</code>
+                <br><br>یا آدرس سرور را در زیر وارد کنید:
+            </div>
+            <div id="server-config" style="margin-top: 10px; display: none;">
+                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">آدرس سرور را وارد کنید (مثلاً: https://your-app.onrender.com):</label>
+                <input type="text" id="manual-server-url" class="text-input" placeholder="https://your-app.onrender.com" style="font-size: 0.9rem; padding: 8px;">
+                <button class="secondary-btn" onclick="updateServerUrl()" style="margin-top: 5px; padding: 8px; font-size: 0.9rem;">ذخیره و تست اتصال</button>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                    بعد از deploy سرور روی Render، آدرس آن را اینجا وارد کنید
+                </p>
+            </div>
         </div>
         
         <div id="create-game-section">
@@ -422,8 +435,23 @@
         var ALL_DEMONS = ['Imp'];
 
         // API Configuration
-        // Change this to your server URL (e.g., 'http://localhost:3000' for local, or your deployed server URL)
-        var API_BASE_URL = window.location.origin; // Uses same origin as the page
+        // Auto-detect server URL, or use default
+        var API_BASE_URL = window.location.origin;
+        
+        // If on GitHub Pages or file://, try to use saved URL or default
+        if (API_BASE_URL === 'file://' || API_BASE_URL === 'null' || !API_BASE_URL || 
+            API_BASE_URL.includes('github.io')) {
+            // Check for saved server URL first
+            var savedUrl = localStorage.getItem('botc_server_url');
+            if (savedUrl) {
+                API_BASE_URL = savedUrl;
+            } else {
+                // Default to localhost for local testing, or set your deployed server URL here
+                API_BASE_URL = 'http://localhost:3000';
+                // For production, uncomment and set your server URL:
+                // API_BASE_URL = 'https://your-server.railway.app';
+            }
+        }
         
         // Game state
         var gameId = null;
@@ -448,12 +476,53 @@
             executions: 0
         };
 
-        // Initialize
-        window.onload = async function() {
+        async function updateServerUrl() {
+            var manualUrl = document.getElementById('manual-server-url').value.trim();
+            if (!manualUrl) {
+                alert('لطفا آدرس سرور را وارد کنید');
+                return;
+            }
+            
+            // Remove trailing slash
+            if (manualUrl.endsWith('/')) {
+                manualUrl = manualUrl.slice(0, -1);
+            }
+            
+            API_BASE_URL = manualUrl;
+            localStorage.setItem('botc_server_url', API_BASE_URL);
+            document.getElementById('server-url-text').textContent = API_BASE_URL;
+            
+            // Test connection
+            document.getElementById('server-status-text').textContent = 'در حال تست اتصال...';
+            await checkServerConnection();
+            
+            if (document.getElementById('server-status-text').textContent.includes('متصل')) {
+                alert('اتصال موفق! حالا می‌توانید بازی را روی چند دستگاه تست کنید.');
+            }
+        }
+
+        async function checkServerConnection() {
             // Display server URL
             document.getElementById('server-url-text').textContent = API_BASE_URL;
             
-            // Check server connection
+            // Check if opened from file://
+            if (window.location.protocol === 'file:') {
+                document.getElementById('file-protocol-warning').style.display = 'block';
+                document.getElementById('server-config').style.display = 'block';
+                document.getElementById('manual-server-url').value = API_BASE_URL;
+                document.getElementById('server-status-text').textContent = 'فایل مستقیماً باز شده است';
+                return;
+            }
+            
+            // If on GitHub Pages, use localStorage (no server needed)
+            if (window.location.hostname.includes('github.io')) {
+                document.getElementById('server-status-text').textContent = 'استفاده از localStorage (فقط همان دستگاه)';
+                document.getElementById('server-status').style.background = 'rgba(255, 193, 7, 0.2)';
+                document.getElementById('server-status').style.borderColor = '#ffc107';
+                return;
+            }
+            
+            // Check server connection (only for custom servers)
             try {
                 const response = await fetch(API_BASE_URL + '/api/health');
                 if (response.ok) {
@@ -461,17 +530,42 @@
                     document.getElementById('server-status-text').textContent = 'متصل (' + data.gamesCount + ' بازی فعال)';
                     document.getElementById('server-status').style.background = 'rgba(76, 175, 80, 0.2)';
                     document.getElementById('server-status').style.borderColor = '#4caf50';
+                    document.getElementById('file-protocol-warning').style.display = 'none';
                 } else {
-                    document.getElementById('server-status-text').textContent = 'خطا در اتصال';
-                    document.getElementById('server-status').style.background = 'rgba(244, 67, 54, 0.2)';
-                    document.getElementById('server-status').style.borderColor = '#f44336';
+                    document.getElementById('server-status-text').textContent = 'خطا در اتصال - استفاده از localStorage';
+                    document.getElementById('server-status').style.background = 'rgba(255, 193, 7, 0.2)';
+                    document.getElementById('server-status').style.borderColor = '#ffc107';
+                    document.getElementById('server-config').style.display = 'block';
                 }
             } catch (error) {
-                document.getElementById('server-status-text').textContent = 'سرور در دسترس نیست';
-                document.getElementById('server-status').style.background = 'rgba(244, 67, 54, 0.2)';
-                document.getElementById('server-status').style.borderColor = '#f44336';
-                console.error('Server connection error:', error);
+                document.getElementById('server-status-text').textContent = 'سرور در دسترس نیست - استفاده از localStorage';
+                document.getElementById('server-status').style.background = 'rgba(255, 193, 7, 0.2)';
+                document.getElementById('server-status').style.borderColor = '#ffc107';
+                document.getElementById('server-config').style.display = 'block';
+                console.log('Server not available, will use localStorage');
             }
+        }
+
+        // Initialize
+        window.onload = async function() {
+            // Load saved server URL if exists (override the initial setting)
+            var savedUrl = localStorage.getItem('botc_server_url');
+            if (savedUrl) {
+                API_BASE_URL = savedUrl;
+            }
+            
+            // If on GitHub Pages, use localStorage (works on same device)
+            if (window.location.hostname.includes('github.io')) {
+                document.getElementById('server-config').style.display = 'block';
+                document.getElementById('file-protocol-warning').innerHTML = 
+                    '<strong>ℹ️ اطلاعات:</strong> شما از GitHub Pages استفاده می‌کنید. بازی از localStorage استفاده می‌کند که فقط روی همان دستگاه/مرورگر کار می‌کند.<br><br>' +
+                    '<strong>برای بازی روی چند دستگاه:</strong> سرور را روی Render (رایگان) deploy کنید و آدرس آن را در زیر وارد کنید.';
+                document.getElementById('file-protocol-warning').style.display = 'block';
+                // Disable server check for GitHub Pages (will use localStorage)
+                API_BASE_URL = 'https://github.io'; // Dummy to trigger localStorage fallback
+            }
+            
+            await checkServerConnection();
             
             // Check URL parameters
             var urlParams = new URLSearchParams(window.location.search);
@@ -515,31 +609,36 @@
             // Creator joins automatically
             gameState.joinedPlayers = [{ name: name, joinedAt: Date.now() }];
 
-            // Create game on server
-            try {
-                const response = await fetch(API_BASE_URL + '/api/games', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ gameId: gameId, gameState: gameState })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    alert('خطا در ایجاد بازی: ' + (error.error || response.statusText));
-                    return;
+            // Try to create on server, fallback to localStorage
+            var created = false;
+            if (API_BASE_URL && !API_BASE_URL.includes('github.io') && API_BASE_URL !== 'file://') {
+                try {
+                    const response = await fetch(API_BASE_URL + '/api/games', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ gameId: gameId, gameState: gameState })
+                    });
+                    
+                    if (response.ok) {
+                        created = true;
+                        console.log('Game created on server:', gameId);
+                    }
+                } catch (error) {
+                    console.log('Server not available, using localStorage');
                 }
-                
-                console.log('Game created successfully:', gameId);
-            } catch (error) {
-                console.error('Error creating game:', error);
-                alert('خطا در اتصال به سرور. لطفا مطمئن شوید سرور در حال اجرا است.');
-                return;
+            }
+            
+            if (!created) {
+                // Use localStorage fallback
+                await saveGameState();
+                console.log('Game created in localStorage:', gameId);
             }
 
             document.getElementById('display-game-id').innerText = gameId;
             showScreen('creator-lobby');
+            setupBroadcastListener(gameId);
             startPolling();
             updateCreatorLobby();
         }
@@ -596,62 +695,137 @@
             // Show waiting screen
             document.getElementById('waiting-game-id').innerText = gameId;
             showScreen('player-waiting');
+            setupBroadcastListener(gameId);
             startPolling();
             updatePlayerWaiting();
         }
 
+        // Use a free backend service: httpbin.org for testing, or a simple storage service
+        // For production, this should be replaced with a proper backend
+        var USE_FREE_STORAGE = true; // Use free storage service for GitHub Pages
+        
         async function saveGameState() {
             if (!gameId || !gameState) return;
             
-            try {
-                const response = await fetch(API_BASE_URL + '/api/games/' + gameId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ gameState: gameState })
-                });
-                
-                if (!response.ok) {
-                    // If game doesn't exist, create it
+            // Try custom server first (if configured and not GitHub Pages)
+            var useCustomServer = API_BASE_URL && !API_BASE_URL.includes('github.io') && 
+                                 API_BASE_URL !== 'file://' && API_BASE_URL !== 'https://github.io' &&
+                                 API_BASE_URL.startsWith('http') && API_BASE_URL.includes('://');
+            
+            if (useCustomServer) {
+                try {
+                    const response = await fetch(API_BASE_URL + '/api/games/' + gameId, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gameState: gameState })
+                    });
+                    
+                    if (response.ok) {
+                        return; // Success with custom server
+                    }
+                    
                     if (response.status === 404) {
                         await fetch(API_BASE_URL + '/api/games', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ gameId: gameId, gameState: gameState })
                         });
-                    } else {
-                        console.error('Failed to save game state:', response.statusText);
+                        return;
                     }
+                } catch (error) {
+                    console.log('Custom server failed, using alternative storage...');
+                }
+            }
+            
+            // For GitHub Pages: Use localStorage + share mechanism
+            // Store in localStorage (primary storage)
+            try {
+                var storageKey = 'botc_game_' + gameId;
+                var gameData = {
+                    gameState: gameState,
+                    lastUpdated: Date.now(),
+                    gameId: gameId
+                };
+                localStorage.setItem(storageKey, JSON.stringify(gameData));
+                
+                // Broadcast to other tabs on same origin
+                if (typeof BroadcastChannel !== 'undefined') {
+                    try {
+                        var channel = new BroadcastChannel('botc_' + gameId);
+                        channel.postMessage({ type: 'update', data: gameData });
+                        setTimeout(() => channel.close(), 100);
+                    } catch (e) {}
                 }
             } catch (error) {
-                console.error('Error saving game state:', error);
+                console.error('Error saving to localStorage:', error);
             }
         }
 
         async function loadGameState() {
             if (!gameId) return;
             
+            // Try custom server first
+            var useCustomServer = API_BASE_URL && !API_BASE_URL.includes('github.io') && 
+                                 API_BASE_URL !== 'file://' && API_BASE_URL !== 'https://github.io' &&
+                                 API_BASE_URL.startsWith('http') && API_BASE_URL.includes('://');
+            
+            if (useCustomServer) {
+                try {
+                    const response = await fetch(API_BASE_URL + '/api/games/' + gameId);
+                    if (response.ok) {
+                        gameState = await response.json();
+                        return;
+                    }
+                } catch (error) {
+                    console.log('Custom server failed, trying localStorage...');
+                }
+            }
+            
+            // Load from localStorage
             try {
-                const response = await fetch(API_BASE_URL + '/api/games/' + gameId);
-                if (response.ok) {
-                    gameState = await response.json();
-                } else if (response.status === 404) {
-                    gameState = null;
-                    console.log('Game not found:', gameId);
+                var storageKey = 'botc_game_' + gameId;
+                var stored = localStorage.getItem(storageKey);
+                if (stored) {
+                    var gameData = JSON.parse(stored);
+                    gameState = gameData.gameState;
                 } else {
-                    console.error('Failed to load game state:', response.status, response.statusText);
-                    const errorText = await response.text();
-                    console.error('Error details:', errorText);
+                    gameState = null;
                 }
             } catch (error) {
-                console.error('Error loading game state:', error);
-                console.error('API_BASE_URL:', API_BASE_URL);
-                console.error('Game ID:', gameId);
+                console.error('Error loading from localStorage:', error);
                 gameState = null;
             }
+        }
+        
+        // Setup BroadcastChannel listener for cross-tab sync
+        var broadcastChannels = {};
+        function setupBroadcastListener(gameId) {
+            if (typeof BroadcastChannel === 'undefined') return;
+            
+            if (broadcastChannels[gameId]) {
+                broadcastChannels[gameId].close();
+            }
+            
+            var channel = new BroadcastChannel('botc_' + gameId);
+            channel.onmessage = function(event) {
+                if (event.data.type === 'update') {
+                    var newTime = event.data.data.lastUpdated;
+                    var currentTime = gameState && gameState._lastUpdated ? gameState._lastUpdated : 0;
+                    if (newTime > currentTime) {
+                        gameState = event.data.data.gameState;
+                        gameState._lastUpdated = newTime;
+                        // Update UI
+                        if (isGameCreator && !gameState.gameStarted) {
+                            updateCreatorLobby();
+                        } else if (!isGameCreator && !gameState.gameStarted) {
+                            updatePlayerWaiting();
+                        } else if (gameState.gameStarted) {
+                            updatePlayerView();
+                        }
+                    }
+                }
+            };
+            broadcastChannels[gameId] = channel;
         }
 
         function startPolling() {
