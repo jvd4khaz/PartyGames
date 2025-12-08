@@ -78,6 +78,87 @@
             margin-bottom: 15px;
             display: block;
         }
+        
+        .saved-players-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .saved-players-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .saved-players-toggle {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+        
+        .saved-players-toggle:hover {
+            background: #5568d3;
+        }
+        
+        .saved-players-list {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .saved-players-list.show {
+            display: block;
+        }
+        
+        .saved-app-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .saved-app-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .saved-players-names {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        .clear-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .no-saved-data {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +197,12 @@
                 <p>Role distribution for Quest game.</p>
             </a>
             
+            <a href="QuestApp/Quest_Farsi.html" class="app-card">
+                <span class="app-icon">⚔️</span>
+                <h2>نبرد فریدون</h2>
+                <p>توزیع نقش برای بازی نبرد فریدون.</p>
+            </a>
+            
             <a href="SecretHitlerApp/Secret_Hitler.html" class="app-card">
                 <span class="app-icon">🎩</span>
                 <h2>Secret Hitler</h2>
@@ -128,13 +215,107 @@
                 <p>Role distribution for Feed the Kraken.</p>
             </a>
             
+            <a href="FeedTheKraken/Feed_The_Kraken_Farsi.html" class="app-card">
+                <span class="app-icon">🐙</span>
+                <h2>خوراک دادن به کراکن</h2>
+                <p>توزیع نقش برای بازی خوراک دادن به کراکن.</p>
+            </a>
+            
+            <a href="ContagionInThePalace/Contagion_Palace.html" class="app-card">
+                <span class="app-icon">🐉</span>
+                <h2>Contagion in the Palace</h2>
+                <p>Role distribution for Contagion in the Palace game.</p>
+            </a>
+            
             <a href="RussianRouletteApp/Russian_Roulette.html" class="app-card">
                 <span class="app-icon">🔫</span>
                 <h2>Russian Roulette</h2>
                 <p>Russian Roulette game app.</p>
             </a>
         </div>
+        
+        <div class="saved-players-section">
+            <h2>💾 Saved Player Names</h2>
+            <button class="saved-players-toggle" onclick="toggleSavedPlayers()">Show Saved Players</button>
+            <div id="saved-players-list" class="saved-players-list">
+                <div id="saved-players-content"></div>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        const playerStorageKeys = {
+            'Quest': 'quest_players',
+            'نبرد فریدون': 'quest_players',
+            'Feed the Kraken': 'kraken_players',
+            'خوراک دادن به کراکن': 'kraken_players_farsi',
+            'Contagion in the Palace': 'contagion_players',
+            'Blood on the Clocktower': 'botc_players',
+            'One Night Ultimate Werewolf': 'onuw_players',
+            'Secret Hitler': 'hitler_players',
+            'Russian Roulette': 'mafia_russian_roulette_players',
+            'The One I Cannot Kill': 'mafia_one_cannot_kill_players',
+            'Mafia Flexible': 'mafia_flexible_players',
+            'Dethy': 'mafia_dethy_players',
+            'Crush Nightless': 'crush_players'
+        };
+        
+        function toggleSavedPlayers() {
+            const list = document.getElementById('saved-players-list');
+            const button = document.querySelector('.saved-players-toggle');
+            const isShowing = list.classList.contains('show');
+            
+            if (!isShowing) {
+                loadSavedPlayers();
+                list.classList.add('show');
+                button.textContent = 'Hide Saved Players';
+            } else {
+                list.classList.remove('show');
+                button.textContent = 'Show Saved Players';
+            }
+        }
+        
+        function loadSavedPlayers() {
+            const content = document.getElementById('saved-players-content');
+            let hasData = false;
+            let html = '';
+            
+            for (const [appName, storageKey] of Object.entries(playerStorageKeys)) {
+                try {
+                    const stored = localStorage.getItem(storageKey);
+                    if (stored) {
+                        const players = JSON.parse(stored);
+                        if (players && players.length > 0) {
+                            hasData = true;
+                            const playerNames = players.map(p => p.name || p).join(', ');
+                            html += `
+                                <div class="saved-app-item">
+                                    <h3>${appName}</h3>
+                                    <div class="saved-players-names">${playerNames}</div>
+                                    <button class="clear-btn" onclick="clearSavedPlayers('${storageKey}', '${appName}')">Clear</button>
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading saved players for', appName, e);
+                }
+            }
+            
+            if (!hasData) {
+                html = '<div class="no-saved-data">No saved player names found.</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+        
+        function clearSavedPlayers(storageKey, appName) {
+            if (confirm(`Clear saved players for ${appName}?`)) {
+                localStorage.removeItem(storageKey);
+                loadSavedPlayers();
+            }
+        }
+    </script>
 </body>
 </html>
 
