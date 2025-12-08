@@ -222,6 +222,10 @@
     <div id="room-screen" class="container">
         <h1>🕰️ خون بر برج ساعت - نسخه آنلاین</h1>
         <p>هر بازیکن از دستگاه خود استفاده می‌کند</p>
+        <div id="server-status" style="background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; border-radius: 8px; padding: 10px; margin: 10px 0; font-size: 0.85rem;">
+            <div>وضعیت سرور: <span id="server-status-text">در حال بررسی...</span></div>
+            <div>آدرس سرور: <span id="server-url-text"></span></div>
+        </div>
         
         <div id="create-game-section">
             <h2>ایجاد بازی</h2>
@@ -413,7 +417,30 @@
         };
 
         // Initialize
-        window.onload = function() {
+        window.onload = async function() {
+            // Display server URL
+            document.getElementById('server-url-text').textContent = API_BASE_URL;
+            
+            // Check server connection
+            try {
+                const response = await fetch(API_BASE_URL + '/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('server-status-text').textContent = 'متصل (' + data.gamesCount + ' بازی فعال)';
+                    document.getElementById('server-status').style.background = 'rgba(76, 175, 80, 0.2)';
+                    document.getElementById('server-status').style.borderColor = '#4caf50';
+                } else {
+                    document.getElementById('server-status-text').textContent = 'خطا در اتصال';
+                    document.getElementById('server-status').style.background = 'rgba(244, 67, 54, 0.2)';
+                    document.getElementById('server-status').style.borderColor = '#f44336';
+                }
+            } catch (error) {
+                document.getElementById('server-status-text').textContent = 'سرور در دسترس نیست';
+                document.getElementById('server-status').style.background = 'rgba(244, 67, 54, 0.2)';
+                document.getElementById('server-status').style.borderColor = '#f44336';
+                console.error('Server connection error:', error);
+            }
+            
             // Check URL parameters
             var urlParams = new URLSearchParams(window.location.search);
             var urlGameId = urlParams.get('gameId');
@@ -438,7 +465,7 @@
             return Math.floor(100 + Math.random() * 900).toString(); // 3-digit number (100-999)
         }
 
-        function createGame() {
+        async function createGame() {
             var name = document.getElementById('storyteller-name').value.trim();
             if (!name) {
                 alert('لطفا نام خود را وارد کنید');
@@ -453,14 +480,37 @@
             gameState = JSON.parse(JSON.stringify(gameStateTemplate));
             gameState.playerCount = 7;
 
-            saveGameState(); // Fire and forget for initial creation
+            // Create game on server
+            try {
+                const response = await fetch(API_BASE_URL + '/api/games', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ gameId: gameId, gameState: gameState })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('خطا در ایجاد بازی: ' + (error.error || response.statusText));
+                    return;
+                }
+                
+                console.log('Game created successfully:', gameId);
+            } catch (error) {
+                console.error('Error creating game:', error);
+                alert('خطا در اتصال به سرور. لطفا مطمئن شوید سرور در حال اجرا است.');
+                return;
+            }
+
             document.getElementById('display-game-id').innerText = gameId;
             showScreen('storyteller-setup');
             renderPlayerInputs();
         }
 
         async function joinGame() {
-            var id = document.getElementById('join-game-id').value.trim().toUpperCase();
+            var id = document.getElementById('join-game-id').value.trim();
+            // Don't convert to uppercase - keep original case
             var name = document.getElementById('join-player-name').value.trim();
             
             if (!id || !name) {
@@ -476,7 +526,8 @@
             await loadGameState();
             
             if (!gameState) {
-                alert('بازی یافت نشد');
+                alert('بازی یافت نشد. لطفا مطمئن شوید:\n1. شناسه بازی صحیح است\n2. سرور در حال اجرا است\n3. همه دستگاه‌ها به همان سرور متصل هستند');
+                console.error('Game not found. GameId:', gameId, 'API URL:', API_BASE_URL);
                 return;
             }
 
@@ -496,7 +547,7 @@
             }
 
             if (playerIndex === -1) {
-                alert('نام شما در لیست بازیکنان نیست');
+                alert('نام شما در لیست بازیکنان نیست. لطفا نام دقیقی که سازنده بازی وارد کرده است را استفاده کنید.');
                 return;
             }
 
@@ -544,11 +595,16 @@
                     gameState = await response.json();
                 } else if (response.status === 404) {
                     gameState = null;
+                    console.log('Game not found:', gameId);
                 } else {
-                    console.error('Failed to load game state:', response.statusText);
+                    console.error('Failed to load game state:', response.status, response.statusText);
+                    const errorText = await response.text();
+                    console.error('Error details:', errorText);
                 }
             } catch (error) {
                 console.error('Error loading game state:', error);
+                console.error('API_BASE_URL:', API_BASE_URL);
+                console.error('Game ID:', gameId);
                 gameState = null;
             }
         }
