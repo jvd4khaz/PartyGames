@@ -714,21 +714,29 @@
     <!-- Quest Card Selection Modal -->
     <div id="quest-card-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:500px;">
-            <h2>Select Quest Card</h2>
-            <p id="quest-card-player" style="margin: 15px 0; font-size: 1.1rem; color: var(--accent-color); font-weight: bold;"></p>
-            <p id="quest-card-magic-note" style="color: var(--amulet-color); font-weight: bold; margin: 10px 0; padding: 10px; background: rgba(156, 39, 176, 0.2); border-radius: 8px;"></p>
-            <p style="color: var(--text-secondary); margin: 20px 0;">Select a Quest card to play:</p>
-            <div style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
-                <button class="quest-card-display quest-card-success" onclick="selectQuestCard('success'); return false;" id="success-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
-                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✓</div>
-                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">SUCCESS</div>
-                </button>
-                <button class="quest-card-display quest-card-fail" onclick="selectQuestCard('fail'); return false;" id="fail-card-btn" style="cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent;">
-                    <div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✗</div>
-                    <div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">FAIL</div>
+            <!-- Confirmation Screen -->
+            <div id="quest-card-confirmation-screen">
+                <h2 style="font-size: 2rem; margin-bottom: 30px; color: var(--accent-color);">Confirm Your Position</h2>
+                <div id="quest-card-confirmation-text" style="font-size: 4rem; font-weight: 900; color: #4CAF50; text-align: center; margin: 40px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); line-height: 1.2;">
+                    TEAM MEMBER<br><span id="quest-card-confirmation-number" style="font-size: 6rem; color: #FF5722;">1</span>
+                </div>
+                <p id="quest-card-confirmation-total" style="font-size: 1.5rem; text-align: center; color: var(--text-secondary); margin: 20px 0;"></p>
+                <button class="action-btn" onclick="confirmQuestCardPlayer(); return false;" style="font-size: 1.5rem; padding: 20px 40px; margin: 30px auto; display: block; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);">
+                    I AM THIS PERSON
                 </button>
             </div>
-            <p id="quest-card-progress" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;"></p>
+            
+            <!-- Card Selection Screen -->
+            <div id="quest-card-selection-screen" class="hidden">
+                <h2>Select Quest Card</h2>
+                <p id="quest-card-player" style="margin: 15px 0; font-size: 1.1rem; color: var(--accent-color); font-weight: bold;"></p>
+                <p id="quest-card-magic-note" style="color: var(--amulet-color); font-weight: bold; margin: 10px 0; padding: 10px; background: rgba(156, 39, 176, 0.2); border-radius: 8px;"></p>
+                <p style="color: var(--text-secondary); margin: 20px 0;">Select a Quest card to play:</p>
+                <div id="quest-card-buttons-container" style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
+                    <!-- Cards will be dynamically inserted here in random order -->
+                </div>
+                <p id="quest-card-progress" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;"></p>
+            </div>
         </div>
     </div>
 
@@ -983,6 +991,7 @@
         var questHistory = [];
         var currentTeam = [];
         var questCards = []; // Array of {player, card: 'success' or 'fail'}
+        var questCardSelectionMode = 'confirmation'; // 'confirmation' or 'selection'
         var isGameEnded = false;
         var gameLog = [];
         var amulets = []; // Array of {quest: number, available: boolean, holder: null or playerIndex, checked: []}
@@ -1806,15 +1815,7 @@
             var teamSize = config.quests[currentQuest - 1];
             
             questCards = [];
-            
-            // Remove any existing warnings
-            var failCardBtn = document.getElementById('fail-card-btn');
-            if (failCardBtn) {
-                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
-                if (existingWarning) {
-                    existingWarning.remove();
-                }
-            }
+            questCardSelectionMode = 'confirmation';
             
             var modal = document.getElementById('quest-card-modal');
             if (!modal) {
@@ -1822,11 +1823,33 @@
                 return;
             }
             
-            document.getElementById('quest-card-progress').innerText = 'Cards selected: 0 / ' + teamSize;
             var revealBtn = document.getElementById('quest-reveal-btn');
             if (revealBtn) revealBtn.classList.add('hidden');
             
+            // Show confirmation screen, hide selection screen
+            document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
+            document.getElementById('quest-card-selection-screen').classList.add('hidden');
+            
             modal.classList.remove('hidden');
+            showQuestCardConfirmation();
+        }
+        
+        function showQuestCardConfirmation() {
+            var config = QUEST_CONFIG[playerCount];
+            var teamSize = config.quests[currentQuest - 1];
+            var memberNum = questCards.length + 1;
+            
+            document.getElementById('quest-card-confirmation-number').innerText = memberNum;
+            document.getElementById('quest-card-confirmation-total').innerText = 'of ' + teamSize;
+        }
+        
+        function confirmQuestCardPlayer() {
+            questCardSelectionMode = 'selection';
+            
+            // Hide confirmation screen, show selection screen
+            document.getElementById('quest-card-confirmation-screen').classList.add('hidden');
+            document.getElementById('quest-card-selection-screen').classList.remove('hidden');
+            
             updateQuestCardSelection();
         }
 
@@ -1841,60 +1864,76 @@
             
             var memberNum = questCards.length + 1;
             document.getElementById('quest-card-player').innerText = 
-                'Pass device to team member ' + memberNum + ' of ' + teamSize;
+                'Team member ' + memberNum + ' of ' + teamSize;
             
             // Check if this team member has magic token
             // The first person to select a card automatically has the magic token
             var hasMagic = (questCards.length === 0);
-            var failCardBtn = document.getElementById('fail-card-btn');
             if (hasMagic) {
                 magicTokenTeamMemberIndex = 0; // First team member to select has magic token
                 document.getElementById('quest-card-magic-note').innerText = 
                     '⚠️ You have the Magic token (first to select) - you cannot play a Fail card (unless you are Morgan le Fay).';
-                
+            } else {
+                document.getElementById('quest-card-magic-note').innerText = '';
+            }
+            
+            // Create and randomize card buttons
+            var container = document.getElementById('quest-card-buttons-container');
+            container.innerHTML = '';
+            
+            // Create both card buttons
+            var successBtn = document.createElement('button');
+            successBtn.className = 'quest-card-display quest-card-success';
+            successBtn.onclick = function() { selectQuestCard('success'); return false; };
+            successBtn.style.cssText = 'cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent; position: relative;';
+            successBtn.innerHTML = '<div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✓</div><div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">SUCCESS</div>';
+            successBtn.id = 'success-card-btn';
+            
+            var failBtn = document.createElement('button');
+            failBtn.className = 'quest-card-display quest-card-fail';
+            failBtn.onclick = function() { selectQuestCard('fail'); return false; };
+            failBtn.style.cssText = 'cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent; position: relative;';
+            failBtn.innerHTML = '<div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✗</div><div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">FAIL</div>';
+            failBtn.id = 'fail-card-btn';
+            
+            // Randomize order: randomly decide which card appears first
+            var cardOrder = Math.random() < 0.5 ? [successBtn, failBtn] : [failBtn, successBtn];
+            
+            // Add cards to container in random order
+            cardOrder.forEach(function(btn) {
+                container.appendChild(btn);
+            });
+            
+            // Add magic token warning to fail button if needed
+            if (hasMagic) {
                 // Check if Youth is in the game
                 var hasYouth = players.some(function(p) { return p.roleKey === 'Youth'; }) || 
                               (selectedRoles && selectedRoles.indexOf('Youth') !== -1) ||
                               (rolesOnGround && rolesOnGround.indexOf('Youth') !== -1);
                 
                 // Add large danger sign on Fail card
-                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
                 var warningText = hasYouth ? 
                     '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY<br>OR YOUTH</div>' :
                     '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY</div>';
                 
-                if (!existingWarning) {
-                    var warning = document.createElement('div');
-                    warning.className = 'magic-token-warning';
-                    warning.style.position = 'absolute';
-                    warning.style.top = '0';
-                    warning.style.left = '0';
-                    warning.style.right = '0';
-                    warning.style.bottom = '0';
-                    warning.style.background = 'rgba(244, 67, 54, 0.95)';
-                    warning.style.border = '4px solid #ff0000';
-                    warning.style.borderRadius = '12px';
-                    warning.style.display = 'flex';
-                    warning.style.flexDirection = 'column';
-                    warning.style.alignItems = 'center';
-                    warning.style.justifyContent = 'center';
-                    warning.style.zIndex = '10';
-                    warning.style.padding = '10px';
-                    warning.innerHTML = warningText;
-                    failCardBtn.style.position = 'relative';
-                    failCardBtn.appendChild(warning);
-                } else {
-                    // Update existing warning if Youth status changed
-                    existingWarning.innerHTML = warningText;
-                }
-            } else {
-                document.getElementById('quest-card-magic-note').innerText = '';
-                
-                // Remove warning from Fail card
-                var existingWarning = failCardBtn.querySelector('.magic-token-warning');
-                if (existingWarning) {
-                    existingWarning.remove();
-                }
+                var warning = document.createElement('div');
+                warning.className = 'magic-token-warning';
+                warning.style.position = 'absolute';
+                warning.style.top = '0';
+                warning.style.left = '0';
+                warning.style.right = '0';
+                warning.style.bottom = '0';
+                warning.style.background = 'rgba(244, 67, 54, 0.95)';
+                warning.style.border = '4px solid #ff0000';
+                warning.style.borderRadius = '12px';
+                warning.style.display = 'flex';
+                warning.style.flexDirection = 'column';
+                warning.style.alignItems = 'center';
+                warning.style.justifyContent = 'center';
+                warning.style.zIndex = '10';
+                warning.style.padding = '10px';
+                warning.innerHTML = warningText;
+                failBtn.appendChild(warning);
             }
             
             document.getElementById('quest-card-progress').innerText = 
@@ -1950,8 +1989,11 @@
                     revealQuestCards();
                 }, 500);
             } else {
-                // Update UI for next card selection
-                updateQuestCardSelection();
+                // Reset to confirmation mode for next player
+                questCardSelectionMode = 'confirmation';
+                document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
+                document.getElementById('quest-card-selection-screen').classList.add('hidden');
+                showQuestCardConfirmation();
             }
         }
 
