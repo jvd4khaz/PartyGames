@@ -1446,7 +1446,8 @@
                     // Ghost never knows other evil players (any player count)
                     extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>Important:</strong> You do not know who the other Minions are. You are alone.</div>';
                 } else {
-                    // Other evil players (Demon, Minion) - show all teammates including Ghost
+                    // Other evil players (Demon, Minion)
+                    // Show all evil teammates including Ghost
                     var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
                     
                     if (evilPlayers.length > 0) {

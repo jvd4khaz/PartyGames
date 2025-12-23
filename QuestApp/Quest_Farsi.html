@@ -1501,7 +1501,8 @@
                     // Blind Hunter never knows other evil players (any player count)
                     extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند. شما تنها هستید.</div>';
                 } else {
-                    // Other evil players (Morgan, Minion) - show all teammates including Blind Hunter
+                    // Other evil players (Morgan, Minion)
+                    // Show all evil teammates including Blind Hunter
                     var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
                     
                     if (evilPlayers.length > 0) {
