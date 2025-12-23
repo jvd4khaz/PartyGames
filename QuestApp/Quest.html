@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quest - Director's Cut</title>
+    <title>Mission - Director's Cut</title>
     <style>
         :root {
             --bg-color: #0a192f;
@@ -549,16 +549,16 @@
 
     <!-- 1. Setup Screen -->
     <div id="setup-screen" class="container">
-        <h1>Quest - Director's Cut</h1>
+        <h1>Mission - Director's Cut</h1>
         <p>Social Deduction Game</p>
 
         <div class="setup-info">
             <strong>Game Overview:</strong><br>
             • Players are secretly assigned Good or Evil roles (Minions of Mordred)<br>
-            • Leader selects team members for each quest<br>
-            • Team executes quest by voting Success or Failure<br>
-            • Good wins by completing 3 successful quests<br>
-            • Evil wins by failing 3 quests<br>
+            • Leader selects team members for each mission<br>
+            • Team executes mission by voting Success or Failure<br>
+            • Good wins by completing 3 successful missions<br>
+            • Evil wins by failing 3 missions<br>
             • Supports 4-10 players
         </div>
 
@@ -620,13 +620,13 @@
             <p style="color: var(--text-secondary);">The first leader is:</p>
             <div class="leader-name" id="first-leader-name">Player Name</div>
         </div>
-        <p style="color: var(--text-secondary);">The leader will select team members for Quest 1.</p>
-        <button class="action-btn" onclick="startGame()">Begin Quest 1</button>
+        <p style="color: var(--text-secondary);">The leader will select team members for Mission 1.</p>
+        <button class="action-btn" onclick="startGame()">Begin Mission 1</button>
     </div>
 
     <!-- 4. Main Game Screen -->
     <div id="game-screen" class="container hidden">
-        <h1>Quest Game</h1>
+        <h1>Mission Game</h1>
         
         <!-- Compact Team Layout -->
         <div style="display: flex; gap: 8px; margin-bottom: 20px;">
@@ -644,7 +644,7 @@
             <!-- Good Team (Right) -->
             <div style="flex: 1; background: rgba(76, 175, 80, 0.05); border: 1px solid var(--good-color); border-radius: 8px; padding: 8px; min-height: 60px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem; color: var(--good-color); font-weight: bold;">
-                    <span>Loyal Servants</span>
+                    <span>Citizens</span>
                     <span>Wins: <strong id="good-wins-display" style="color: var(--good-color); font-size: 0.95rem;">0</strong></span>
                 </div>
                 <div id="good-team-list" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-start; align-content: flex-start;">
@@ -673,11 +673,11 @@
             <div id="phase-content"></div>
         </div>
 
-        <!-- Amulets Section -->
+        <!-- Visions Section -->
         <div class="amulet-section" id="amulet-section">
-            <div class="amulet-title">🔮 Amulets</div>
+            <div class="amulet-title">🔮 Visions</div>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 10px 0;" id="amulet-explanation">
-                These are given to others by the leader of the last quest and allow a player to check the loyalty of another player.
+                These are given to others by the leader of the last mission and allow a player to check the loyalty of another player.
             </p>
             <div class="amulet-list" id="amulet-list">
                 <!-- Amulets will be generated here -->
@@ -700,12 +700,12 @@
     </div>
 
 
-    <!-- Magic Token Modal -->
+    <!-- Spell Modal -->
     <div id="magic-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:500px;">
-            <h2>Magic Token</h2>
-            <p style="margin: 15px 0;">Leader: Select a player to receive the Magic token.</p>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">The player with the Magic token cannot play a Fail card (unless their role allows it).</p>
+            <h2>Spell</h2>
+            <p style="margin: 15px 0;">Leader: Select a player to receive the Spell.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">The player with the Spell cannot play a Fail card (unless their role allows it).</p>
             <div id="magic-player-list" style="margin: 20px 0;"></div>
             <button class="secondary-btn" onclick="document.getElementById('magic-modal').classList.add('hidden')">Skip (Place on Leader)</button>
         </div>
@@ -728,10 +728,10 @@
             
             <!-- Card Selection Screen -->
             <div id="quest-card-selection-screen" class="hidden">
-                <h2>Select Quest Card</h2>
+                <h2>Select Mission Card</h2>
                 <p id="quest-card-player" style="margin: 15px 0; font-size: 1.1rem; color: var(--accent-color); font-weight: bold;"></p>
                 <p id="quest-card-magic-note" style="color: var(--amulet-color); font-weight: bold; margin: 10px 0; padding: 10px; background: rgba(156, 39, 176, 0.2); border-radius: 8px;"></p>
-                <p style="color: var(--text-secondary); margin: 20px 0;">Select a Quest card to play:</p>
+                <p style="color: var(--text-secondary); margin: 20px 0;">Select a Mission card to play:</p>
                 <div id="quest-card-buttons-container" style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
                     <!-- Cards will be dynamically inserted here in random order -->
                 </div>
@@ -743,7 +743,7 @@
     <!-- Quest Cards Reveal Modal -->
     <div id="quest-cards-reveal-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:90%; max-height:90vh; overflow-y: auto; padding: 15px;">
-            <h2 style="color: var(--accent-color); font-size: 1.2rem; margin-bottom: 8px;">Quest Cards Revealed</h2>
+            <h2 style="color: var(--accent-color); font-size: 1.2rem; margin-bottom: 8px;">Mission Cards Revealed</h2>
             <div class="card-reveal-container" id="revealed-cards-container" style="margin: 10px 0;"></div>
             <div id="quest-result-summary" style="margin: 10px 0; padding: 10px; border-radius: 8px; font-size: 0.95rem; font-weight: bold;"></div>
             <button class="action-btn" onclick="closeQuestReveal()" style="margin-top: 8px; padding: 10px 20px; font-size: 0.95rem;">Continue</button>
@@ -757,26 +757,26 @@
         <div class="container" style="max-width:500px;">
             <h2>Select Next Leader</h2>
             <p style="margin: 15px 0;">Current Leader: <strong id="current-leader-select-name"></strong></p>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player who has not been a Leader and does not have an Amulet.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player who has not been a Leader and does not have a Vision.</p>
             <div id="leader-select-list" style="margin: 20px 0;"></div>
         </div>
     </div>
 
-    <!-- Amulet Selection Modal -->
+    <!-- Vision Selection Modal -->
     <div id="amulet-select-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:500px;">
-            <h2>Amulet Available</h2>
-            <p style="margin: 15px 0;">An Amulet is available after Quest <span id="amulet-quest-num"></span>.</p>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player to receive the Amulet (cannot be the new Leader, and cannot have Veteran/Amulet token).</p>
+            <h2>Vision Available</h2>
+            <p style="margin: 15px 0;">A Vision is available after Mission <span id="amulet-quest-num"></span>.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Select a player to receive the Vision (cannot be the new Leader, and cannot have Veteran/Vision token).</p>
             <div id="amulet-select-list" style="margin: 20px 0;"></div>
-            <button class="secondary-btn" onclick="skipAmulet()">Skip Amulet</button>
+            <button class="secondary-btn" onclick="skipAmulet()">Skip Vision</button>
         </div>
     </div>
 
-    <!-- Amulet Check Modal -->
+    <!-- Vision Check Modal -->
     <div id="amulet-check-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto;">
-            <h2>Amulet Check</h2>
+            <h2>Vision Check</h2>
             <div id="amulet-check-list" style="margin: 15px 0;"></div>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <p id="amulet-holder-name" style="margin: 10px 0; color: var(--amulet-color); font-weight: bold;"></p>
@@ -785,10 +785,10 @@
         </div>
     </div>
 
-    <!-- Amulet Result Modal -->
+    <!-- Vision Result Modal -->
     <div id="amulet-result-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:90%; max-height:85vh; overflow-y: auto; padding: 20px;">
-            <h2 style="color: var(--amulet-color); margin-bottom: 15px;">Amulet Check Result</h2>
+            <h2 style="color: var(--amulet-color); margin-bottom: 15px;">Vision Check Result</h2>
             <p style="margin: 15px 0; font-size: 1.1rem;">You checked:</p>
             <p id="amulet-checked-name" style="margin: 10px 0; font-size: 1.3rem; font-weight: bold; color: var(--accent-color);"></p>
             <div id="amulet-result-text" style="margin: 20px 0; padding: 20px; border-radius: 12px; text-align: center; background: rgba(0,0,0,0.3); border: 3px solid;"></div>
@@ -796,11 +796,11 @@
         </div>
     </div>
 
-    <!-- Final Quest Modal -->
+    <!-- Final Mission Modal -->
     <div id="final-quest-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:500px;">
-            <h2>Final Quest</h2>
-            <p style="margin: 15px 0; font-size: 1.1rem;">Three quests have failed!</p>
+            <h2>Final Mission</h2>
+            <p style="margin: 15px 0; font-size: 1.1rem;">Three missions have failed!</p>
             <div id="final-quest-content"></div>
         </div>
     </div>
@@ -830,71 +830,71 @@
         // --- Role Definitions ---
         // Role strength ranking (higher number = stronger/more important)
         var ROLE_STRENGTH = {
-            // Evil: Morgan > Blind Hunter > Minion
-            'Morgan': 30,      // Morgan le Fay - strongest evil
-            'Blind Hunter': 20, // Blind Hunter
-            'Minion': 10,      // Minion of Mordred - weakest evil
+            // Evil: Demon > Ghost > Minion
+            'Demon': 30,      // Demon - strongest evil
+            'Ghost': 20,      // Ghost
+            'Minion': 10,     // Minion - weakest evil
             
-            // Good: Cleric > Duke > Archduke > Troublemaker > Youth > Loyal Servant
-            'Cleric': 60,      // Cleric - strongest good
-            'Duke': 50,        // Duke
-            'Archduke': 40,    // Archduke
-            'Troublemaker': 30, // Troublemaker
-            'Youth': 20,       // Youth
-            'Loyal Servant': 10 // Loyal Servant - weakest good
+            // Good: Detective > Mayor > Guard > Suspect > Fool > Citizen
+            'Detective': 60,  // Detective - strongest good
+            'Mayor': 50,      // Mayor
+            'Guard': 40,      // Guard
+            'Suspect': 30,    // Suspect
+            'Fool': 20,       // Fool
+            'Citizen': 10     // Citizen - weakest good
         };
         
         var ROLE_DEFINITIONS = {
-            'Loyal Servant': { name: 'Loyal Servant of Arthur', symbol: '🛡️', rebus: '🛡️', alignment: 'good', description: 'A loyal servant fighting for Good.' },
-            'Cleric': { name: 'Cleric', symbol: '🔮', rebus: '🔮', alignment: 'good', description: 'Knows if the first Leader is Good or Evil.', required: false },
-            'Youth': { name: 'Youth', symbol: '🌱', rebus: '🌱', alignment: 'good', description: 'If Magic token is placed on you, you must play Fail.', required: false },
-            'Troublemaker': { name: 'Troublemaker', symbol: '⚔️', rebus: '⚔️', alignment: 'good', description: 'If checked for loyalty, you must lie and show Evil.', required: false },
-            'Duke': { name: 'Duke', symbol: '🔨', rebus: '🔨', alignment: 'good', description: 'May drop one hand during Good\'s Last Chance.', required: false },
-            'Archduke': { name: 'Archduke', symbol: '💪', rebus: '💪', alignment: 'good', description: 'May switch one hand during Good\'s Last Chance.', required: false },
-            'Minion': { name: 'Minion of Mordred', symbol: '🗡️', rebus: '🗡️', alignment: 'evil', description: 'A minion fighting for Evil.', required: false },
-            'Morgan': { name: 'Morgan le Fay', symbol: '🐉', rebus: '🐉', alignment: 'evil', description: 'May ignore Magic token and play Fail or Success.', required: false },
-            'Blind Hunter': { name: 'Blind Hunter', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: 'Does not know other Minions. Can Hunt in Final Quest.', required: false }
+            'Citizen': { name: 'Citizen', symbol: '🛡️', rebus: '🛡️', alignment: 'good', description: 'A citizen fighting for Good.' },
+            'Detective': { name: 'Detective', symbol: '🔮', rebus: '🔮', alignment: 'good', description: 'Knows if the first Leader is Good or Evil.', required: false },
+            'Fool': { name: 'Fool', symbol: '🌱', rebus: '🌱', alignment: 'good', description: 'If Spell is placed on you, you must play Fail.', required: false },
+            'Suspect': { name: 'Suspect', symbol: '⚔️', rebus: '⚔️', alignment: 'good', description: 'If checked for loyalty, you must lie and show Evil.', required: false },
+            'Mayor': { name: 'Mayor', symbol: '🔨', rebus: '🔨', alignment: 'good', description: 'May drop one hand during Final.', required: false },
+            'Guard': { name: 'Guard', symbol: '💪', rebus: '💪', alignment: 'good', description: 'May switch one hand during Final.', required: false },
+            'Minion': { name: 'Minion', symbol: '🗡️', rebus: '🗡️', alignment: 'evil', description: 'A minion fighting for Evil.', required: false },
+            'Demon': { name: 'Demon', symbol: '🐉', rebus: '🐉', alignment: 'evil', description: 'May ignore Spell and play Fail or Success.', required: false },
+            'Ghost': { name: 'Ghost', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: 'Does not know other Minions. Can Hunt in Final Mission.', required: false }
         };
 
         // Recommended roles by player count
         var RECOMMENDED_ROLES = {
-            4: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'],
-            5: ['Loyal Servant', 'Loyal Servant', 'Minion', 'Morgan', 'Blind Hunter'],
-            6: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion'],
-            7: ['Cleric', 'Troublemaker', 'Duke', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
-            8: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
-            9: ['Cleric', 'Troublemaker', 'Archduke', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'],
-            10: ['Cleric', 'Troublemaker', 'Duke', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion']
+            4: ['Citizen', 'Citizen', 'Demon', 'Ghost'],
+            5: ['Citizen', 'Citizen', 'Minion', 'Demon', 'Ghost'],
+            6: ['Detective', 'Suspect', 'Mayor', 'Demon', 'Ghost', 'Minion'],
+            7: ['Detective', 'Suspect', 'Mayor', 'Demon', 'Ghost', 'Minion', 'Minion'],
+            8: ['Detective', 'Suspect', 'Mayor', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion'],
+            9: ['Detective', 'Suspect', 'Guard', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion'],
+            10: ['Detective', 'Suspect', 'Mayor', 'Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion']
         };
 
         var SCENARIOS = {
             4: [
-                { name: 'Classic Battle', description: '2 Loyal Servants vs Morgan and Blind Hunter', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter'] },
-                { name: 'Ambiguous Battle', description: '2 from (Cleric, Youth, Servant) + Morgan & Blind Hunter (5 roles, 1 removed)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter'] }
+                { name: 'Classic Battle', description: '2 Citizens vs Demon and Ghost', roles: ['Citizen', 'Citizen', 'Demon', 'Ghost'] },
+                { name: 'Ambiguous Battle', description: '2 from (Detective, Fool, Citizen) + Demon & Ghost (5 roles, 1 removed)', roles: ['Detective', 'Fool', 'Citizen', 'Demon', 'Ghost'] }
             ],
             5: [
-                { name: 'Classic Battle', description: '2 Loyal Servants vs Morgan, Blind Hunter, and Minion', roles: ['Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] },
-                { name: 'Ambiguous Battle', description: '2 from (Cleric, Youth, Servant) + Morgan, Hunter, Minion (6 roles, 1 removed)', roles: ['Cleric', 'Youth', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+                { name: 'Classic Battle', description: '2 Citizens vs Demon, Ghost, and Minion', roles: ['Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion'] },
+                { name: 'Ambiguous Battle', description: '2 from (Detective, Fool, Citizen) + Demon, Ghost, Minion (6 roles, 1 removed)', roles: ['Detective', 'Fool', 'Citizen', 'Demon', 'Ghost', 'Minion'] }
             ],
             6: [
-                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker vs Morgan, Hunter, Minion', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion'] },
-                { name: 'Classic Battle', description: '3 Loyal Servants vs Morgan, Hunter, Minion', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion'] }
+                { name: 'Director\'s Cut', description: 'Detective, Mayor, Suspect vs Demon, Ghost, Minion', roles: ['Detective', 'Mayor', 'Suspect', 'Demon', 'Ghost', 'Minion'] },
+                { name: 'Classic Battle', description: '3 Citizens vs Demon, Ghost, Minion', roles: ['Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion'] }
             ],
             7: [
-                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker vs Morgan, Hunter, 2 Minions', roles: ['Cleric', 'Duke', 'Troublemaker', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
-                { name: 'Classic Battle', description: '3 Loyal Servants vs Morgan, Hunter, 2 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+                { name: 'Director\'s Cut', description: 'Detective, Mayor, Suspect vs Demon, Ghost, 2 Minions', roles: ['Detective', 'Mayor', 'Suspect', 'Demon', 'Ghost', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '3 Citizens vs Demon, Ghost, 2 Minions', roles: ['Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion'] }
             ],
             8: [
-                { name: 'Director\'s Cut', description: 'Cleric, Duke, Troublemaker, Servant vs Morgan, Hunter, 2 Minions', roles: ['Cleric', 'Duke', 'Troublemaker', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] },
-                { name: 'Classic Battle', description: '4 Loyal Servants vs Morgan, Hunter, 2 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion'] }
+                { name: 'Director\'s Cut', description: 'Detective, Mayor, Suspect, Citizen vs Demon, Ghost, 2 Minions', roles: ['Detective', 'Mayor', 'Suspect', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '4 Citizens vs Demon, Ghost, 2 Minions', roles: ['Citizen', 'Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion'] }
             ],
             9: [
-                { name: 'Director\'s Cut', description: 'Cleric, Archduke, Troublemaker, 2 Servants vs Morgan, Hunter, 3 Minions', roles: ['Cleric', 'Archduke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
-                { name: 'Classic Battle', description: '4 Loyal Servants vs Morgan, Hunter, 3 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+                { name: 'Director\'s Cut', description: 'Detective, Guard, Suspect, 2 Citizens vs Demon, Ghost, 3 Minions', roles: ['Detective', 'Guard', 'Suspect', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '4 Citizens vs Demon, Ghost, 3 Minions', roles: ['Citizen', 'Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion', 'Minion'] }
             ],
             10: [
-                { name: 'Director\'s Cut', description: 'Cleric, Archduke, Duke, Troublemaker, 2 Servants vs Morgan, Hunter, 3 Minions', roles: ['Cleric', 'Archduke', 'Duke', 'Troublemaker', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] },
-                { name: 'Classic Battle', description: '5 Loyal Servants vs Morgan, Hunter, 3 Minions', roles: ['Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Loyal Servant', 'Morgan', 'Blind Hunter', 'Minion', 'Minion', 'Minion'] }
+                { name: 'Director\'s Cut', description: 'Detective, Guard, Mayor, Suspect, 2 Citizens vs Demon, Ghost, 3 Minions', roles: ['Detective', 'Guard', 'Mayor', 'Suspect', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion', 'Minion'] },
+                { name: 'Classic Battle', description: '5 Citizens vs Demon, Ghost, 3 Minions', roles: ['Citizen', 'Citizen', 'Citizen', 'Citizen', 'Citizen', 'Demon', 'Ghost', 'Minion', 'Minion', 'Minion'] }
             ]
         };
 
@@ -996,8 +996,8 @@
         var gameLog = [];
         var amulets = []; // Array of {quest: number, available: boolean, holder: null or playerIndex, checked: []}
         var veterans = []; // Array of player indices who have been leaders
-        var magicTokenHolder = null; // Player index with magic token
-        var magicTokenTeamMemberIndex = null; // Which team member (0-based) has magic token
+        var magicTokenHolder = null; // Player index with spell
+        var magicTokenTeamMemberIndex = null; // Which team member (0-based) has spell
         var amuletHolders = []; // Players who have received amulets
         var checkedByAmulet = []; // Players checked by amulets
         var quest3Size = null; // For 4 players, track if Quest 3 is 2 or 3
@@ -1147,7 +1147,7 @@
                 list.appendChild(scenarioContainer);
             }
 
-            var availableRoles = ['Cleric', 'Youth', 'Troublemaker', 'Duke', 'Archduke', 'Morgan', 'Blind Hunter', 'Loyal Servant', 'Minion'];
+            var availableRoles = ['Detective', 'Fool', 'Suspect', 'Mayor', 'Guard', 'Demon', 'Ghost', 'Citizen', 'Minion'];
             
             var roleCounts = {};
             selectedRoles.forEach(function(role) {
@@ -1230,10 +1230,10 @@
             
             // Special rule for 4-5 players: if ambiguity pool roles are selected, allow N+1 roles
             var allowedCount = playerCount;
-            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
-            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            // Check for ambiguity pool roles: Detective, Fool, Citizen
+            var hasAmbiguityRoles = selectedRoles.includes('Detective') || selectedRoles.includes('Fool') || selectedRoles.includes('Citizen');
             // Also check if the role being added is from ambiguity pool
-            var addingAmbiguityRole = roleKey === 'Cleric' || roleKey === 'Youth' || roleKey === 'Loyal Servant';
+            var addingAmbiguityRole = roleKey === 'Detective' || roleKey === 'Fool' || roleKey === 'Citizen';
             if ((playerCount === 4 || playerCount === 5) && (hasAmbiguityRoles || addingAmbiguityRole)) {
                 allowedCount = playerCount + 1;
             }
@@ -1257,8 +1257,8 @@
         function confirmRoleSelection() {
             // Special rule for 4-5 players with ambiguity pool roles
             var allowedCount = playerCount;
-            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
-            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            // Check for ambiguity pool roles: Detective, Fool, Citizen
+            var hasAmbiguityRoles = selectedRoles.includes('Detective') || selectedRoles.includes('Fool') || selectedRoles.includes('Citizen');
             if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
                 allowedCount = playerCount + 1;
             }
@@ -1282,8 +1282,8 @@
             
             // Validate roles
             var allowedCount = playerCount;
-            // Check for ambiguity pool roles: Cleric, Youth, Loyal Servant
-            var hasAmbiguityRoles = selectedRoles.includes('Cleric') || selectedRoles.includes('Youth') || selectedRoles.includes('Loyal Servant');
+            // Check for ambiguity pool roles: Detective, Fool, Citizen
+            var hasAmbiguityRoles = selectedRoles.includes('Detective') || selectedRoles.includes('Fool') || selectedRoles.includes('Citizen');
             if ((playerCount === 4 || playerCount === 5) && hasAmbiguityRoles) {
                 allowedCount = playerCount + 1;
             }
@@ -1312,8 +1312,8 @@
             // Define ambiguity pools for different player counts
             var ambiguityPool = [];
             if (playerCount === 4 || playerCount === 5) {
-                // For 4-5 players: ambiguity pool is [Cleric, Youth, Loyal Servant]
-                ambiguityPool = ['Cleric', 'Youth', 'Loyal Servant'];
+                // For 4-5 players: ambiguity pool is [Detective, Fool, Citizen]
+                ambiguityPool = ['Detective', 'Fool', 'Citizen'];
             }
             // For 6+ players, no ambiguity rule applies (all roles are fixed)
             
@@ -1332,7 +1332,7 @@
             // If we have ambiguity roles and N+1 total roles, apply ambiguity rule
             if (selectedRoles.length === playerCount + 1 && ambiguityRoles.length > 0) {
                 // Randomly select required number from ambiguity pool
-                // For 4-5 players: need 2 from [Cleric, Youth, Loyal Servant]
+                // For 4-5 players: need 2 from [Detective, Fool, Citizen]
                 var requiredFromAmbiguity = 2;
                 shuffleArray(ambiguityRoles);
                 var selectedAmbiguity = ambiguityRoles.slice(0, requiredFromAmbiguity);
@@ -1442,30 +1442,30 @@
             
             // Show teammates for evil players
             if (!isGood) {
-                if (player.roleKey === 'Blind Hunter') {
-                    // Blind Hunter never knows other evil players (any player count)
+                if (player.roleKey === 'Ghost') {
+                    // Ghost never knows other evil players (any player count)
                     extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>Important:</strong> You do not know who the other Minions are. You are alone.</div>';
                 } else {
-                    // Other evil players (Morgan, Minion)
-                    // In 4-5 player games, Blind Hunter is known to other evil
-                    // In 6+ player games, Blind Hunter is not known
+                    // Other evil players (Demon, Minion)
+                    // In 4-5 player games, Ghost is known to other evil
+                    // In 6+ player games, Ghost is not known
                     var includeBlindHunter = (playerCount === 4 || playerCount === 5);
                     var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
                     
                     if (includeBlindHunter) {
-                        // Include Blind Hunter in team list for 4-5 players, and indicate which one is Blind Hunter
+                        // Include Ghost in team list for 4-5 players, and indicate which one is Ghost
                         if (evilPlayers.length > 0) {
                             var teamList = evilPlayers.map(p => {
-                                if (p.roleKey === 'Blind Hunter') {
-                                    return p.name + ' (Blind Hunter)';
+                                if (p.roleKey === 'Ghost') {
+                                    return p.name + ' (Ghost)';
                                 }
                                 return p.name;
                             }).join(', ');
                             extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + teamList + '</div>';
                         }
                     } else {
-                        // 6+ players: Don't show Blind Hunter at all (no mention)
-                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Blind Hunter');
+                        // 6+ players: Don't show Ghost at all (no mention)
+                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Ghost');
                         if (visibleEvil.length > 0) {
                             extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + visibleEvil.map(p => p.name).join(', ') + '</div>';
                         }
@@ -1473,12 +1473,12 @@
                 }
             }
             
-            // Show information for Cleric about first leader (all player counts)
-            if (player.roleKey === 'Cleric') {
+            // Show information for Detective about first leader (all player counts)
+            if (player.roleKey === 'Detective') {
                 var firstLeader = players[currentLeader];
                 var firstLeaderIsGood = firstLeader.alignment === 'good';
-                var clericInfo = '<div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.2); border: 1px solid var(--good-color); border-radius: 8px; color: #C8E6C9;"><strong>Cleric Information:</strong><br>First Leader: <strong>' + firstLeader.name + '</strong><br>The first Leader is <strong style="color: ' + (firstLeaderIsGood ? 'var(--good-color)' : 'var(--evil-color)') + ';">' + (firstLeaderIsGood ? 'Good' : 'Evil') + '</strong>.</div>';
-                extra.innerHTML = (extra.innerHTML ? extra.innerHTML + clericInfo : clericInfo);
+                var detectiveInfo = '<div style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.2); border: 1px solid var(--good-color); border-radius: 8px; color: #C8E6C9;"><strong>Detective Information:</strong><br>First Leader: <strong>' + firstLeader.name + '</strong><br>The first Leader is <strong style="color: ' + (firstLeaderIsGood ? 'var(--good-color)' : 'var(--evil-color)') + ';">' + (firstLeaderIsGood ? 'Good' : 'Evil') + '</strong>.</div>';
+                extra.innerHTML = (extra.innerHTML ? extra.innerHTML + detectiveInfo : detectiveInfo);
             }
             
             var nextBtn = document.getElementById('next-dist-btn');
@@ -1722,7 +1722,7 @@
                 if (amuletConfig.indexOf(q) !== -1) {
                     var amuletMarker = document.createElement('div');
                     amuletMarker.className = 'quest-amulet-marker';
-                    amuletMarker.title = 'Amulet available after this quest';
+                    amuletMarker.title = 'Vision available after this mission';
                     amuletMarker.innerText = '🔮';
                     marker.appendChild(amuletMarker);
                     
@@ -1757,10 +1757,10 @@
                     var item = document.createElement('div');
                     item.className = 'amulet-item';
                     if (amulet.holder !== null) {
-                        item.innerText = 'Quest ' + amulet.quest + ' - ' + (amulet.holder !== null ? players[amulet.holder].name : 'Available');
+                        item.innerText = 'Mission ' + amulet.quest + ' - ' + (amulet.holder !== null ? players[amulet.holder].name : 'Available');
                         if (amulet.used) item.classList.add('used');
                     } else {
-                        item.innerText = 'Quest ' + amulet.quest + ' - Available';
+                        item.innerText = 'Mission ' + amulet.quest + ' - Available';
                     }
                     container.appendChild(item);
                 }
@@ -1799,10 +1799,10 @@
             var config = QUEST_CONFIG[playerCount];
             var teamSize = config.quests[currentQuest - 1];
             
-            addLog('Leader ' + players[currentLeader].name + ' selected team for Quest ' + currentQuest + ' (size: ' + teamSize + ')');
-            addLog('Magic token will be on the first team member who selects a card.');
+            addLog('Leader ' + players[currentLeader].name + ' selected team for Mission ' + currentQuest + ' (size: ' + teamSize + ')');
+            addLog('Spell will be on the first team member who selects a card.');
             
-            // Magic token is automatically on the first person who selects a card
+            // Spell is automatically on the first person who selects a card
             magicTokenHolder = null; // We don't track which player, just that first selector has it
             magicTokenTeamMemberIndex = null; // Will be set to 0 when first card is selected
             
@@ -1866,13 +1866,13 @@
             document.getElementById('quest-card-player').innerText = 
                 'Team member ' + memberNum + ' of ' + teamSize;
             
-            // Check if this team member has magic token
-            // The first person to select a card automatically has the magic token
+            // Check if this team member has spell
+            // The first person to select a card automatically has the spell
             var hasMagic = (questCards.length === 0);
             if (hasMagic) {
-                magicTokenTeamMemberIndex = 0; // First team member to select has magic token
+                magicTokenTeamMemberIndex = 0; // First team member to select has spell
                 document.getElementById('quest-card-magic-note').innerText = 
-                    '⚠️ You have the Magic token (first to select) - you cannot play a Fail card (unless you are Morgan le Fay).';
+                    '⚠️ You have the Spell (first to select) - you cannot play a Fail card (unless you are Demon).';
             } else {
                 document.getElementById('quest-card-magic-note').innerText = '';
             }
@@ -1904,17 +1904,17 @@
                 container.appendChild(btn);
             });
             
-            // Add magic token warning to fail button if needed
+            // Add spell warning to fail button if needed
             if (hasMagic) {
-                // Check if Youth is in the game
-                var hasYouth = players.some(function(p) { return p.roleKey === 'Youth'; }) || 
-                              (selectedRoles && selectedRoles.indexOf('Youth') !== -1) ||
-                              (rolesOnGround && rolesOnGround.indexOf('Youth') !== -1);
+                // Check if Fool is in the game
+                var hasFool = players.some(function(p) { return p.roleKey === 'Fool'; }) || 
+                              (selectedRoles && selectedRoles.indexOf('Fool') !== -1) ||
+                              (rolesOnGround && rolesOnGround.indexOf('Fool') !== -1);
                 
                 // Add large danger sign on Fail card
-                var warningText = hasYouth ? 
-                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY<br>OR YOUTH</div>' :
-                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>MORGAN<br>LE FAY</div>';
+                var warningText = hasFool ? 
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>DEMON<br>OR FOOL</div>' :
+                    '<div style="font-size: 4rem; margin-bottom: 10px;">⚠️</div><div style="font-size: 1.1rem; font-weight: 900; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ONLY<br>DEMON</div>';
                 
                 var warning = document.createElement('div');
                 warning.className = 'magic-token-warning';
@@ -1950,8 +1950,8 @@
                 return;
             }
             
-            // Check magic token restriction
-            // Only restrict if this is the team member with magic token
+            // Check spell restriction
+            // Only restrict if this is the team member with spell
             var hasMagic = (magicTokenTeamMemberIndex !== null && questCards.length === magicTokenTeamMemberIndex);
             if (hasMagic && cardType === 'fail') {
                 // No confirmation dialog - just allow selection to avoid revealing choice
@@ -2080,10 +2080,10 @@
             
             if (success) {
                 goodWins++;
-                addLog('Quest ' + currentQuest + ' succeeded!');
+                addLog('Mission ' + currentQuest + ' succeeded!');
             } else {
                 evilWins++;
-                addLog('Quest ' + currentQuest + ' failed! (' + failures + ' fail card' + (failures > 1 ? 's' : '') + ')');
+                addLog('Mission ' + currentQuest + ' failed! (' + failures + ' fail card' + (failures > 1 ? 's' : '') + ')');
             }
             
             // Check for amulet availability
@@ -2092,7 +2092,7 @@
                 amuletAvailable.available = true;
             }
             
-            // Reset magic token
+            // Reset spell
             magicTokenHolder = null;
             magicTokenTeamMemberIndex = null;
             
@@ -2101,7 +2101,7 @@
             // Check win conditions
             var failThreshold = (playerCount === 4) ? 2 : 3;
             if (goodWins >= 3) {
-                endGame('good', 'Good wins! 3 quests completed successfully.');
+                endGame('good', 'Good wins! 3 missions completed successfully.');
                 return;
             }
             if (evilWins >= failThreshold) {
@@ -2186,7 +2186,7 @@
         function selectAmuletHolder(amulet, playerIndex) {
             amulet.holder = playerIndex;
             amuletHolders.push(playerIndex);
-            addLog(players[playerIndex].name + ' received Amulet after Quest ' + amulet.quest);
+            addLog(players[playerIndex].name + ' received Vision after Mission ' + amulet.quest);
             
             document.getElementById('amulet-select-modal').classList.add('hidden');
             openAmuletCheck(amulet, playerIndex);
@@ -2224,10 +2224,10 @@
             amulet.used = true;
             
             var checkedPlayer = players[checkedIndex];
-            // Troublemaker always shows as Evil when checked
-            var isTroublemaker = checkedPlayer.roleKey === 'Troublemaker';
+            // Suspect always shows as Evil when checked
+            var isSuspect = checkedPlayer.roleKey === 'Suspect';
             var actualAlignment = checkedPlayer.alignment;
-            var displayedAlignment = isTroublemaker ? 'evil' : actualAlignment;
+            var displayedAlignment = isSuspect ? 'evil' : actualAlignment;
             
             addLog(players[amulet.holder].name + ' checked ' + checkedPlayer.name + ' with Amulet');
             
@@ -2262,7 +2262,7 @@
             if (currentQuest > config.quests.length) {
                 // All quests completed
                 if (goodWins > evilWins) {
-                    endGame('good', 'Good wins! More successful quests completed.');
+                    endGame('good', 'Good wins! More successful missions completed.');
                 } else {
                     endGame('evil', 'Evil wins! More quests failed.');
                 }
@@ -2310,22 +2310,22 @@
             // Reset timer to 5 minutes
             discussionTimeLeft = 300;
             
-            // Check if Blind Hunter is in the game
-            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            // Check if Ghost is in the game
+            var hasGhost = players.some(function(p) { return p.roleKey === 'Ghost'; });
             
-            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
-            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            // Check if there are special good roles (Detective, Suspect, Mayor, Guard, Fool)
+            var specialGoodRoles = ['Detective', 'Suspect', 'Mayor', 'Guard', 'Fool'];
             var hasSpecialGoodRoles = players.some(function(p) {
                 return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
             });
             
             var warningHtml = '';
-            if (hasBlindHunter && hasSpecialGoodRoles) {
+            if (hasGhost && hasSpecialGoodRoles) {
                 warningHtml = '<div style="background: rgba(255, 87, 34, 0.3); border: 3px solid #FF5722; border-radius: 8px; padding: 15px; margin: 15px 0;">' +
                     '<p style="font-size: 1.2rem; font-weight: 900; color: #FF5722; margin-bottom: 10px; text-align: center;">⚠️ IMPORTANT WARNING ⚠️</p>' +
                     '<p style="font-size: 1.1rem; font-weight: bold; color: #FF5722; margin: 10px 0; text-align: center;">DO NOT REVEAL YOUR ROLES!</p>' +
-                    '<p style="margin: 10px 0; font-weight: bold;">Blind Hunter is in the game and can identify special Good roles during The Hunt.</p>' +
-                    '<p style="margin: 10px 0;">If you reveal your roles (Cleric, Troublemaker, Duke, Archduke, Youth), Blind Hunter can identify you and Evil will win!</p>' +
+                    '<p style="margin: 10px 0; font-weight: bold;">Ghost is in the game and can identify special Good roles during The Hunt.</p>' +
+                    '<p style="margin: 10px 0;">If you reveal your roles (Detective, Suspect, Mayor, Guard, Fool), Ghost can identify you and Evil will win!</p>' +
                     '</div>';
             }
             
@@ -2351,7 +2351,7 @@
                 return;
             }
             
-            phaseTitle.innerText = 'Discussion Phase - Final Quest';
+            phaseTitle.innerText = 'Discussion Phase - Final Mission';
             phaseContent.innerHTML = 
                 '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
                 '<p style="font-size: 1.2rem; font-weight: bold; color: var(--evil-color); margin-bottom: 10px;">' + failThreshold + ' Quests Have Failed!</p>' +
@@ -2437,45 +2437,45 @@
         }
         
         function showBlindHunterDecision() {
-            // Check if Blind Hunter is in the game
-            var hasBlindHunter = players.some(function(p) { return p.roleKey === 'Blind Hunter'; });
+            // Check if Ghost is in the game
+            var hasGhost = players.some(function(p) { return p.roleKey === 'Ghost'; });
             
-            // Check if there are special good roles (Cleric, Troublemaker, Duke, Archduke, Youth)
-            var specialGoodRoles = ['Cleric', 'Troublemaker', 'Duke', 'Archduke', 'Youth'];
+            // Check if there are special good roles (Detective, Suspect, Mayor, Guard, Fool)
+            var specialGoodRoles = ['Detective', 'Suspect', 'Mayor', 'Guard', 'Fool'];
             var hasSpecialGoodRoles = players.some(function(p) {
                 return p.alignment === 'good' && specialGoodRoles.indexOf(p.roleKey) !== -1;
             });
             
-            // Skip Blind Hunter decision if Blind Hunter is not in game or no special good roles
-            if (!hasBlindHunter || !hasSpecialGoodRoles) {
+            // Skip Ghost decision if Ghost is not in game or no special good roles
+            if (!hasGhost || !hasSpecialGoodRoles) {
                 showGoodsLastChance();
                 return;
             }
             
-            document.getElementById('phase-title').innerText = 'Blind Hunter Decision';
+            document.getElementById('phase-title').innerText = 'Ghost Decision';
             document.getElementById('phase-content').innerHTML = 
                 '<div style="background: rgba(255, 152, 0, 0.2); border: 2px solid var(--quest-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
                 '<p style="margin: 10px 0; font-size: 1.1rem; font-weight: bold;">The Final Leader asks:</p>' +
-                '<p style="margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 1.1rem; font-weight: bold; color: var(--accent-color);">"Blind Hunter, if you would like to stop the Good team from their last chance, you may enter The Hunt. But you must be correct, otherwise they will win."</p>' +
-                '<p style="margin: 10px 0; color: var(--text-secondary);">If Blind Hunter stays silent, proceed to Good\'s Last Chance.</p>' +
+                '<p style="margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 1.1rem; font-weight: bold; color: var(--accent-color);">"Ghost, if you would like to stop the Good team from their last chance, you may enter The Hunt. But you must be correct, otherwise they will win."</p>' +
+                '<p style="margin: 10px 0; color: var(--text-secondary);">If Ghost stays silent, proceed to Final.</p>' +
                 '</div>';
             
             var actions = document.getElementById('action-buttons');
             actions.innerHTML = 
-                '<button class="action-btn" onclick="showBlindHunterHuntInstructions()" style="background: var(--evil-color);">Blind Hunter Hunts</button>' +
-                '<button class="secondary-btn" onclick="showGoodsLastChance()" style="margin-top: 10px;">Blind Hunter Stays Silent - Good\'s Last Chance</button>';
+                '<button class="action-btn" onclick="showBlindHunterHuntInstructions()" style="background: var(--evil-color);">Ghost Hunts</button>' +
+                '<button class="secondary-btn" onclick="showGoodsLastChance()" style="margin-top: 10px;">Ghost Stays Silent - Final</button>';
         }
         
         function showGoodsLastChance() {
-            // Update main screen with Good's Last Chance instructions
-            document.getElementById('phase-title').innerText = 'GOOD\'S LAST CHANCE';
+            // Update main screen with Final instructions
+            document.getElementById('phase-title').innerText = 'FINAL';
             document.getElementById('phase-content').innerHTML = 
                 '<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--good-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
-                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--good-color); margin-bottom: 15px;">Good\'s Last Chance Instructions:</p>' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--good-color); margin-bottom: 15px;">Final Instructions:</p>' +
                 '<ol style="text-align: left; margin: 10px 0; padding-left: 20px;">' +
                 '<li style="margin: 8px 0;">Each player gets ready to accuse, but <strong>no further discussion occurs</strong>.</li>' +
                 '<li style="margin: 8px 0;">At the count of three, each player <strong>points at 2 players</strong>.</li>' +
-                '<li style="margin: 8px 0;">Hold your hands in the air, then announce: <strong>"Minions of Mordred, drop your hands."</strong></li>' +
+                '<li style="margin: 8px 0;">Hold your hands in the air, then announce: <strong>"Minions, drop your hands."</strong></li>' +
                 '<li style="margin: 8px 0;">At this point, <strong>only Good players should be pointing</strong>.</li>' +
                 '</ol>' +
                 '<p style="margin-top: 15px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>Win Condition:</strong> If Good players are pointing at <strong>all Evil players</strong> and <strong>only Evil players</strong>, Good wins!</p>' +
@@ -2484,7 +2484,7 @@
             
             var actions = document.getElementById('action-buttons');
             actions.innerHTML = 
-                '<button class="action-btn" onclick="resolveGoodsLastChance()">Resolve Good\'s Last Chance</button>';
+                '<button class="action-btn" onclick="resolveGoodsLastChance()">Resolve Final</button>';
         }
         
         function resolveGoodsLastChance() {
@@ -2499,51 +2499,51 @@
             }
             
             // Show resolution screen
-            document.getElementById('phase-title').innerText = 'Resolve Good\'s Last Chance';
+            document.getElementById('phase-title').innerText = 'Resolve Final';
             document.getElementById('phase-content').innerHTML = 
                 '<p style="margin: 15px 0;">After players pointed and Minions dropped their hands:</p>' +
                 '<p style="color: var(--text-secondary); margin: 15px 0;">Did Good players point at all Evil players and only Evil players?</p>';
             
             var actions = document.getElementById('action-buttons');
             actions.innerHTML = 
-                '<button class="action-btn" onclick="endGame(\'good\', \'Good wins! Good\'s Last Chance succeeded - all Evil players identified correctly.\')" style="background: var(--good-color);">Good Wins</button>' +
-                '<button class="action-btn" onclick="endGame(\'evil\', \'Evil wins! Good\'s Last Chance failed - Evil players not all identified correctly.\')" style="background: var(--evil-color); margin-top: 10px;">Evil Wins</button>';
+                '<button class="action-btn" onclick="endGame(\'good\', \'Good wins! Final succeeded - all Evil players identified correctly.\')" style="background: var(--good-color);">Good Wins</button>' +
+                '<button class="action-btn" onclick="endGame(\'evil\', \'Evil wins! Final failed - Evil players not all identified correctly.\')" style="background: var(--evil-color); margin-top: 10px;">Evil Wins</button>';
         }
 
         function showBlindHunterHuntInstructions() {
-            // Update main screen with detailed Blind Hunter hunt instructions
-            document.getElementById('phase-title').innerText = 'Blind Hunter Hunt';
+            // Update main screen with detailed Ghost hunt instructions
+            document.getElementById('phase-title').innerText = 'Ghost Hunt';
             document.getElementById('phase-content').innerHTML = 
                 '<div style="background: rgba(244, 67, 54, 0.2); border: 2px solid var(--evil-color); border-radius: 8px; padding: 15px; margin: 15px 0;">' +
-                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--evil-color); margin-bottom: 15px;">Blind Hunter Hunt Instructions:</p>' +
+                '<p style="font-size: 1.1rem; font-weight: bold; color: var(--evil-color); margin-bottom: 15px;">Ghost Hunt Instructions:</p>' +
                 '<ol style="text-align: left; margin: 10px 0; padding-left: 20px;">' +
-                '<li style="margin: 8px 0;">Blind Hunter reveals themselves and says they are the Blind Hunter.</li>' +
-                '<li style="margin: 8px 0;">Blind Hunter must identify <strong>2 Good targets</strong> by <strong>role</strong>.</li>' +
-                '<li style="margin: 8px 0;"><strong>Must identify Cleric as one of the targets</strong> (required).</li>' +
+                '<li style="margin: 8px 0;">Ghost reveals themselves and says they are the Ghost.</li>' +
+                '<li style="margin: 8px 0;">Ghost must identify <strong>2 Good targets</strong> by <strong>role</strong>.</li>' +
+                '<li style="margin: 8px 0;"><strong>Must identify Detective as one of the targets</strong> (required).</li>' +
                 '<li style="margin: 8px 0;">Targets can be any player (or face-down cards in ' + (playerCount === 4 || playerCount === 5 ? '4-5' : '4-5') + ' player games).</li>' +
-                '<li style="margin: 8px 0;">For targets, Duke and Archduke can be identified as "Loyal Servant".</li>' +
-                '<li style="margin: 8px 0;">No player (except Blind Hunter) may speak during the Hunt.</li>' +
+                '<li style="margin: 8px 0;">For targets, Mayor and Guard can be identified as "Citizen".</li>' +
+                '<li style="margin: 8px 0;">No player (except Ghost) may speak during the Hunt.</li>' +
                 '</ol>' +
-                '<p style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.3); border-radius: 6px;"><strong>Win Condition:</strong> If Blind Hunter correctly identifies both targets (including Cleric), <strong>Evil wins</strong>!</p>' +
-                '<p style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>Otherwise:</strong> If Blind Hunter makes a mistake, <strong>Good wins</strong>!</p>' +
+                '<p style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.3); border-radius: 6px;"><strong>Win Condition:</strong> If Ghost correctly identifies both targets (including Detective), <strong>Evil wins</strong>!</p>' +
+                '<p style="margin-top: 10px; padding: 10px; background: rgba(76, 175, 80, 0.3); border-radius: 6px;"><strong>Otherwise:</strong> If Ghost makes a mistake, <strong>Good wins</strong>!</p>' +
                 '</div>' +
-                '<p style="margin: 15px 0; color: var(--text-secondary);">After Blind Hunter has identified their targets:</p>';
+                '<p style="margin: 15px 0; color: var(--text-secondary);">After Ghost has identified their targets:</p>';
             
             var actions = document.getElementById('action-buttons');
             actions.innerHTML = 
-                '<button class="action-btn" onclick="blindHunterHunt()">Blind Hunter Has Identified Targets</button>';
+                '<button class="action-btn" onclick="blindHunterHunt()">Ghost Has Identified Targets</button>';
         }
         
         function blindHunterHunt() {
             // Show resolution screen
-            document.getElementById('phase-title').innerText = 'Blind Hunter Hunt Result';
+            document.getElementById('phase-title').innerText = 'Ghost Hunt Result';
             document.getElementById('phase-content').innerHTML = 
-                '<p style="margin: 15px 0;">Did Blind Hunter correctly identify both Good targets (including Cleric)?</p>';
+                '<p style="margin: 15px 0;">Did Ghost correctly identify both Good targets (including Detective)?</p>';
             
             var actions = document.getElementById('action-buttons');
             actions.innerHTML = 
-                '<button class="action-btn" onclick="endGame(\'evil\', \'Blind Hunter correctly identified Good targets. Evil wins!\')" style="background: var(--evil-color);">Blind Hunter Succeeds</button>' +
-                '<button class="action-btn" onclick="endGame(\'good\', \'Blind Hunter failed to identify targets. Good wins!\')" style="background: var(--good-color); margin-top: 10px;">Blind Hunter Fails</button>';
+                '<button class="action-btn" onclick="endGame(\'evil\', \'Ghost correctly identified Good targets. Evil wins!\')" style="background: var(--evil-color);">Ghost Succeeds</button>' +
+                '<button class="action-btn" onclick="endGame(\'good\', \'Ghost failed to identify targets. Good wins!\')" style="background: var(--good-color); margin-top: 10px;">Ghost Fails</button>';
         }
 
 
