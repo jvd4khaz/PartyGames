@@ -1452,12 +1452,9 @@
                     
                     if (evilPlayers.length > 0) {
                         var teamList = evilPlayers.map(p => {
-                            if (p.roleKey === 'Ghost') {
-                                return p.name + ' (Ghost)';
-                            } else if (p.roleKey === 'Demon') {
-                                return p.name + ' (Demon)';
-                            }
-                            return p.name;
+                            var roleDef = ROLE_DEFINITIONS[p.roleKey];
+                            var roleName = roleDef ? roleDef.name : p.roleKey;
+                            return p.name + ' (' + roleName + ')';
                         }).join(', ');
                         extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + teamList + '</div>';
                     }
