@@ -1501,37 +1501,19 @@
                     // Blind Hunter never knows other evil players (any player count)
                     extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند. شما تنها هستید.</div>';
                 } else {
-                    // Other evil players (Morgan, Minion)
-                    // In 4-5 player games, Blind Hunter is known to other evil
-                    // In 6+ player games, Blind Hunter is not known
-                    var includeBlindHunter = (playerCount === 4 || playerCount === 5);
+                    // Other evil players (Morgan, Minion) - show all teammates including Blind Hunter
                     var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
                     
-                    if (includeBlindHunter) {
-                        // Include Blind Hunter in team list for 4-5 players, and indicate which one is Blind Hunter
-                        if (evilPlayers.length > 0) {
-                            var teamList = evilPlayers.map(p => {
-                                if (p.roleKey === 'Blind Hunter') {
-                                    return p.name + ' (نقاب‌دار)';
-                                } else if (p.roleKey === 'Morgan') {
-                                    return p.name + ' (ضحاک ماردوش)';
-                                }
-                                return p.name;
-                            }).join('، ');
-                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>هم‌گروهی‌های لشکر ضحاک شما:</strong> ' + teamList + '</div>';
-                        }
-                    } else {
-                        // 6+ players: Don't show Blind Hunter at all (no mention)
-                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Blind Hunter');
-                        if (visibleEvil.length > 0) {
-                            var teamList = visibleEvil.map(p => {
-                                if (p.roleKey === 'Morgan') {
-                                    return p.name + ' (ضحاک ماردوش)';
-                                }
-                                return p.name;
-                            }).join('، ');
-                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>هم‌گروهی‌های لشکر ضحاک شما:</strong> ' + teamList + '</div>';
-                        }
+                    if (evilPlayers.length > 0) {
+                        var teamList = evilPlayers.map(p => {
+                            if (p.roleKey === 'Blind Hunter') {
+                                return p.name + ' (نقاب‌دار)';
+                            } else if (p.roleKey === 'Morgan') {
+                                return p.name + ' (ضحاک ماردوش)';
+                            }
+                            return p.name;
+                        }).join('، ');
+                        extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>هم‌گروهی‌های لشکر ضحاک شما:</strong> ' + teamList + '</div>';
                     }
                 }
             }

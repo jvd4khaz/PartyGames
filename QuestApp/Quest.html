@@ -1446,29 +1446,19 @@
                     // Ghost never knows other evil players (any player count)
                     extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>Important:</strong> You do not know who the other Minions are. You are alone.</div>';
                 } else {
-                    // Other evil players (Demon, Minion)
-                    // In 4-5 player games, Ghost is known to other evil
-                    // In 6+ player games, Ghost is not known
-                    var includeBlindHunter = (playerCount === 4 || playerCount === 5);
+                    // Other evil players (Demon, Minion) - show all teammates including Ghost
                     var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
                     
-                    if (includeBlindHunter) {
-                        // Include Ghost in team list for 4-5 players, and indicate which one is Ghost
-                        if (evilPlayers.length > 0) {
-                            var teamList = evilPlayers.map(p => {
-                                if (p.roleKey === 'Ghost') {
-                                    return p.name + ' (Ghost)';
-                                }
-                                return p.name;
-                            }).join(', ');
-                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + teamList + '</div>';
-                        }
-                    } else {
-                        // 6+ players: Don't show Ghost at all (no mention)
-                        var visibleEvil = evilPlayers.filter(p => p.roleKey !== 'Ghost');
-                        if (visibleEvil.length > 0) {
-                            extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + visibleEvil.map(p => p.name).join(', ') + '</div>';
-                        }
+                    if (evilPlayers.length > 0) {
+                        var teamList = evilPlayers.map(p => {
+                            if (p.roleKey === 'Ghost') {
+                                return p.name + ' (Ghost)';
+                            } else if (p.roleKey === 'Demon') {
+                                return p.name + ' (Demon)';
+                            }
+                            return p.name;
+                        }).join(', ');
+                        extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;">Your Minion teammates: ' + teamList + '</div>';
                     }
                 }
             }
