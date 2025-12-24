@@ -2606,6 +2606,7 @@
 
         function endGame(winner, message) {
             isGameEnded = true;
+            isGameInProgress = false;
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = winner.toUpperCase() + ' WINS!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
