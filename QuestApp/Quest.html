@@ -1013,6 +1013,8 @@
                         quest3Size: quest3Size,
                         amulets: amulets,
                         questCards: questCards,
+                        questCardSelectionMode: questCardSelectionMode,
+                        currentTeam: currentTeam,
                         magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
                         selectedRoles: selectedRoles,
                         currentDistIndex: currentDistIndex
@@ -1079,6 +1081,8 @@
                         quest3Size = state.quest3Size;
                         amulets = state.amulets || [];
                         questCards = state.questCards || [];
+                        questCardSelectionMode = state.questCardSelectionMode || 'confirmation';
+                        currentTeam = state.currentTeam || [];
                         magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
                         selectedRoles = state.selectedRoles || [];
                         currentDistIndex = state.currentDistIndex;
@@ -1095,8 +1099,31 @@
                             // Game is in progress - restore to game screen
                             showScreen('game-screen');
                             updateGameDisplay();
-                            // Check if we need to restore phase state
-                            // This will be handled by the existing game logic
+                            
+                            // Restore game phase based on state
+                            if (questCards.length > 0) {
+                                // In quest card selection phase
+                                var config = QUEST_CONFIG[playerCount];
+                                var teamSize = config.quests[currentQuest - 1];
+                                if (playerCount === 4 && currentQuest === 3 && quest3Size !== null) {
+                                    teamSize = quest3Size;
+                                }
+                                
+                                if (questCards.length < teamSize) {
+                                    // Still selecting cards
+                                    startQuestCardSelection();
+                                } else {
+                                    // All cards selected, show confirmation
+                                    showQuestCardConfirmation();
+                                }
+                            } else if (currentTeam.length > 0) {
+                                // Team selected but cards not started yet
+                                var actions = document.getElementById('action-buttons');
+                                actions.innerHTML = '<button class="action-btn" onclick="startQuestCardSelection()">Team Selected - Start Card Selection</button>';
+                            } else {
+                                // No team selected yet, start team selection
+                                startTeamSelection();
+                            }
                         }
                         return true;
                     } else {
