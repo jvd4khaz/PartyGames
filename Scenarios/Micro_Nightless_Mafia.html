@@ -689,29 +689,57 @@
         var playerNames = [];
         var isGameInProgress = false;
         
-        // Prevent accidental refresh/back navigation
+        // Completely prevent accidental refresh/back navigation
         function preventAccidentalNavigation() {
-            // Prevent back button
-            history.pushState(null, null, location.href);
+            if (!isGameInProgress) return;
+            
+            // Completely prevent back button - push state and immediately replace
+            history.pushState({page: 'game'}, '', location.href);
+            history.pushState({page: 'game'}, '', location.href);
+            
             window.onpopstate = function(event) {
                 if (isGameInProgress) {
-                    if (!confirm('Are you sure you want to go back? All game progress will be lost!')) {
-                        history.pushState(null, null, location.href);
-                    } else {
-                        isGameInProgress = false;
-                        history.back();
-                    }
+                    // Immediately push state back to prevent navigation
+                    history.pushState({page: 'game'}, '', location.href);
+                    // Show warning
+                    alert('Back button is disabled during game. Use game controls to navigate.');
                 }
             };
             
-            // Prevent refresh
+            // Prevent refresh with aggressive warning
             window.addEventListener('beforeunload', function(e) {
                 if (isGameInProgress) {
                     e.preventDefault();
-                    e.returnValue = 'Game is in progress! Are you sure you want to leave? All progress will be lost.';
+                    e.returnValue = 'Game is in progress! Reloading will lose all progress.';
                     return e.returnValue;
                 }
             });
+            
+            // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+            document.addEventListener('keydown', function(e) {
+                if (isGameInProgress) {
+                    // F5
+                    if (e.key === 'F5' || e.keyCode === 116) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                    // Ctrl+R or Ctrl+Shift+R
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                }
+            });
+            
+            // Disable right-click context menu (which might have refresh option)
+            if (isGameInProgress) {
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                }, false);
+            }
         }
         
         // Save game state to localStorage
