@@ -295,94 +295,17 @@
         if (window.matchMedia('(display-mode: standalone)').matches) {
             fullscreenBtn.style.display = 'none';
         }
-    </script>
-</body>
-</html>
-
-
-                <h2>Bang! The Dice Game</h2>
-                <p>Role distribution for Bang! The Dice Game.</p>
-            </a>
-            
-            <a href="BloodOnTheClocktowerApp/Blood_On_The_Clocktower.html" class="app-card">
-                <span class="app-icon">🕰️</span>
-                <h2>Blood on the Clocktower</h2>
-                <p>Role distribution and cheat sheets for Blood on the Clocktower.</p>
-            </a>
-            
-            <a href="BloodOnTheClocktowerApp/Blood_On_The_Clocktower_Farsi.html" class="app-card">
-                <span class="app-icon">🕰️</span>
-                <h2>خون بر برج ساعت</h2>
-                <p>توزیع نقش و برگه تقلب برای بازی خون بر برج ساعت.</p>
-            </a>
-            
-            <a href="OneNightWerewolfApp/One_Night_Ultimate_Werewolf.html" class="app-card">
-                <span class="app-icon">🐺</span>
-                <h2>One Night Ultimate Werewolf</h2>
-                <p>Role distributor for One Night Ultimate Werewolf.</p>
-            </a>
-            
-            <a href="QuestApp/Quest.html" class="app-card">
-                <span class="app-icon">⚔️</span>
-                <h2>Quest</h2>
-                <p>Role distribution for Quest game.</p>
-            </a>
-            
-            <a href="QuestApp/Quest_Farsi.html" class="app-card">
-                <span class="app-icon">⚔️</span>
-                <h2>نبرد فریدون</h2>
-                <p>توزیع نقش برای بازی نبرد فریدون.</p>
-            </a>
-            
-            <a href="SecretHitlerApp/Secret_Hitler.html" class="app-card">
-                <span class="app-icon">🎩</span>
-                <h2>Secret Hitler</h2>
-                <p>Role distribution for Secret Hitler.</p>
-            </a>
-            
-            <a href="FeedTheKraken/Feed_The_Kraken.html" class="app-card">
-                <span class="app-icon">🐙</span>
-                <h2>Feed the Kraken</h2>
-                <p>Role distribution for Feed the Kraken.</p>
-            </a>
-            
-            <a href="FeedTheKraken/Feed_The_Kraken_Farsi.html" class="app-card">
-                <span class="app-icon">🐙</span>
-                <h2>خوراک دادن به کراکن</h2>
-                <p>توزیع نقش برای بازی خوراک دادن به کراکن.</p>
-            </a>
-            
-            <a href="ContagionInThePalace/Contagion_Palace.html" class="app-card">
-                <span class="app-icon">🐉</span>
-                <h2>Contagion in the Palace</h2>
-                <p>Role distribution for Contagion in the Palace game.</p>
-            </a>
-            
-            <a href="RussianRouletteApp/Russian_Roulette.html" class="app-card">
-                <span class="app-icon">🔫</span>
-                <h2>Russian Roulette</h2>
-                <p>Russian Roulette game app.</p>
-            </a>
-            
-            <a href="DethyApp/Mystery_of_4_Detectives.html" class="app-card">
-                <span class="app-icon">🔍</span>
-                <h2>معمای ۴ کارآگاه</h2>
-                <p>توزیع نقش برای بازی معمای ۴ کارآگاه.</p>
-            </a>
-            
-            <a href="InsideJobApp/Hokm_Nofoozi.html" class="app-card">
-                <span class="app-icon">🕵️</span>
-                <h2>حکم نفوذی</h2>
-                <p>توزیع نقش برای بازی حکم نفوذی (Inside Job).</p>
-            </a>
-        </div>
-    </div>
-    
-    <button class="fullscreen-btn" id="fullscreenBtn" title="Enter Fullscreen">
-        <span>⛶</span> Fullscreen
-    </button>
-    
     <script>
+        // Fix manifest URL to use current origin
+        (function() {
+            const manifestLink = document.getElementById('manifest-link');
+            if (manifestLink && window.location.origin) {
+                // Ensure manifest uses current origin, not relative path
+                const manifestUrl = new URL('./manifest.json', window.location.href).href;
+                manifestLink.href = manifestUrl;
+            }
+        })();
+        
         // Fullscreen functionality
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         
