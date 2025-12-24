@@ -559,6 +559,7 @@
         // --- Setup ---
         function startDistribution() {
             isGameInProgress = true;
+            preventAccidentalNavigation(); // Push history states when game starts
             // Get Names
             var inputs = document.querySelectorAll('.player-input');
             playerNames = [];
