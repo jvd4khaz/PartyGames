@@ -1075,6 +1075,7 @@
 
         function startRoleDistribution() {
             isGameInProgress = true;
+            preventAccidentalNavigation();
             players = [];
             var pInputs = document.getElementById('player-inputs-container').querySelectorAll('input');
             for(var i=0; i<pInputs.length; i++) {
