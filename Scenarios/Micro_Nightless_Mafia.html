@@ -687,6 +687,99 @@
         var currentPlayerIndex = 0;
         var savedPlayers = [];
         var playerNames = [];
+        var isGameInProgress = false;
+        
+        // Prevent accidental refresh/back navigation
+        function preventAccidentalNavigation() {
+            // Prevent back button
+            history.pushState(null, null, location.href);
+            window.onpopstate = function(event) {
+                if (isGameInProgress) {
+                    if (!confirm('Are you sure you want to go back? All game progress will be lost!')) {
+                        history.pushState(null, null, location.href);
+                    } else {
+                        isGameInProgress = false;
+                        history.back();
+                    }
+                }
+            };
+            
+            // Prevent refresh
+            window.addEventListener('beforeunload', function(e) {
+                if (isGameInProgress) {
+                    e.preventDefault();
+                    e.returnValue = 'Game is in progress! Are you sure you want to leave? All progress will be lost.';
+                    return e.returnValue;
+                }
+            });
+        }
+        
+        // Save game state to localStorage
+        function saveGameState() {
+            if (isGameInProgress && selectedScenario && players.length > 0) {
+                try {
+                    var state = {
+                        selectedPlayerCount: selectedPlayerCount,
+                        selectedScenario: selectedScenario.name,
+                        players: players,
+                        currentPlayerIndex: currentPlayerIndex,
+                        playerNames: playerNames
+                    };
+                    localStorage.setItem('micro_mafia_game_state', JSON.stringify(state));
+                } catch (e) {
+                    // Silently fail if localStorage not available
+                }
+            }
+        }
+        
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('micro_mafia_game_state');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('A game in progress was found. Would you like to restore it?')) {
+                        selectedPlayerCount = state.selectedPlayerCount;
+                        players = state.players;
+                        currentPlayerIndex = state.currentPlayerIndex;
+                        playerNames = state.playerNames;
+                        
+                        // Find scenario by name
+                        for (var i = 0; i < scenarios.length; i++) {
+                            if (scenarios[i].name === state.selectedScenario) {
+                                selectedScenario = scenarios[i];
+                                break;
+                            }
+                        }
+                        
+                        if (selectedScenario && players.length > 0) {
+                            isGameInProgress = true;
+                            preventAccidentalNavigation();
+                            // Continue from where we left off
+                            if (currentPlayerIndex < players.length) {
+                                updatePassScreen();
+                                showScreen('pass-screen');
+                            } else {
+                                finishGame();
+                            }
+                            return true;
+                        }
+                    } else {
+                        // Clear saved state if user doesn't want to restore
+                        localStorage.removeItem('micro_mafia_game_state');
+                    }
+                }
+            } catch (e) {
+                // Silently fail
+            }
+            return false;
+        }
+        
+        // Initialize navigation prevention
+        preventAccidentalNavigation();
+        
+        // Save state periodically
+        setInterval(saveGameState, 2000);
 
         function selectPlayerCount(count) {
             selectedPlayerCount = count;
@@ -888,6 +981,8 @@
 
         function startDistribution() {
             if (!selectedScenario) return;
+            isGameInProgress = true;
+            preventAccidentalNavigation();
             
             // Create role list
             var roleList = [];
@@ -1056,6 +1151,8 @@
         }
 
         function finishGame() {
+            isGameInProgress = false;
+            localStorage.removeItem('micro_mafia_game_state');
             var html = "<strong>🎭 Scenario:</strong> " + selectedScenario.name + "<br>";
             
             // Format setup with emojis only (no letters)
@@ -1089,6 +1186,8 @@
         }
 
         function newSetup() {
+            isGameInProgress = false;
+            localStorage.removeItem('micro_mafia_game_state');
             document.getElementById('player-count-screen').classList.remove('hidden');
             document.getElementById('scenario-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.add('hidden');
@@ -1112,6 +1211,15 @@
             }
             document.getElementById(id).classList.remove('hidden');
         }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Try to restore game state
+            if (!restoreGameState()) {
+                // No saved state, show player count screen
+                document.getElementById('player-count-screen').classList.remove('hidden');
+            }
+        });
     </script>
 </body>
 </html>

@@ -927,7 +927,38 @@
         // --- Distribution ---
         let distIndex = 0;
 
+        // Prevent accidental refresh/back navigation
+        var isGameInProgress = false;
+        
+        function preventAccidentalNavigation() {
+            // Prevent back button
+            history.pushState(null, null, location.href);
+            window.onpopstate = function(event) {
+                if (isGameInProgress) {
+                    if (!confirm('Are you sure you want to go back? All game progress will be lost!')) {
+                        history.pushState(null, null, location.href);
+                    } else {
+                        isGameInProgress = false;
+                        history.back();
+                    }
+                }
+            };
+            
+            // Prevent refresh
+            window.addEventListener('beforeunload', function(e) {
+                if (isGameInProgress) {
+                    e.preventDefault();
+                    e.returnValue = 'Game is in progress! Are you sure you want to leave? All progress will be lost.';
+                    return e.returnValue;
+                }
+            });
+        }
+        
+        // Initialize navigation prevention
+        preventAccidentalNavigation();
+        
         function startRoleDistribution() {
+            isGameInProgress = true;
             players = [];
             var pInputs = document.getElementById('player-inputs-container').querySelectorAll('input');
             for(var i=0; i<pInputs.length; i++) {
