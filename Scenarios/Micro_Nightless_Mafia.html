@@ -551,17 +551,17 @@
                 legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=immortal D1 T revealed (vote=1.5)\n✓=T win, ×=M win"
             },
             {
-                name: "Vengeful Fool 4P",
+                name: "Vengeful Joker 4P",
                 players: 4,
-                setup: "1T, 2M, 1F",
+                setup: "1T, 2M, 1J",
                 roles: [
                     {type: "Town", count: 1},
                     {type: "Mafia", count: 2},
-                    {type: "Fool", count: 1}
+                    {type: "Joker", count: 1}
                 ],
-                rules: "• D1: T/F ⊗ → † someone\n  If † M: shooter survives, M dies\n  If † non-M: only voted dies\n• M ⊗ → dies (NO †)\n• Nightless",
-                win: "F: F dies, or F+M shake\n✓: handshake Fool or loop in handshakes\n×: M majority (>50%), or T+M shake\n(F gets 0.5 when T+F in [T][F][M])",
-                legend: "F=Fool, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, F=F win"
+                rules: "• D1: T/J ⊗ → † someone\n  If † M: shooter survives, M dies\n  If † non-M: only voted dies\n• M ⊗ → dies (NO †)\n• Nightless",
+                win: "J: J dies, or J+M shake\n✓: handshake Joker or loop in handshakes\n×: M majority (>50%), or T+M shake\n(J gets 0.5 when T+J in [T][J][M])",
+                legend: "J=Joker, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, J=J win"
             },
             {
                 name: "Vengeful 5P",
@@ -590,17 +590,17 @@
                 legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=D1 T revealed (alive through D2)\n✓=T win, ×=M win"
             },
             {
-                name: "Vengeful Werewolf 5P",
+                name: "Vengeful Joker 5P",
                 players: 5,
-                setup: "2T, 2M, 1W",
+                setup: "2T, 2M, 1J",
                 roles: [
                     {type: "Town", count: 2},
                     {type: "Mafia", count: 2},
-                    {type: "Werewolf", count: 1}
+                    {type: "Joker", count: 1}
                 ],
-                rules: "• D1: W ⊗ → dies, † anyone\n• D1: T ⊗ → dies, † anyone\n• M ⊗ → dies (NO †)\n• Nightless",
-                win: "W: W † T, or W+M shake\n✓: all M dead, or good handshake\n×: parity, or T+M shake\n(W gets 0.5 when T+W in [T][W][M])",
-                legend: "W=Werewolf, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, W=W win"
+                rules: "• D1: J ⊗ → dies, † anyone\n• D1: T ⊗ → dies, † anyone\n• M ⊗ → dies (NO †)\n• Nightless",
+                win: "J: J † T, or J+M shake\n✓: all M dead, or good handshake\n×: parity, or T+M shake\n(J gets 0.5 when T+J in [T][J][M])",
+                legend: "J=Joker, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, J=J win"
             },
             {
                 name: "Think Twice 6P",
@@ -616,17 +616,17 @@
                 legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=D1 T revealed (1.5 votes on D2)\n✓=T win, ×=M win"
             },
             {
-                name: "Vengeful Werewolf 6P",
+                name: "Vengeful Joker 6P",
                 players: 6,
-                setup: "3T, 2M, 1W",
+                setup: "3T, 2M, 1J",
                 roles: [
                     {type: "Town", count: 3},
                     {type: "Mafia", count: 2},
-                    {type: "Werewolf", count: 1}
+                    {type: "Joker", count: 1}
                 ],
-                rules: "• V-Day: W/T ⊗ → dies, † anyone\n• Nightless",
-                win: "W: W † T, or W+M shake\n✓: all M dead, or good handshake\n×: M majority (>50%), or T+M shake\n(W gets 0.5 when T+W in [T][W][M])",
-                legend: "W=Werewolf, T=Town, M=Mafia\nV-Day=others=M+1, ⊗=voted, †=vengekill\n✓=T win, ×=M win, W=W win"
+                rules: "• V-Day: J/T ⊗ → dies, † anyone\n• Nightless",
+                win: "J: J † T, or J+M shake\n✓: all M dead, or good handshake\n×: M majority (>50%), or T+M shake\n(J gets 0.5 when T+J in [T][J][M])",
+                legend: "J=Joker, T=Town, M=Mafia\nV-Day=others=M+1, ⊗=voted, †=vengekill\n✓=T win, ×=M win, J=J win"
             },
             {
                 name: "Lovers Mafia 6P",
@@ -710,12 +710,13 @@
                 var emoji = "🎭";
                 if (scenario.name.includes("Vengeful")) emoji = "🎯";
                 if (scenario.name.includes("Think Twice")) emoji = "🧠";
-                if (scenario.name.includes("Werewolf")) emoji = "🃏";
-                if (scenario.name.includes("Fool")) emoji = "🃏";
+                if (scenario.name.includes("Joker")) emoji = "🤡";
+                if (scenario.name.includes("Werewolf")) emoji = "🐺";
+                if (scenario.name.includes("Fool")) emoji = "🤡";
                 if (scenario.name.includes("Lovers")) emoji = "❤️";
                 if (scenario.name.includes("Sniper") || scenario.name.includes("Mexican")) emoji = "🎯";
                 if (scenario.name.includes("Sheriff")) emoji = "⭐";
-                var setupText = scenario.setup.replace(/Sn/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/Ta/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/GF/g, "<span style='font-size: 1.2rem;'>🎩</span>").replace(/W/g, "<span style='font-size: 1.2rem;'>🃏</span>").replace(/F/g, "<span style='font-size: 1.2rem;'>🃏</span>").replace(/M/g, "<span style='font-size: 1.2rem;'>🗡️</span>").replace(/T/g, "<span style='font-size: 1.2rem;'>🏛️</span>");
+                var setupText = scenario.setup.replace(/Sn/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/Ta/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/GF/g, "<span style='font-size: 1.2rem;'>🎩</span>").replace(/W/g, "<span style='font-size: 1.2rem;'>🐺</span>").replace(/F/g, "<span style='font-size: 1.2rem;'>🤡</span>").replace(/M/g, "<span style='font-size: 1.2rem;'>🗡️</span>").replace(/T/g, "<span style='font-size: 1.2rem;'>🏛️</span>");
                 btn.innerHTML = '<div class="scenario-name">' + emoji + ' ' + scenario.name + '</div><div class="scenario-setup">Setup: ' + setupText + '</div>';
                 listEl.appendChild(btn);
             });
@@ -798,8 +799,9 @@
             if (role.includes("Town")) return "🏛️";
             if (role.includes("Godfather")) return "🎩";
             if (role.includes("Mafia")) return "🗡️";
-            if (role.includes("Werewolf")) return "🃏";
-            if (role.includes("Fool")) return "🃏";
+            if (role.includes("Joker")) return "🤡";
+            if (role.includes("Werewolf")) return "🐺";
+            if (role.includes("Fool")) return "🤡";
             if (role.includes("Sniper")) return "🎯";
             return "❓";
         }
@@ -807,6 +809,7 @@
         function addEmojisToRules(rules) {
             return rules
                 // Replace role combinations first (before single letters)
+                .replace(/T\/J/g, "🏛️/🤡")
                 .replace(/T\/F/g, "🏛️/🤡")
                 .replace(/W\/T/g, "🐺/🏛️")
                 .replace(/T\+M/g, "🏛️+🎩")
@@ -819,6 +822,8 @@
                 .replace(/Ta/g, "🎯")
                 .replace(/GF/g, "🎩")
                 .replace(/W/g, "🐺")
+                .replace(/J/g, "🤡")
+                .replace(/J/g, "🤡")
                 .replace(/F/g, "🤡")
                 .replace(/M/g, "🗡️")
                 .replace(/T/g, "🏛️")
@@ -842,8 +847,9 @@
             var emoji = "🎭";
             if (scenario.name.includes("Vengeful")) emoji = "🎯";
             if (scenario.name.includes("Think Twice")) emoji = "🧠";
-            if (scenario.name.includes("Werewolf")) emoji = "🃏";
-            if (scenario.name.includes("Fool")) emoji = "🃏";
+            if (scenario.name.includes("Joker")) emoji = "🤡";
+            if (scenario.name.includes("Werewolf")) emoji = "🐺";
+            if (scenario.name.includes("Fool")) emoji = "🤡";
             if (scenario.name.includes("Lovers")) emoji = "❤️";
             if (scenario.name.includes("Takavar") || scenario.name.includes("Mexican")) emoji = "🎯";
             if (scenario.name.includes("Sheriff")) emoji = "⭐";
@@ -854,8 +860,8 @@
             setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>🎩</span>");
-            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🃏</span>");
-            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🃏</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
             setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🗡️</span>");
             setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
             
@@ -968,13 +974,17 @@
             } else if (p.role.includes("Godfather")) {
                 titleEl.className = "role-title role-mafia";
                 descEl.innerHTML = "🎩 You are the <strong>Godfather</strong> (Mafia). Lead your team to victory.";
+            } else if (p.role.includes("Joker")) {
+                titleEl.className = "role-title role-special";
+                descEl.innerHTML = "🤡 You are the <strong>Joker</strong>. You have your own win condition.";
+                mafiaBox.classList.add('hidden');
             } else if (p.role.includes("Werewolf")) {
                 titleEl.className = "role-title role-special";
-                descEl.innerHTML = "🃏 You are a <strong>Werewolf</strong>. You have your own win condition.";
+                descEl.innerHTML = "🐺 You are a <strong>Werewolf</strong>. You have your own win condition.";
                 mafiaBox.classList.add('hidden');
             } else if (p.role.includes("Fool")) {
                 titleEl.className = "role-title role-special";
-                descEl.innerHTML = "🃏 You are the <strong>Fool</strong>. You have your own win condition.";
+                descEl.innerHTML = "🤡 You are the <strong>Fool</strong>. You have your own win condition.";
                 mafiaBox.classList.add('hidden');
             } else if (p.role.includes("Sniper")) {
                 titleEl.className = "role-title role-special";
@@ -1050,8 +1060,9 @@
             setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>🎩</span>");
-            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🃏</span>");
-            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🃏</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
+            setupText = setupText.replace(/J/g, "<span style='font-size: 1.3rem;'>🤡</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
             setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🗡️</span>");
             setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
             html += "<strong>👥 Setup:</strong> " + setupText + "<br><br>";
