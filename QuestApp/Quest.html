@@ -1017,9 +1017,13 @@
                         questCards: questCards,
                         magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
                         selectedRoles: selectedRoles,
-                        currentDistIndex: currentDistIndex
+                        currentDistIndex: currentDistIndex,
+                        isGameEnded: isGameEnded
                     };
                     localStorage.setItem('quest_game_state', JSON.stringify(state));
+                } else if (isGameEnded) {
+                    // Game ended - clear saved state
+                    localStorage.removeItem('quest_game_state');
                 }
             } catch (e) {
                 // Silently fail if localStorage not available
