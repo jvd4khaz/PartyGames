@@ -1013,8 +1013,9 @@
                             updateMainDisplay();
                         }
                         return true;
-                    } else {
-                        localStorage.removeItem('kraken_game_state_farsi');
+                        }
+                        // User chose not to restore - keep the state saved for next time
+                        // Don't remove it, so they can restore later if they want
                     }
                 }
             } catch (e) {
