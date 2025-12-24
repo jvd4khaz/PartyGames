@@ -1387,6 +1387,8 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
+            isGameInProgress = true;
+            preventAccidentalNavigation();
             // If no roles selected, use recommended
             if (selectedRoles.length === 0) {
                 useRecommendedRoles();
