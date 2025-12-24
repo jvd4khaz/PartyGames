@@ -972,7 +972,9 @@
                 var stored = localStorage.getItem('kraken_game_state_farsi');
                 if (stored) {
                     var state = JSON.parse(stored);
-                    if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
+                    // Only prompt if game is actually in progress (has players and not ended)
+                    if (state.players && state.players.length > 0 && !state.isGameEnded) {
+                        if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
                         // Restore all game state
                         playerCount = state.playerCount;
                         players = state.players;
