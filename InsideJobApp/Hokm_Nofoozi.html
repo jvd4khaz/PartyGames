@@ -580,6 +580,8 @@
 
     // --- Functions ---
     function startGame(players) {
+        isGameInProgress = true;
+        preventAccidentalNavigation();
         gameState.playerCount = players;
         gameState.winLimitMissions = WIN_CONFIG[players].missions;
         gameState.winLimitTokens = WIN_CONFIG[players].tokens;
