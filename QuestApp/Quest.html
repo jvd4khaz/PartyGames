@@ -1092,17 +1092,13 @@
                         if (currentDistIndex < players.length) {
                             // Still in distribution phase
                             showScreen('distribution-screen');
-                            updateDistributionScreen();
+                            updateDistScreen();
                         } else if (players.length > 0 && !isGameEnded) {
-                            // Game is in progress
+                            // Game is in progress - restore to game screen
                             showScreen('game-screen');
-                            renderQuestBoard();
-                            renderTeamLists();
-                            updateLeaderDisplay();
-                            updateWinsDisplay();
-                            renderAmulets();
-                            updateActionButtons();
-                            updatePhaseDisplay();
+                            updateGameDisplay();
+                            // Check if we need to restore phase state
+                            // This will be handled by the existing game logic
                         }
                         return true;
                     } else {
