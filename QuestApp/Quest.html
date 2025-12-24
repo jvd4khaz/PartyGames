@@ -2658,6 +2658,8 @@
         function endGame(winner, message) {
             isGameEnded = true;
             isGameInProgress = false;
+            // Clear saved state when game ends
+            localStorage.removeItem('quest_game_state');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = winner.toUpperCase() + ' WINS!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
