@@ -1067,7 +1067,7 @@
         function saveGameState() {
             try {
                 // Only save if game is in progress
-                if (players.length > 0 && !isGameEnded) {
+                if (isGameInProgress && players.length > 0 && !isGameEnded) {
                     var state = {
                         playerCount: playerCount,
                         players: players,
@@ -1084,9 +1084,13 @@
                         questCards: questCards,
                         magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
                         selectedRoles: selectedRoles,
-                        currentDistIndex: currentDistIndex
+                        currentDistIndex: currentDistIndex,
+                        isGameEnded: isGameEnded
                     };
                     localStorage.setItem('quest_game_state_farsi', JSON.stringify(state));
+                } else if (isGameEnded) {
+                    // Game ended - clear saved state
+                    localStorage.removeItem('quest_game_state_farsi');
                 }
             } catch (e) {
                 // Silently fail if localStorage not available
@@ -2684,6 +2688,8 @@
         function endGame(winner, message) {
             isGameEnded = true;
             isGameInProgress = false;
+            // Clear saved state when game ends
+            localStorage.removeItem('quest_game_state_farsi');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = (winner === 'good' ? 'خوبی' : 'بدی') + ' برنده شد!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
