@@ -1110,41 +1110,47 @@
                 var stored = localStorage.getItem('quest_game_state_farsi');
                 if (stored) {
                     var state = JSON.parse(stored);
-                    if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
-                        // Restore all game state
-                        playerCount = state.playerCount;
-                        players = state.players;
-                        currentQuest = state.currentQuest;
-                        currentLeader = state.currentLeader;
-                        goodWins = state.goodWins;
-                        evilWins = state.evilWins;
-                        questHistory = state.questHistory;
-                        veterans = state.veterans || [];
-                        amuletHolders = state.amuletHolders || [];
-                        checkedByAmulet = state.checkedByAmulet || [];
-                        quest3Size = state.quest3Size;
-                        amulets = state.amulets || [];
-                        questCards = state.questCards || [];
-                        magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
-                        selectedRoles = state.selectedRoles || [];
-                        currentDistIndex = state.currentDistIndex;
-                        
-                        isGameInProgress = true;
-                        preventAccidentalNavigation();
-                        
-                        // Determine which screen to show
-                        if (currentDistIndex < players.length) {
-                            // Still in distribution phase
-                            showScreen('distribution-screen');
-                            updateDistScreen();
-                        } else if (players.length > 0 && !isGameEnded) {
-                            // Game is in progress - restore to game screen
-                            showScreen('game-screen');
-                            updateGameDisplay();
+                    // Only prompt if there's actually a game in progress (not just saved state from a finished game)
+                    if (state.players && state.players.length > 0 && !state.isGameEnded) {
+                        if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
+                            // Restore all game state
+                            playerCount = state.playerCount;
+                            players = state.players;
+                            currentQuest = state.currentQuest;
+                            currentLeader = state.currentLeader;
+                            goodWins = state.goodWins;
+                            evilWins = state.evilWins;
+                            questHistory = state.questHistory;
+                            veterans = state.veterans || [];
+                            amuletHolders = state.amuletHolders || [];
+                            checkedByAmulet = state.checkedByAmulet || [];
+                            quest3Size = state.quest3Size;
+                            amulets = state.amulets || [];
+                            questCards = state.questCards || [];
+                            magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
+                            selectedRoles = state.selectedRoles || [];
+                            currentDistIndex = state.currentDistIndex;
+                            isGameEnded = state.isGameEnded || false;
+                            
+                            isGameInProgress = true;
+                            preventAccidentalNavigation();
+                            
+                            // Determine which screen to show
+                            if (currentDistIndex < players.length) {
+                                // Still in distribution phase
+                                showScreen('distribution-screen');
+                                updateDistScreen();
+                            } else if (players.length > 0 && !isGameEnded) {
+                                // Game is in progress - restore to game screen
+                                showScreen('game-screen');
+                                updateGameDisplay();
+                            }
+                            return true;
                         }
-                        return true;
+                        // User chose not to restore - DON'T clear saved state, keep it for next time
+                        // Only clear if they explicitly start a new game
                     } else {
-                        // User chose not to restore, clear saved state
+                        // Saved state is from a finished game, clear it
                         localStorage.removeItem('quest_game_state_farsi');
                     }
                 }
@@ -2682,6 +2688,8 @@
         function endGame(winner, message) {
             isGameEnded = true;
             isGameInProgress = false;
+            // Clear saved state when game ends
+            localStorage.removeItem('quest_game_state_farsi');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = (winner === 'good' ? 'خوبی' : 'بدی') + ' برنده شد!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
