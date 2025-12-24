@@ -1082,6 +1082,8 @@
                         quest3Size: quest3Size,
                         amulets: amulets,
                         questCards: questCards,
+                        questCardSelectionMode: questCardSelectionMode,
+                        currentTeam: currentTeam,
                         magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
                         selectedRoles: selectedRoles,
                         currentDistIndex: currentDistIndex
@@ -1125,6 +1127,8 @@
                         quest3Size = state.quest3Size;
                         amulets = state.amulets || [];
                         questCards = state.questCards || [];
+                        questCardSelectionMode = state.questCardSelectionMode || 'confirmation';
+                        currentTeam = state.currentTeam || [];
                         magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
                         selectedRoles = state.selectedRoles || [];
                         currentDistIndex = state.currentDistIndex;
@@ -1141,6 +1145,47 @@
                             // Game is in progress - restore to game screen
                             showScreen('game-screen');
                             updateGameDisplay();
+                            
+                            // Restore game phase based on state
+                            var config = QUEST_CONFIG[playerCount];
+                            var teamSize = config.quests[currentQuest - 1];
+                            if (playerCount === 4 && currentQuest === 3 && quest3Size !== null) {
+                                teamSize = quest3Size;
+                            }
+                            
+                            if (questCards.length > 0 && questCards.length < teamSize) {
+                                // In quest card selection phase - partially complete
+                                // Open the modal and show the selection screen
+                                var modal = document.getElementById('quest-card-modal');
+                                if (modal) {
+                                    modal.classList.remove('hidden');
+                                    if (questCardSelectionMode === 'selection') {
+                                        document.getElementById('quest-card-confirmation-screen').classList.add('hidden');
+                                        document.getElementById('quest-card-selection-screen').classList.remove('hidden');
+                                        updateQuestCardSelection();
+                                    } else {
+                                        document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
+                                        document.getElementById('quest-card-selection-screen').classList.add('hidden');
+                                        showQuestCardConfirmation();
+                                    }
+                                }
+                            } else if (questCards.length >= teamSize) {
+                                // All cards selected, show confirmation screen
+                                var modal = document.getElementById('quest-card-modal');
+                                if (modal) {
+                                    modal.classList.remove('hidden');
+                                    document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
+                                    document.getElementById('quest-card-selection-screen').classList.add('hidden');
+                                    showQuestCardConfirmation();
+                                }
+                            } else if (currentTeam.length > 0) {
+                                // Team selected but cards not started yet
+                                var actions = document.getElementById('action-buttons');
+                                actions.innerHTML = '<button class="action-btn" onclick="startQuestCardSelection()">تیم انتخاب شد - شروع انتخاب کارت</button>';
+                            } else {
+                                // No team selected yet, start team selection
+                                startTeamSelection();
+                            }
                         }
                         return true;
                     } else {

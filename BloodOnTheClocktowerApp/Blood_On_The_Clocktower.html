@@ -806,6 +806,95 @@
         // Initialize navigation prevention
         preventAccidentalNavigation();
         
+        // Auto-save game state periodically
+        function saveGameState() {
+            try {
+                if (isGameInProgress && players.length > 0) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentDay: currentDay,
+                        isNightPhase: isNightPhase,
+                        currentNightOrder: currentNightOrder,
+                        nightIndex: nightIndex,
+                        executions: executions,
+                        lastExecutionDay: lastExecutionDay,
+                        lastExecutedPlayer: lastExecutedPlayer,
+                        gameLog: gameLog,
+                        grimoireVisible: grimoireVisible,
+                        playerInfo: playerInfo,
+                        poisonedPlayers: poisonedPlayers,
+                        protectedPlayers: protectedPlayers,
+                        markedForDeath: markedForDeath,
+                        butlerChoices: butlerChoices,
+                        slayerUsed: slayerUsed,
+                        virginTriggered: virginTriggered,
+                        fortuneTellerRedHerrings: fortuneTellerRedHerrings,
+                        currentDistIndex: currentDistIndex
+                    };
+                    localStorage.setItem('botc_game_state', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('botc_game_state');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('A game in progress was found. Would you like to restore it?')) {
+                        // Restore all game state
+                        playerCount = state.playerCount;
+                        players = state.players;
+                        currentDay = state.currentDay;
+                        isNightPhase = state.isNightPhase;
+                        currentNightOrder = state.currentNightOrder || [];
+                        nightIndex = state.nightIndex;
+                        executions = state.executions;
+                        lastExecutionDay = state.lastExecutionDay;
+                        lastExecutedPlayer = state.lastExecutedPlayer;
+                        gameLog = state.gameLog || [];
+                        grimoireVisible = state.grimoireVisible;
+                        playerInfo = state.playerInfo || {};
+                        poisonedPlayers = state.poisonedPlayers || [];
+                        protectedPlayers = state.protectedPlayers || [];
+                        markedForDeath = state.markedForDeath;
+                        butlerChoices = state.butlerChoices || {};
+                        slayerUsed = state.slayerUsed;
+                        virginTriggered = state.virginTriggered;
+                        fortuneTellerRedHerrings = state.fortuneTellerRedHerrings || {};
+                        currentDistIndex = state.currentDistIndex;
+                        
+                        isGameInProgress = true;
+                        preventAccidentalNavigation();
+                        
+                        // Determine which screen to show
+                        if (currentDistIndex < players.length) {
+                            // Still in distribution phase
+                            showScreen('distribution-screen');
+                            updateDistributionScreen();
+                        } else if (players.length > 0) {
+                            // Game is in progress
+                            showScreen('game-screen');
+                            updateGameDisplay();
+                        }
+                        return true;
+                    } else {
+                        localStorage.removeItem('botc_game_state');
+                    }
+                }
+            } catch (e) {
+                console.error('Error restoring game state:', e);
+            }
+            return false;
+        }
+        
         // Game State
         var currentDay = 1;
         var isNightPhase = true;
