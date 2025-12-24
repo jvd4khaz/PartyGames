@@ -898,6 +898,8 @@
     function confirmReset() {
         const msg = TEXTS[currentLang].confirmReset;
         if(confirm(msg)) {
+            isGameInProgress = false;
+            localStorage.removeItem('hokm_nofoozi_game_state');
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
         }
