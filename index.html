@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Role Apps">
+    <link rel="manifest" href="manifest.json">
     <title>Role Generator Apps</title>
     <style>
         * {
@@ -77,6 +82,40 @@
             font-size: 3rem;
             margin-bottom: 15px;
             display: block;
+        }
+        
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .fullscreen-btn:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+        
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @media (display-mode: standalone) {
+            .fullscreen-btn {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -177,6 +216,86 @@
             </a>
         </div>
     </div>
+    
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Enter Fullscreen">
+        <span>⛶</span> Fullscreen
+    </button>
+    
+    <script>
+        // Fullscreen functionality
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // Try to enter fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('Error attempting to enable fullscreen:', err);
+                    });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                }
+            }
+        }
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Update button text based on fullscreen state
+        function updateFullscreenButton() {
+            if (document.fullscreenElement || document.webkitFullscreenElement || 
+                document.msFullscreenElement || document.mozFullScreenElement) {
+                fullscreenBtn.innerHTML = '<span>⛶</span> Exit Fullscreen';
+            } else {
+                fullscreenBtn.innerHTML = '<span>⛶</span> Fullscreen';
+            }
+        }
+        
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+        
+        // Auto-request fullscreen on mobile after user interaction
+        let fullscreenRequested = false;
+        function requestFullscreenOnInteraction() {
+            if (fullscreenRequested) return;
+            fullscreenRequested = true;
+            
+            // Only auto-request on mobile devices
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                // Wait a bit for page to load, then try fullscreen
+                setTimeout(() => {
+                    if (!document.fullscreenElement) {
+                        toggleFullscreen();
+                    }
+                }, 500);
+            }
+        }
+        
+        // Request fullscreen on first user interaction
+        document.addEventListener('click', requestFullscreenOnInteraction, { once: true });
+        document.addEventListener('touchstart', requestFullscreenOnInteraction, { once: true });
+        
+        // Hide fullscreen button if already in standalone mode (PWA)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            fullscreenBtn.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
 
