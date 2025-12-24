@@ -728,6 +728,10 @@
             loadSavedPlayers();
             renderPlayerInputs();
             updateSetupSummary();
+            // Try to restore game state first
+            if (!restoreGameState()) {
+                // No saved game, show normal setup
+            }
         };
 
         function updatePlayerCount(delta) {
