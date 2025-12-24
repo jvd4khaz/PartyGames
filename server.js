@@ -89,4 +89,3 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Game API available at http://localhost:${PORT}/api`);
 });
-
