@@ -806,7 +806,62 @@
         };
         var savedPlayers = [];
         var currentDistIndex = 0;
+        var isGameInProgress = false;
         var distributionOrder = []; // Shuffled order for distribution when immediate results is enabled
+        
+        // Completely prevent accidental refresh/back navigation
+        // Set up event listeners once (always active, check flag when firing)
+        window.addEventListener('beforeunload', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                e.returnValue = 'Game is in progress! Reloading will lose all progress.';
+                return e.returnValue;
+            }
+        });
+        
+        // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+        document.addEventListener('keydown', function(e) {
+            if (isGameInProgress) {
+                // F5
+                if (e.key === 'F5' || e.keyCode === 116) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+                // Ctrl+R or Ctrl+Shift+R
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+            }
+        });
+        
+        // Disable right-click context menu during game
+        document.addEventListener('contextmenu', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+        
+        // Handle back button
+        window.onpopstate = function(event) {
+            if (isGameInProgress) {
+                // Immediately push state back to prevent navigation
+                history.pushState({page: 'game'}, '', location.href);
+                // Show warning
+                alert('Back button is disabled during game. Use game controls to navigate.');
+            }
+        };
+        
+        function preventAccidentalNavigation() {
+            if (isGameInProgress) {
+                // Completely prevent back button - push state and immediately replace
+                history.pushState({page: 'game'}, '', location.href);
+                history.pushState({page: 'game'}, '', location.href);
+            }
+        }
         var centerCards = [];
         var centerCardsFinal = []; // Center cards after all swaps (for immediate resolution)
         var playerActions = {}; // Store actions from Round 1
@@ -1253,6 +1308,7 @@
         // --- Role Distribution ---
         function startRoleDistribution() {
             isGameInProgress = true;
+            preventAccidentalNavigation();
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
             for (var i = 0; i < inputs.length; i++) {
@@ -5155,6 +5211,8 @@
         }
 
         function endGame(winner, message) {
+            isGameInProgress = false;
+            localStorage.removeItem('one_night_werewolf_game_state');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = winner.toUpperCase() + ' WIN!';
             titleEl.style.color = winner === 'Werewolves' ? 'var(--werewolf-color)' : (winner === 'Tanner' ? 'var(--special-color)' : 'var(--villager-color)');

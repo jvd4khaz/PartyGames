@@ -240,6 +240,61 @@
         var currentPlayerIndex = 0;
         var jesterPlayerIndex = -1; // Index of Jester
         var icPlayerIndex = -1; // Index of Innocent Child
+        var isGameInProgress = false;
+        
+        // Completely prevent accidental refresh/back navigation
+        // Set up event listeners once (always active, check flag when firing)
+        window.addEventListener('beforeunload', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                e.returnValue = 'Game is in progress! Reloading will lose all progress.';
+                return e.returnValue;
+            }
+        });
+        
+        // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+        document.addEventListener('keydown', function(e) {
+            if (isGameInProgress) {
+                // F5
+                if (e.key === 'F5' || e.keyCode === 116) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+                // Ctrl+R or Ctrl+Shift+R
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+            }
+        });
+        
+        // Disable right-click context menu during game
+        document.addEventListener('contextmenu', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+        
+        // Handle back button
+        window.onpopstate = function(event) {
+            if (isGameInProgress) {
+                // Immediately push state back to prevent navigation
+                history.pushState({page: 'game'}, '', location.href);
+                // Show warning
+                alert('Back button is disabled during game. Use game controls to navigate.');
+            }
+        };
+        
+        function preventAccidentalNavigation() {
+            if (isGameInProgress) {
+                // Completely prevent back button - push state and immediately replace
+                history.pushState({page: 'game'}, '', location.href);
+                history.pushState({page: 'game'}, '', location.href);
+            }
+        }
 
         // --- Logic ---
         function shuffleArray(array) {
@@ -253,6 +308,7 @@
 
         function startGame() {
             isGameInProgress = true;
+            preventAccidentalNavigation();
             // 1. Shuffle Roles
             shuffleArray(roles);
             
@@ -332,10 +388,14 @@
             var icNum = icPlayerIndex + 1;
             document.getElementById('ic-reveal').innerText = "کودک معصوم: بازیکن شماره " + icNum;
             
+            isGameInProgress = false;
+            localStorage.removeItem('sadomafiosochism_game_state');
             showScreen('end-screen');
         }
 
         function restartGame() {
+            isGameInProgress = false;
+            localStorage.removeItem('sadomafiosochism_game_state');
             if (confirm("آیا بازی با همان تنظیمات مجدداً شروع شود؟")) {
                 startGame();
             }
