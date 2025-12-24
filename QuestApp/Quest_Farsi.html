@@ -1067,7 +1067,7 @@
         function saveGameState() {
             try {
                 // Only save if game is in progress
-                if (players.length > 0 && !isGameEnded) {
+                if (isGameInProgress && players.length > 0 && !isGameEnded) {
                     var state = {
                         playerCount: playerCount,
                         players: players,
@@ -1084,9 +1084,13 @@
                         questCards: questCards,
                         magicTokenTeamMemberIndex: magicTokenTeamMemberIndex,
                         selectedRoles: selectedRoles,
-                        currentDistIndex: currentDistIndex
+                        currentDistIndex: currentDistIndex,
+                        isGameEnded: isGameEnded
                     };
                     localStorage.setItem('quest_game_state_farsi', JSON.stringify(state));
+                } else if (isGameEnded) {
+                    // Game ended, clear saved state
+                    localStorage.removeItem('quest_game_state_farsi');
                 }
             } catch (e) {
                 // Silently fail if localStorage not available
