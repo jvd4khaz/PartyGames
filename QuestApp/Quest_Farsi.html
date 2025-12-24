@@ -1104,10 +1104,64 @@
             }
         }, 10000);
 
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('quest_game_state_farsi');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
+                        // Restore all game state
+                        playerCount = state.playerCount;
+                        players = state.players;
+                        currentQuest = state.currentQuest;
+                        currentLeader = state.currentLeader;
+                        goodWins = state.goodWins;
+                        evilWins = state.evilWins;
+                        questHistory = state.questHistory;
+                        veterans = state.veterans || [];
+                        amuletHolders = state.amuletHolders || [];
+                        checkedByAmulet = state.checkedByAmulet || [];
+                        quest3Size = state.quest3Size;
+                        amulets = state.amulets || [];
+                        questCards = state.questCards || [];
+                        magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
+                        selectedRoles = state.selectedRoles || [];
+                        currentDistIndex = state.currentDistIndex;
+                        
+                        isGameInProgress = true;
+                        preventAccidentalNavigation();
+                        
+                        // Determine which screen to show
+                        if (currentDistIndex < players.length) {
+                            // Still in distribution phase
+                            showScreen('distribution-screen');
+                            updateDistScreen();
+                        } else if (players.length > 0 && !isGameEnded) {
+                            // Game is in progress - restore to game screen
+                            showScreen('game-screen');
+                            updateGameDisplay();
+                        }
+                        return true;
+                    } else {
+                        // User chose not to restore, clear saved state
+                        localStorage.removeItem('quest_game_state_farsi');
+                    }
+                }
+            } catch (e) {
+                console.error('Error restoring game state:', e);
+            }
+            return false;
+        }
+        
         // --- Initialization ---
         window.onload = function() {
             loadSavedPlayers();
             renderPlayerInputs();
+            // Try to restore game state first
+            if (!restoreGameState()) {
+                // No saved game, show normal setup
+            }
         };
 
         function loadSavedPlayers() {

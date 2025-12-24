@@ -930,6 +930,96 @@
         // Completely prevent accidental refresh/back navigation
         var isGameInProgress = false;
         
+        // Auto-save game state periodically
+        function saveGameState() {
+            try {
+                if (isGameInProgress && players.length > 0 && !isGameEnded) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentNodeId: currentNodeId,
+                        blockedCaptainId: blockedCaptainId,
+                        gunStashCount: gunStashCount,
+                        drawPile: drawPile,
+                        discardPile: discardPile,
+                        currentHand: currentHand,
+                        gameLog: gameLog,
+                        navPhaseStep: navPhaseStep,
+                        tempCards: tempCards,
+                        offDutyPlayers: offDutyPlayers,
+                        cultRitualDeck: cultRitualDeck,
+                        cultRitualDiscard: cultRitualDiscard,
+                        isFirstRound: isFirstRound,
+                        distIndex: distIndex,
+                        MAP_NODES: MAP_NODES,
+                        captainIndex: captainIndex
+                    };
+                    localStorage.setItem('kraken_game_state', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('kraken_game_state');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('A game in progress was found. Would you like to restore it?')) {
+                        // Restore all game state
+                        playerCount = state.playerCount;
+                        players = state.players;
+                        currentNodeId = state.currentNodeId;
+                        blockedCaptainId = state.blockedCaptainId;
+                        gunStashCount = state.gunStashCount;
+                        drawPile = state.drawPile;
+                        discardPile = state.discardPile;
+                        currentHand = state.currentHand;
+                        gameLog = state.gameLog;
+                        navPhaseStep = state.navPhaseStep;
+                        tempCards = state.tempCards;
+                        offDutyPlayers = state.offDutyPlayers;
+                        cultRitualDeck = state.cultRitualDeck;
+                        cultRitualDiscard = state.cultRitualDiscard;
+                        isFirstRound = state.isFirstRound;
+                        distIndex = state.distIndex;
+                        MAP_NODES = state.MAP_NODES;
+                        captainIndex = state.captainIndex;
+                        
+                        isGameInProgress = true;
+                        preventAccidentalNavigation();
+                        
+                        // Determine which screen to show
+                        if (distIndex < players.length) {
+                            // Still in distribution phase
+                            document.getElementById('setup-screen').classList.add('hidden');
+                            document.getElementById('distribution-screen').classList.remove('hidden');
+                            document.getElementById('dist-pass-view').classList.remove('hidden');
+                            document.getElementById('dist-reveal-view').classList.add('hidden');
+                            updateDistScreen();
+                        } else if (players.length > 0 && !isGameEnded) {
+                            // Game is in progress
+                            document.getElementById('setup-screen').classList.add('hidden');
+                            document.getElementById('distribution-screen').classList.add('hidden');
+                            document.getElementById('game-screen').classList.remove('hidden');
+                            updateMainDisplay();
+                        }
+                        return true;
+                    } else {
+                        localStorage.removeItem('kraken_game_state');
+                    }
+                }
+            } catch (e) {
+                console.error('Error restoring game state:', e);
+            }
+            return false;
+        }
+        
         function preventAccidentalNavigation() {
             if (!isGameInProgress) return;
             
