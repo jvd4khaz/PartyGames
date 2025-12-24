@@ -926,6 +926,154 @@
 
         // --- Distribution ---
         let distIndex = 0;
+        var isGameInProgress = false;
+        
+        // Auto-save game state periodically
+        function saveGameState() {
+            try {
+                if (isGameInProgress && players.length > 0 && !isGameEnded) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentNodeId: currentNodeId,
+                        blockedCaptainId: blockedCaptainId,
+                        gunStashCount: gunStashCount,
+                        drawPile: drawPile,
+                        discardPile: discardPile,
+                        currentHand: currentHand,
+                        gameLog: gameLog,
+                        navPhaseStep: navPhaseStep,
+                        tempCards: tempCards,
+                        offDutyPlayers: offDutyPlayers,
+                        cultRitualDeck: cultRitualDeck,
+                        cultRitualDiscard: cultRitualDiscard,
+                        isFirstRound: isFirstRound,
+                        distIndex: distIndex,
+                        MAP_NODES: MAP_NODES,
+                        captainIndex: captainIndex
+                    };
+                    localStorage.setItem('kraken_game_state_farsi', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('kraken_game_state_farsi');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
+                        // Restore all game state
+                        playerCount = state.playerCount;
+                        players = state.players;
+                        currentNodeId = state.currentNodeId;
+                        blockedCaptainId = state.blockedCaptainId;
+                        gunStashCount = state.gunStashCount;
+                        drawPile = state.drawPile;
+                        discardPile = state.discardPile;
+                        currentHand = state.currentHand;
+                        gameLog = state.gameLog;
+                        navPhaseStep = state.navPhaseStep;
+                        tempCards = state.tempCards;
+                        offDutyPlayers = state.offDutyPlayers;
+                        cultRitualDeck = state.cultRitualDeck;
+                        cultRitualDiscard = state.cultRitualDiscard;
+                        isFirstRound = state.isFirstRound;
+                        distIndex = state.distIndex;
+                        MAP_NODES = state.MAP_NODES;
+                        captainIndex = state.captainIndex;
+                        
+                        isGameInProgress = true;
+                        preventAccidentalNavigation();
+                        
+                        // Determine which screen to show
+                        if (distIndex < players.length) {
+                            // Still in distribution phase
+                            document.getElementById('setup-screen').classList.add('hidden');
+                            document.getElementById('distribution-screen').classList.remove('hidden');
+                            document.getElementById('dist-pass-view').classList.remove('hidden');
+                            document.getElementById('dist-reveal-view').classList.add('hidden');
+                            document.getElementById('dist-player-num').innerText = distIndex + 1;
+                            document.getElementById('dist-player-name').innerText = players[distIndex].name;
+                        } else if (players.length > 0 && !isGameEnded) {
+                            // Game is in progress
+                            document.getElementById('setup-screen').classList.add('hidden');
+                            document.getElementById('distribution-screen').classList.add('hidden');
+                            document.getElementById('game-screen').classList.remove('hidden');
+                            updateMainDisplay();
+                        }
+                        return true;
+                    } else {
+                        localStorage.removeItem('kraken_game_state_farsi');
+                    }
+                }
+            } catch (e) {
+                console.error('Error restoring game state:', e);
+            }
+            return false;
+        }
+        
+        // Completely prevent accidental refresh/back navigation
+        function preventAccidentalNavigation() {
+            if (!isGameInProgress) return;
+            
+            // Completely prevent back button - push state and immediately replace
+            history.pushState({page: 'game'}, '', location.href);
+            history.pushState({page: 'game'}, '', location.href);
+            
+            window.onpopstate = function(event) {
+                if (isGameInProgress) {
+                    // Immediately push state back to prevent navigation
+                    history.pushState({page: 'game'}, '', location.href);
+                    // Show warning
+                    alert('Back button is disabled during game. Use game controls to navigate.');
+                }
+            };
+            
+            // Prevent refresh with aggressive warning
+            window.addEventListener('beforeunload', function(e) {
+                if (isGameInProgress) {
+                    e.preventDefault();
+                    e.returnValue = 'Game is in progress! Reloading will lose all progress.';
+                    return e.returnValue;
+                }
+            });
+            
+            // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+            document.addEventListener('keydown', function(e) {
+                if (isGameInProgress) {
+                    // F5
+                    if (e.key === 'F5' || e.keyCode === 116) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                    // Ctrl+R or Ctrl+Shift+R
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                }
+            });
+            
+            // Disable right-click context menu (which might have refresh option)
+            if (isGameInProgress) {
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                }, false);
+            }
+        }
+        
+        // Initialize navigation prevention
+        preventAccidentalNavigation();
 
         function startRoleDistribution() {
             isGameInProgress = true;
