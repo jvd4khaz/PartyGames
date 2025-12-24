@@ -1058,7 +1058,11 @@
             
             html += "<strong>📜 Rules:</strong><br>";
             html += "<div style='font-family: monospace; font-size: 0.85rem; margin-top: 10px; line-height: 1.8;'>" + 
-                    addEmojisToRules(selectedScenario.rules).replace(/\n/g, '<br>') + "</div>";
+                    addEmojisToRules(selectedScenario.rules).replace(/\n/g, '<br>') + "</div><br>";
+            
+            html += "<strong>🏆 Win Conditions:</strong><br>";
+            html += "<div style='font-family: monospace; font-size: 0.85rem; margin-top: 10px; line-height: 1.8;'>" + 
+                    formatWinConditions(addEmojisToRules(selectedScenario.win)).replace(/\n/g, '<br>') + "</div>";
             
             document.getElementById('final-setup').innerHTML = html;
             showScreen('end-screen');
