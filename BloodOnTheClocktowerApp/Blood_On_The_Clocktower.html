@@ -919,6 +919,10 @@
             loadSavedPlayers();
             renderPlayerInputs();
             updateScriptSelection(); // Initialize script
+            // Try to restore game state first
+            if (!restoreGameState()) {
+                // No saved game, show normal setup
+            }
         };
         
         function updateScriptSelection() {

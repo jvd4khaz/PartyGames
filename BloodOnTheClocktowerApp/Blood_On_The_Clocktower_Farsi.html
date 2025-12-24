@@ -907,11 +907,162 @@
         var virginTriggered = false;
         var fortuneTellerRedHerrings = {}; // Track red herring player for each Fortune Teller {playerIndex: redHerringPlayerIndex}
 
+        // Completely prevent accidental refresh/back navigation
+        var isGameInProgress = false;
+        
+        function preventAccidentalNavigation() {
+            if (!isGameInProgress) return;
+            
+            // Completely prevent back button - push state and immediately replace
+            history.pushState({page: 'game'}, '', location.href);
+            history.pushState({page: 'game'}, '', location.href);
+            
+            window.onpopstate = function(event) {
+                if (isGameInProgress) {
+                    // Immediately push state back to prevent navigation
+                    history.pushState({page: 'game'}, '', location.href);
+                    // Show warning
+                    alert('Back button is disabled during game. Use game controls to navigate.');
+                }
+            };
+            
+            // Prevent refresh with aggressive warning
+            window.addEventListener('beforeunload', function(e) {
+                if (isGameInProgress) {
+                    e.preventDefault();
+                    e.returnValue = 'Game is in progress! Reloading will lose all progress.';
+                    return e.returnValue;
+                }
+            });
+            
+            // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+            document.addEventListener('keydown', function(e) {
+                if (isGameInProgress) {
+                    // F5
+                    if (e.key === 'F5' || e.keyCode === 116) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                    // Ctrl+R or Ctrl+Shift+R
+                    if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                        e.preventDefault();
+                        alert('Refresh is disabled during game. Use game controls to navigate.');
+                        return false;
+                    }
+                }
+            });
+            
+            // Disable right-click context menu (which might have refresh option)
+            if (isGameInProgress) {
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                }, false);
+            }
+        }
+        
+        // Initialize navigation prevention
+        preventAccidentalNavigation();
+        
+        // Auto-save game state periodically
+        function saveGameState() {
+            try {
+                if (isGameInProgress && players.length > 0) {
+                    var state = {
+                        playerCount: playerCount,
+                        players: players,
+                        currentDay: currentDay,
+                        isNightPhase: isNightPhase,
+                        currentNightOrder: currentNightOrder,
+                        nightIndex: nightIndex,
+                        executions: executions,
+                        lastExecutionDay: lastExecutionDay,
+                        lastExecutedPlayer: lastExecutedPlayer,
+                        gameLog: gameLog,
+                        grimoireVisible: grimoireVisible,
+                        playerInfo: playerInfo,
+                        poisonedPlayers: poisonedPlayers,
+                        protectedPlayers: protectedPlayers,
+                        markedForDeath: markedForDeath,
+                        butlerChoices: butlerChoices,
+                        slayerUsed: slayerUsed,
+                        virginTriggered: virginTriggered,
+                        fortuneTellerRedHerrings: fortuneTellerRedHerrings,
+                        currentDistIndex: currentDistIndex
+                    };
+                    localStorage.setItem('botc_game_state_farsi', JSON.stringify(state));
+                }
+            } catch (e) {
+                // Silently fail if localStorage not available
+            }
+        }
+        
+        // Save state every 3 seconds
+        setInterval(saveGameState, 3000);
+        
+        // Restore game state from localStorage
+        function restoreGameState() {
+            try {
+                var stored = localStorage.getItem('botc_game_state_farsi');
+                if (stored) {
+                    var state = JSON.parse(stored);
+                    if (confirm('بازی در حال انجام پیدا شد. آیا می‌خواهید آن را بازیابی کنید؟')) {
+                        // Restore all game state
+                        playerCount = state.playerCount;
+                        players = state.players;
+                        currentDay = state.currentDay;
+                        isNightPhase = state.isNightPhase;
+                        currentNightOrder = state.currentNightOrder || [];
+                        nightIndex = state.nightIndex;
+                        executions = state.executions;
+                        lastExecutionDay = state.lastExecutionDay;
+                        lastExecutedPlayer = state.lastExecutedPlayer;
+                        gameLog = state.gameLog || [];
+                        grimoireVisible = state.grimoireVisible;
+                        playerInfo = state.playerInfo || {};
+                        poisonedPlayers = state.poisonedPlayers || [];
+                        protectedPlayers = state.protectedPlayers || [];
+                        markedForDeath = state.markedForDeath;
+                        butlerChoices = state.butlerChoices || {};
+                        slayerUsed = state.slayerUsed;
+                        virginTriggered = state.virginTriggered;
+                        fortuneTellerRedHerrings = state.fortuneTellerRedHerrings || {};
+                        currentDistIndex = state.currentDistIndex;
+                        
+                        isGameInProgress = true;
+                        preventAccidentalNavigation();
+                        
+                        // Determine which screen to show
+                        if (currentDistIndex < players.length) {
+                            // Still in distribution phase
+                            showScreen('distribution-screen');
+                            updateDistributionScreen();
+                        } else if (players.length > 0) {
+                            // Game is in progress
+                            showScreen('game-screen');
+                            updateGameDisplay();
+                        }
+                        return true;
+                    } else {
+                        localStorage.removeItem('botc_game_state_farsi');
+                    }
+                }
+            } catch (e) {
+                console.error('Error restoring game state:', e);
+            }
+            return false;
+        }
+        
         // --- Initialization ---
         window.onload = function() {
             loadSavedPlayers();
             renderPlayerInputs();
             updateScriptSelection(); // Initialize script
+            // Try to restore game state first
+            if (!restoreGameState()) {
+                // No saved game, show normal setup
+            }
         };
 
         function loadSavedPlayers() {
