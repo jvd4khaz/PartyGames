@@ -74,6 +74,12 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', gamesCount: Object.keys(games).length });
 });
 
+// Serve manifest.json with correct MIME type
+app.get('/manifest.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+
 // Serve static files from root directory
 app.use(express.static(__dirname, {
     extensions: ['html', 'htm']
