@@ -710,12 +710,12 @@
                 var emoji = "🎭";
                 if (scenario.name.includes("Vengeful")) emoji = "🎯";
                 if (scenario.name.includes("Think Twice")) emoji = "🧠";
-                if (scenario.name.includes("Werewolf")) emoji = "🐺";
-                if (scenario.name.includes("Fool")) emoji = "🤡";
+                if (scenario.name.includes("Werewolf")) emoji = "🃏";
+                if (scenario.name.includes("Fool")) emoji = "🃏";
                 if (scenario.name.includes("Lovers")) emoji = "❤️";
                 if (scenario.name.includes("Sniper") || scenario.name.includes("Mexican")) emoji = "🎯";
                 if (scenario.name.includes("Sheriff")) emoji = "⭐";
-                var setupText = scenario.setup.replace(/Sn/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/Ta/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/GF/g, "<span style='font-size: 1.2rem;'>🎩</span>").replace(/W/g, "<span style='font-size: 1.2rem;'>🐺</span>").replace(/F/g, "<span style='font-size: 1.2rem;'>🤡</span>").replace(/M/g, "<span style='font-size: 1.2rem;'>🗡️</span>").replace(/T/g, "<span style='font-size: 1.2rem;'>🏛️</span>");
+                var setupText = scenario.setup.replace(/Sn/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/Ta/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/GF/g, "<span style='font-size: 1.2rem;'>🎩</span>").replace(/W/g, "<span style='font-size: 1.2rem;'>🃏</span>").replace(/F/g, "<span style='font-size: 1.2rem;'>🃏</span>").replace(/M/g, "<span style='font-size: 1.2rem;'>🗡️</span>").replace(/T/g, "<span style='font-size: 1.2rem;'>🏛️</span>");
                 btn.innerHTML = '<div class="scenario-name">' + emoji + ' ' + scenario.name + '</div><div class="scenario-setup">Setup: ' + setupText + '</div>';
                 listEl.appendChild(btn);
             });
@@ -798,8 +798,8 @@
             if (role.includes("Town")) return "🏛️";
             if (role.includes("Godfather")) return "🎩";
             if (role.includes("Mafia")) return "🗡️";
-            if (role.includes("Werewolf")) return "🐺";
-            if (role.includes("Fool")) return "🤡";
+            if (role.includes("Werewolf")) return "🃏";
+            if (role.includes("Fool")) return "🃏";
             if (role.includes("Sniper")) return "🎯";
             return "❓";
         }
@@ -842,8 +842,8 @@
             var emoji = "🎭";
             if (scenario.name.includes("Vengeful")) emoji = "🎯";
             if (scenario.name.includes("Think Twice")) emoji = "🧠";
-            if (scenario.name.includes("Werewolf")) emoji = "🐺";
-            if (scenario.name.includes("Fool")) emoji = "🤡";
+            if (scenario.name.includes("Werewolf")) emoji = "🃏";
+            if (scenario.name.includes("Fool")) emoji = "🃏";
             if (scenario.name.includes("Lovers")) emoji = "❤️";
             if (scenario.name.includes("Takavar") || scenario.name.includes("Mexican")) emoji = "🎯";
             if (scenario.name.includes("Sheriff")) emoji = "⭐";
@@ -854,8 +854,8 @@
             setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>🎩</span>");
-            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
-            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🃏</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🃏</span>");
             setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🗡️</span>");
             setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
             
@@ -970,11 +970,11 @@
                 descEl.innerHTML = "🎩 You are the <strong>Godfather</strong> (Mafia). Lead your team to victory.";
             } else if (p.role.includes("Werewolf")) {
                 titleEl.className = "role-title role-special";
-                descEl.innerHTML = "🐺 You are a <strong>Werewolf</strong>. You have your own win condition.";
+                descEl.innerHTML = "🃏 You are a <strong>Werewolf</strong>. You have your own win condition.";
                 mafiaBox.classList.add('hidden');
             } else if (p.role.includes("Fool")) {
                 titleEl.className = "role-title role-special";
-                descEl.innerHTML = "🤡 You are the <strong>Fool</strong>. You have your own win condition.";
+                descEl.innerHTML = "🃏 You are the <strong>Fool</strong>. You have your own win condition.";
                 mafiaBox.classList.add('hidden');
             } else if (p.role.includes("Sniper")) {
                 titleEl.className = "role-title role-special";
@@ -1050,8 +1050,8 @@
             setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>🎩</span>");
-            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
-            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🃏</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🃏</span>");
             setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🗡️</span>");
             setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
             html += "<strong>👥 Setup:</strong> " + setupText + "<br><br>";
