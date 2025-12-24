@@ -1086,6 +1086,7 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
+            isGameInProgress = true;
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
             for (var i = 0; i < inputs.length; i++) {

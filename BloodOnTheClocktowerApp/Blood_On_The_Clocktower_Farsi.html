@@ -1148,6 +1148,7 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
+            isGameInProgress = true;
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
             for (var i = 0; i < inputs.length; i++) {
@@ -3060,6 +3061,8 @@
         }
 
         function endGame(winner, message) {
+            isGameInProgress = false;
+            localStorage.removeItem('botc_game_state_farsi');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = (winner === 'good' ? 'خوبی' : 'شریر') + ' برنده شد!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
