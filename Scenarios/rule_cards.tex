@@ -1,0 +1,349 @@
+\documentclass[10pt]{article}
+\usepackage[paperwidth=2.5in, paperheight=3.5in, margin=0.15in]{geometry}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\pagestyle{empty}
+
+\newcommand{\card}[2]{
+\begin{tikzpicture}[remember picture,overlay]
+\draw[line width=0.5pt] (current page.south west) rectangle (current page.north east);
+\end{tikzpicture}
+\begin{center}
+{\large\bfseries #1}\\[0.03in]
+\rule{2in}{0.4pt}\\[0.03in]
+\end{center}
+\footnotesize
+#2
+\newpage
+}
+
+\begin{document}
+
+\card{We Need A Fifth}{
+\textbf{Setup:} 2T, 2M (4 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ survives + 1-shot dayvig (compulsive)\\
+$\bullet$ D1: M $\otimes$ $\rightarrow$ dies + confirms 1T\\
+$\bullet$ Daystart, Nightless\\
+$\bullet$ 1v1 parity $\rightarrow$ $\times$\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead\\
+$\times$: all T dead or 1v1\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, D1=Day 1\\
+$\otimes$=voted, $\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 36\%, Mafia: 64\%}
+}
+
+\card{Vengeful 5P}{
+\textbf{Setup:} 3T, 1GF, 1M (5 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ $\dagger$ anyone\\
+\phantom{$\bullet$ D1: }(if $\dagger$ hits GF: no instant $\checkmark$)\\
+$\bullet$ M$\geq$T (parity) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, $\otimes$=voted\\
+$\dagger$=vengekill, $\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 40\%, Mafia: 60\%}
+}
+
+\card{Vengeful 4P}{
+\textbf{Setup:} 2T, 1GF, 1M (4 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ $\dagger$ anyone\\
+\phantom{$\bullet$ D1: }(if $\dagger$ hits GF: no instant $\checkmark$)\\
+$\bullet$ M$\geq$T (parity) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, $\otimes$=voted\\
+$\dagger$=vengekill, $\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 33\%, Mafia: 67\%}
+}
+
+\card{Think Twice 5P}{
+\textbf{Setup:} 3T, 1GF, 1M (5 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ T* (revealed, alive til end D2)\\
+$\bullet$ T* dies end D2 with D2 $\otimes$\\
+$\bullet$ M$\geq$T (parity) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, D2=Day 2, $\otimes$=voted\\
+T*=D1 T revealed (alive through D2)\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 46\%, Mafia: 54\%}
+}
+
+\card{Think Twice 6P}{
+\textbf{Setup:} 4T, 1GF, 1M (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+Same as Think Twice 5P:\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ T* (revealed, alive til end D2, vote=1.5 on D2)\\
+$\bullet$ T* dies end D2 with D2 $\otimes$\\
+$\bullet$ M$\geq$T (parity by votes) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity by vote weight\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, D2=Day 2, $\otimes$=voted\\
+T*=D1 T revealed (1.5 votes on D2)\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 47\%, Mafia: 53\%}
+}
+
+\card{Think Twice 4P}{
+\textbf{Setup:} 2T, 1GF, 1M (4 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ T* (revealed, alive til end D2, vote=1.5 on D2)\\
+$\bullet$ T* dies end D2 with D2 $\otimes$\\
+$\bullet$ M$\geq$T (parity by votes) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity by vote weight\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, D2=Day 2, $\otimes$=voted\\
+T*=D1 T revealed (1.5 votes on D2)\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 46\%, Mafia: 54\%}
+}
+
+\card{Think Twice 4P\\Potion Variant}{
+\textbf{Setup:} 2T, 1GF, 1M (4 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ GF $\otimes$ $\rightarrow$ $\checkmark$ instant\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ T* (\textbf{immortal}, cannot be $\otimes$, vote=1.5 from D2+)\\
+$\bullet$ T* persists entire game\\
+$\bullet$ M$\geq$T (parity by votes) $\rightarrow$ $\times$\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead or GF $\otimes$\\
+$\times$: parity by vote weight\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, GF=Godfather (mafia)\\
+D1=Day 1, D2=Day 2, $\otimes$=voted\\
+T*=immortal D1 T revealed (vote=1.5)\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 67\%, Mafia: 33\%}
+}
+
+\card{Vengeful Werewolf 5P}{
+\textbf{Setup:} 2T, 2M, 1W (5 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ D1: W $\otimes$ $\rightarrow$ dies, $\dagger$ anyone\\
+$\bullet$ D1: T $\otimes$ $\rightarrow$ dies, $\dagger$ anyone\\
+$\bullet$ M $\otimes$ $\rightarrow$ dies (NO $\dagger$)\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win (3p $\rightarrow$ Chaos handshake):}\\
+\textbf{W}: W $\dagger$ T, or W+M shake\\
+$\checkmark$: all M dead, or good handshake\\
+$\times$: parity, or T+M shake\\
+(W gets 0.5 when T+W in [T][W][M])\\[0.03in]
+
+\textbf{Legend:}\\
+W=Werewolf, T=Town, M=Mafia, D1=Day 1\\
+$\otimes$=voted, $\dagger$=vengekill\\
+$\checkmark$=T win, $\times$=M win, \textbf{W}=W win\\[0.03in]
+
+\vfill
+\tiny{Town: 33\%, Mafia: 37\%, Werewolf: 0.37 avg}
+}
+
+\card{Vengeful Fool 4P}{
+\textbf{Setup:} 1T, 2M, 1F (4 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ D1: T/F $\otimes$ $\rightarrow$ dies, $\dagger$ someone\\
+\phantom{$\bullet$ D1: }If $\dagger$ M: shooter survives, M dies\\
+\phantom{$\bullet$ D1: }If $\dagger$ non-M: only voted dies\\
+$\bullet$ M $\otimes$ $\rightarrow$ dies (NO $\dagger$)\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win (3p $\rightarrow$ Chaos handshake):}\\
+\textbf{F}: F dies, or F+M shake\\
+$\checkmark$: all M dead, or good handshake\\
+$\times$: M majority (>50\%), or T+M shake\\
+(F gets 0.5 when T+F in [T][F][M])\\[0.03in]
+
+\textbf{Legend:}\\
+F=Fool, T=Town, M=Mafia, D1=Day 1\\
+$\otimes$=voted, $\dagger$=vengekill\\
+$\checkmark$=T win, $\times$=M win, \textbf{F}=F win\\[0.03in]
+
+\vfill
+\tiny{Town: 84\%, Mafia: 8\%, Fool: 0.13 avg}
+}
+
+\card{Vengeful Werewolf 6P}{
+\textbf{Setup:} 3T, 2M, 1W (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ V-Day: W/T $\otimes$ $\rightarrow$ dies, $\dagger$ anyone\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win (3p $\rightarrow$ Chaos handshake):}\\
+\textbf{W}: W $\dagger$ T, or W+M shake\\
+$\checkmark$: all M dead, or good handshake\\
+$\times$: M majority (>50\%), or T+M shake\\
+(W gets 0.5 when T+W in [T][W][M])\\[0.03in]
+
+\textbf{Legend:}\\
+W=Werewolf, T=Town, M=Mafia\\
+V-Day=others=M+1, $\otimes$=voted, $\dagger$=vengekill\\
+$\checkmark$=T win, $\times$=M win, \textbf{W}=W win\\[0.03in]
+
+\vfill
+\tiny{Town: 57\%, Mafia: 10\%, Werewolf: 0.27 avg}
+}
+
+\card{Lovers Mafia 6P}{
+\textbf{Setup:} 4T, 2M (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ M $\otimes$ $\rightarrow$ dies\\
+$\bullet$ If M $\otimes$ $\rightarrow$ partner dies too\\
+$\bullet$ Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead\\
+$\times$: M control 50\% of town\\
+(If M $\otimes$ $\rightarrow$ instant $\checkmark$)\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia Lovers\\
+$\otimes$=voted\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Town: 31\%, Mafia: 69\%}
+}
+
+\card{Takavar 6P}{
+\textbf{Setup:} 3T, 2M, 1Ta (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ Anyone can $\dagger$ anyone (any time)\\
+$\bullet$ $\dagger$ M $\rightarrow$ M dies (success)\\
+$\bullet$ $\dagger$ Ta $\rightarrow$ shooter dies, Ta survives\\
+$\bullet$ $\dagger$ T $\rightarrow$ nothing (shot fails)\\
+$\bullet$ No voting, Nightless\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead\\
+$\times$: M$\geq$others (parity)\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia, Ta=Takavar\\
+$\dagger$=shoot attempt, $\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Balance TBD}
+}
+
+\card{Mexican 6P}{
+\textbf{Setup:} 4T (all Takavar), 2M (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ \textbf{Night:} All T can $\dagger$ anyone\\
+$\bullet$ $\dagger$ M $\rightarrow$ M dies (success)\\
+$\bullet$ $\dagger$ T $\rightarrow$ shooter dies, target survives\\
+$\bullet$ \textbf{Day:} Discussion + vote $\otimes$\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead\\
+$\times$: M$\geq$T (parity)\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town (Takavar), M=Mafia\\
+$\dagger$=night shoot, $\otimes$=voted\\
+$\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Balance TBD}
+}
+
+\card{Nightless Sheriff 6P}{
+\textbf{Setup:} 4T, 2M (6 players)\\[0.03in]
+
+\textbf{Rules:}\\
+$\bullet$ \textbf{Day:} Vote for Sheriff\\
+$\bullet$ Sheriff picks 2 for court\\
+$\bullet$ Sheriff $\dagger$ one of the 2\\
+$\bullet$ If dead = T on V-day $\rightarrow$ T gets $\dagger$\\
+$\bullet$ No night, no vote to kill\\[0.03in]
+
+\textbf{Win:}\\
+$\checkmark$: all M dead\\
+$\times$: M$\geq$T (parity)\\[0.03in]
+
+\textbf{Legend:}\\
+T=Town, M=Mafia\\
+$\dagger$=shoot, $\checkmark$=T win, $\times$=M win\\[0.03in]
+
+\vfill
+\tiny{Balance TBD}
+}
+
+\end{document}
+

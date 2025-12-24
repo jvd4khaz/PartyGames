@@ -956,13 +956,9 @@
                         isFirstRound: isFirstRound,
                         distIndex: distIndex,
                         MAP_NODES: MAP_NODES,
-                        captainIndex: captainIndex,
-                        isGameEnded: isGameEnded
+                        captainIndex: captainIndex
                     };
                     localStorage.setItem('kraken_game_state', JSON.stringify(state));
-                } else if (isGameEnded) {
-                    // Game ended - clear saved state
-                    localStorage.removeItem('kraken_game_state');
                 }
             } catch (e) {
                 // Silently fail if localStorage not available
@@ -978,9 +974,7 @@
                 var stored = localStorage.getItem('kraken_game_state');
                 if (stored) {
                     var state = JSON.parse(stored);
-                    // Only prompt if game is actually in progress (has players and not ended)
-                    if (state.players && state.players.length > 0 && !state.isGameEnded) {
-                        if (confirm('A game in progress was found. Would you like to restore it?')) {
+                    if (confirm('A game in progress was found. Would you like to restore it?')) {
                         // Restore all game state
                         playerCount = state.playerCount;
                         players = state.players;
@@ -1020,9 +1014,8 @@
                             updateMainDisplay();
                         }
                         return true;
-                        }
-                        // User chose not to restore - keep the state saved for next time
-                        // Don't remove it, so they can restore later if they want
+                    } else {
+                        localStorage.removeItem('kraken_game_state');
                     }
                 }
             } catch (e) {
@@ -2136,8 +2129,6 @@
         function endGame(type, label) {
              isGameEnded = true;
              isGameInProgress = false;
-             // Clear saved state when game ends
-             localStorage.removeItem('kraken_game_state');
              var msg = "";
              var color = "";
              
