@@ -1376,6 +1376,7 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
+            isGameInProgress = true;
             // If no roles selected, use recommended
             if (selectedRoles.length === 0) {
                 useRecommendedRoles();
@@ -2626,6 +2627,7 @@
 
         function endGame(winner, message) {
             isGameEnded = true;
+            isGameInProgress = false;
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = (winner === 'good' ? 'خوبی' : 'بدی') + ' برنده شد!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
