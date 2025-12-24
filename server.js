@@ -74,9 +74,12 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', gamesCount: Object.keys(games).length });
 });
 
-// Serve manifest.json with correct MIME type
+// Serve manifest.json with correct MIME type and cache control
 app.get('/manifest.json', (req, res) => {
     res.setHeader('Content-Type', 'application/manifest+json');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(__dirname, 'manifest.json'));
 });
 
