@@ -873,7 +873,7 @@
         function formatWinConditions(winText) {
             return winText
                 .replace(/✓/g, '<span class="checkmark">🏛️</span>')
-                .replace(/×/g, '<span class="cross">🎩</span>')
+                .replace(/×/g, '<span class="cross">🗡️</span>')
                 .replace(/([A-Z]):/g, '<span class="special-win">$1</span>:');
         }
 
@@ -960,7 +960,7 @@
             // Set color based on role type
             if (p.role.includes("Mafia") || p.role === "Mafia") {
                 titleEl.className = "role-title role-mafia";
-                descEl.innerHTML = "🎩 You are <strong>Mafia</strong>. Work with your team to eliminate Town.";
+                descEl.innerHTML = "🗡️ You are <strong>Mafia</strong>. Work with your team to eliminate Town.";
             } else if (p.role.includes("Town") || p.role === "Town") {
                 titleEl.className = "role-title role-town";
                 descEl.innerHTML = "🏛️ You are <strong>Town</strong>. Find and eliminate the Mafia.";
@@ -1049,10 +1049,10 @@
             var setupText = selectedScenario.setup;
             setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
             setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
-            setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>💼</span>");
+            setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>🎩</span>");
             setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
             setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
-            setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🎩</span>");
+            setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🗡️</span>");
             setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
             html += "<strong>👥 Setup:</strong> " + setupText + "<br><br>";
             
