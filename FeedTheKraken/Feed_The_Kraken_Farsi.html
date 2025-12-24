@@ -950,9 +950,13 @@
                         isFirstRound: isFirstRound,
                         distIndex: distIndex,
                         MAP_NODES: MAP_NODES,
-                        captainIndex: captainIndex
+                        captainIndex: captainIndex,
+                        isGameEnded: isGameEnded
                     };
                     localStorage.setItem('kraken_game_state_farsi', JSON.stringify(state));
+                } else if (isGameEnded) {
+                    // Game ended - clear saved state
+                    localStorage.removeItem('kraken_game_state_farsi');
                 }
             } catch (e) {
                 // Silently fail if localStorage not available
@@ -2125,6 +2129,8 @@
         function endGame(type, label) {
              isGameEnded = true;
              isGameInProgress = false;
+             // Clear saved state when game ends
+             localStorage.removeItem('kraken_game_state_farsi');
              var msg = "";
              var color = "";
              
