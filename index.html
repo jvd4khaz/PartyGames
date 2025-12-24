@@ -7,8 +7,20 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Role Apps">
-    <link rel="manifest" href="./manifest.json" id="manifest-link">
+    <link rel="manifest" href="/manifest.json" id="manifest-link">
     <title>Role Generator Apps</title>
+    <script>
+        // Fix manifest URL immediately (before browser reads it)
+        (function() {
+            if (window.location.origin) {
+                const manifestLink = document.createElement('link');
+                manifestLink.rel = 'manifest';
+                manifestLink.href = window.location.origin + '/manifest.json';
+                manifestLink.id = 'manifest-link';
+                document.head.appendChild(manifestLink);
+            }
+        })();
+    </script>
     <style>
         * {
             margin: 0;
