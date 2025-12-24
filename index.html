@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Role Apps">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json" id="manifest-link">
     <title>Role Generator Apps</title>
     <style>
         * {
@@ -139,6 +139,167 @@
             
             <a href="BangTheDiceGameApp/Bang_The_Dice_Game.html" class="app-card">
                 <span class="app-icon">🎲</span>
+                <h2>Bang! The Dice Game</h2>
+                <p>Role distribution for Bang! The Dice Game.</p>
+            </a>
+            
+            <a href="BloodOnTheClocktowerApp/Blood_On_The_Clocktower.html" class="app-card">
+                <span class="app-icon">🕰️</span>
+                <h2>Blood on the Clocktower</h2>
+                <p>Role distribution and cheat sheets for Blood on the Clocktower.</p>
+            </a>
+            
+            <a href="BloodOnTheClocktowerApp/Blood_On_The_Clocktower_Farsi.html" class="app-card">
+                <span class="app-icon">🕰️</span>
+                <h2>خون بر برج ساعت</h2>
+                <p>توزیع نقش و برگه تقلب برای بازی خون بر برج ساعت.</p>
+            </a>
+            
+            <a href="OneNightWerewolfApp/One_Night_Ultimate_Werewolf.html" class="app-card">
+                <span class="app-icon">🐺</span>
+                <h2>One Night Ultimate Werewolf</h2>
+                <p>Role distributor for One Night Ultimate Werewolf.</p>
+            </a>
+            
+            <a href="QuestApp/Quest.html" class="app-card">
+                <span class="app-icon">⚔️</span>
+                <h2>Quest</h2>
+                <p>Role distribution for Quest game.</p>
+            </a>
+            
+            <a href="QuestApp/Quest_Farsi.html" class="app-card">
+                <span class="app-icon">⚔️</span>
+                <h2>نبرد فریدون</h2>
+                <p>توزیع نقش برای بازی نبرد فریدون.</p>
+            </a>
+            
+            <a href="SecretHitlerApp/Secret_Hitler.html" class="app-card">
+                <span class="app-icon">🎩</span>
+                <h2>Secret Hitler</h2>
+                <p>Role distribution for Secret Hitler.</p>
+            </a>
+            
+            <a href="FeedTheKraken/Feed_The_Kraken.html" class="app-card">
+                <span class="app-icon">🐙</span>
+                <h2>Feed the Kraken</h2>
+                <p>Role distribution for Feed the Kraken.</p>
+            </a>
+            
+            <a href="FeedTheKraken/Feed_The_Kraken_Farsi.html" class="app-card">
+                <span class="app-icon">🐙</span>
+                <h2>خوراک دادن به کراکن</h2>
+                <p>توزیع نقش برای بازی خوراک دادن به کراکن.</p>
+            </a>
+            
+            <a href="ContagionInThePalace/Contagion_Palace.html" class="app-card">
+                <span class="app-icon">🐉</span>
+                <h2>Contagion in the Palace</h2>
+                <p>Role distribution for Contagion in the Palace game.</p>
+            </a>
+            
+            <a href="RussianRouletteApp/Russian_Roulette.html" class="app-card">
+                <span class="app-icon">🔫</span>
+                <h2>Russian Roulette</h2>
+                <p>Russian Roulette game app.</p>
+            </a>
+            
+            <a href="DethyApp/Mystery_of_4_Detectives.html" class="app-card">
+                <span class="app-icon">🔍</span>
+                <h2>معمای ۴ کارآگاه</h2>
+                <p>توزیع نقش برای بازی معمای ۴ کارآگاه.</p>
+            </a>
+            
+            <a href="InsideJobApp/Hokm_Nofoozi.html" class="app-card">
+                <span class="app-icon">🕵️</span>
+                <h2>حکم نفوذی</h2>
+                <p>توزیع نقش برای بازی حکم نفوذی (Inside Job).</p>
+            </a>
+        </div>
+    </div>
+    
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Enter Fullscreen">
+        <span>⛶</span> Fullscreen
+    </button>
+    
+    <script>
+        // Fullscreen functionality
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                // Try to enter fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('Error attempting to enable fullscreen:', err);
+                    });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                }
+            }
+        }
+        
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        
+        // Update button text based on fullscreen state
+        function updateFullscreenButton() {
+            if (document.fullscreenElement || document.webkitFullscreenElement || 
+                document.msFullscreenElement || document.mozFullScreenElement) {
+                fullscreenBtn.innerHTML = '<span>⛶</span> Exit Fullscreen';
+            } else {
+                fullscreenBtn.innerHTML = '<span>⛶</span> Fullscreen';
+            }
+        }
+        
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+        
+        // Auto-request fullscreen on mobile after user interaction
+        let fullscreenRequested = false;
+        function requestFullscreenOnInteraction() {
+            if (fullscreenRequested) return;
+            fullscreenRequested = true;
+            
+            // Only auto-request on mobile devices
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                // Wait a bit for page to load, then try fullscreen
+                setTimeout(() => {
+                    if (!document.fullscreenElement) {
+                        toggleFullscreen();
+                    }
+                }, 500);
+            }
+        }
+        
+        // Request fullscreen on first user interaction
+        document.addEventListener('click', requestFullscreenOnInteraction, { once: true });
+        document.addEventListener('touchstart', requestFullscreenOnInteraction, { once: true });
+        
+        // Hide fullscreen button if already in standalone mode (PWA)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            fullscreenBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
+
                 <h2>Bang! The Dice Game</h2>
                 <p>Role distribution for Bang! The Dice Game.</p>
             </a>
