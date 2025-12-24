@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Micro Nightless Mafia</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a5568;
+            --accent-color: #6366f1;
+            --town-color: #10b981;
+            --mafia-color: #ef4444;
+            --special-color: #f59e0b;
+            --border-radius: 20px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.1);
+            --shadow-hover: 0 15px 50px rgba(99, 102, 241, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 32px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 100px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        h1 { 
+            font-size: 2.2rem; 
+            margin: 0 0 0.5rem 0; 
+            font-weight: 900; 
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        h2 { 
+            font-size: 1.3rem; 
+            margin: 10px 0; 
+            color: var(--text-secondary); 
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+            margin: 15px 0 10px 0;
+            color: var(--accent-color);
+        }
+
+        p { 
+            font-size: 1rem; 
+            color: var(--text-secondary); 
+            margin-bottom: 1rem; 
+            line-height: 1.6; 
+        }
+
+        .setup-info {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 10px 0;
+            width: 100%;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .scenario-list {
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .scenario-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid var(--accent-color);
+            color: var(--text-primary);
+            padding: 18px;
+            margin: 10px 0;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .scenario-btn:hover {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .scenario-btn:active {
+            transform: scale(0.98);
+        }
+
+        .scenario-name {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .scenario-setup {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .player-count-btn {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+            margin: 8px;
+            width: 140px;
+        }
+
+        .player-count-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .player-count-btn:active { 
+            transform: scale(0.95); 
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        button.action-btn {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        button.action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        button.action-btn:active { 
+            transform: scale(0.95); 
+        }
+
+        .hidden { 
+            display: none !important; 
+        }
+
+        .role-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 24px;
+            border-radius: 20px;
+            width: 100%;
+            margin: 20px 0;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .role-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+
+        .role-town {
+            color: var(--town-color);
+        }
+
+        .role-mafia {
+            color: var(--mafia-color);
+        }
+
+        .role-special {
+            color: var(--special-color);
+        }
+
+        .rules-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .rules-section h4 {
+            margin: 0 0 10px 0;
+            color: var(--accent-color);
+            font-size: 1rem;
+        }
+
+        .rebus-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+
+        .emoji-large {
+            font-size: 3rem;
+            margin: 10px;
+        }
+
+        .role-icon {
+            font-size: 2.5rem;
+            margin-right: 12px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .legend {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .win-conditions {
+            margin-top: 15px;
+        }
+
+        .win-conditions .checkmark {
+            color: var(--town-color);
+        }
+
+        .win-conditions .cross {
+            color: var(--mafia-color);
+        }
+
+        .win-conditions .special-win {
+            color: var(--special-color);
+        }
+
+        .mafia-team-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid var(--mafia-color);
+            color: #dc2626;
+            padding: 18px;
+            border-radius: 16px;
+            margin-top: 20px;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .mafia-team-box h4 {
+            margin: 0 0 10px 0;
+            color: var(--mafia-color);
+            font-size: 1.1rem;
+        }
+
+        .teammate-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(244, 67, 54, 0.2);
+            font-size: 1.1rem;
+        }
+
+        .teammate-item:last-child {
+            border-bottom: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .player-input {
+            width: 100%;
+            padding: 14px;
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .player-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .saved-list-container {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .saved-list-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .player-chip {
+            display: inline-block;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border: 2px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin: 4px;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .player-chip:hover {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .player-chip:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Player Count Selection Screen -->
+    <div id="player-count-screen" class="container">
+        <div class="emoji-large">🎭</div>
+        <h1>Micro Nightless Mafia</h1>
+        <p>Select number of players</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 20px 0;">
+            <button class="player-count-btn" onclick="selectPlayerCount(4)">👥 4 Players</button>
+            <button class="player-count-btn" onclick="selectPlayerCount(5)">👥 5 Players</button>
+            <button class="player-count-btn" onclick="selectPlayerCount(6)">👥 6 Players</button>
+        </div>
+        
+        <div id="player-inputs-container" style="width: 100%; margin-top: 20px; display: none;"></div>
+        
+        <!-- Saved Players List -->
+        <div class="saved-list-container" id="saved-list-container" style="display: none;">
+            <div class="saved-list-label">Saved Names (tap to fill):</div>
+            <div id="saved-list" style="text-align: center;"></div>
+        </div>
+        
+        <button id="proceed-btn" class="action-btn" style="margin-top: 20px; display: none;" onclick="proceedToScenarios()">Continue to Scenarios</button>
+    </div>
+
+    <!-- 2. Scenario Selection Screen -->
+    <div id="scenario-screen" class="container hidden">
+        <div class="emoji-large">📋</div>
+        <h1>Select Scenario</h1>
+        <p id="player-count-display">For 4 players</p>
+        <div id="scenario-list" class="scenario-list"></div>
+        <button class="action-btn" style="margin-top: 20px; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);" onclick="goBack()">⬅️ Back</button>
+    </div>
+
+    <!-- 3. Setup Info Screen -->
+    <div id="setup-screen" class="container hidden">
+        <div class="emoji-large" id="scenario-emoji">🎭</div>
+        <h1 id="scenario-title">Scenario Name</h1>
+        <div class="setup-info" id="setup-details"></div>
+        <div class="rules-section">
+            <h4>📜 Rules (Rebus Style):</h4>
+            <div class="rebus-text" id="rules-text"></div>
+        </div>
+        <div class="rules-section win-conditions">
+            <h4>🏆 Win Conditions:</h4>
+            <div class="rebus-text" id="win-text"></div>
+        </div>
+        <div class="legend" id="legend-text"></div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div id="bottom-bar" class="bottom-bar">
+        <button class="action-btn" id="main-action-btn" onclick="startDistribution()">🎲 Start Distribution</button>
+    </div>
+
+    <!-- 4. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 20px;">
+            Player <span id="player-num-pass">1</span> of <span id="total-players">4</span>
+        </div>
+        <div style="font-size: 5rem; margin: 30px;">📱</div>
+        <h2>Pass to <span id="player-name-pass" style="color: var(--accent-color); font-size: 1.5rem;">Player 1</span></h2>
+        <p>Please hand the device to this player.</p>
+        <button class="action-btn" style="margin-top: 20px;" onclick="revealRole()">Reveal Role</button>
+    </div>
+
+    <!-- 5. Reveal Screen -->
+    <div id="reveal-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: #4a5568;">
+            <span id="player-name-reveal">Player 1</span>
+        </div>
+        
+        <div class="role-card">
+            <div id="role-title" class="role-title">...</div>
+            <div id="role-desc" style="color: #374151; margin-bottom: 15px;">...</div>
+            
+            <div id="mafia-team-box" class="mafia-team-box hidden">
+                <h4>🎩 Your Mafia Team:</h4>
+                <div id="teammates-list"></div>
+            </div>
+        </div>
+
+        <p style="font-size: 0.9rem; color: #6b7280; margin-top: 20px;">Memorize your role and hide it.</p>
+        <button id="next-btn" class="action-btn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);" onclick="nextPlayer()">Hide & Next Player</button>
+    </div>
+
+    <!-- 6. End Screen -->
+    <div id="end-screen" class="container hidden">
+        <div style="font-size: 5rem; margin-bottom: 20px;">✅</div>
+        <h1>Distribution Complete</h1>
+        <p>All roles have been assigned.</p>
+        
+        <div class="setup-info" style="text-align: center;">
+            <h3 style="margin-top: 0; color: var(--accent-color);">Game Setup</h3>
+            <div id="final-setup" style="text-align: left; font-size: 0.9rem; line-height: 1.8;"></div>
+        </div>
+
+        <button class="action-btn" style="margin-top: 20px; background-color: var(--accent-color);" onclick="restartGame()">🔄 New Game</button>
+        <button class="action-btn" style="margin-top: 10px; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);" onclick="newSetup()">📋 Change Scenario</button>
+    </div>
+
+    <script>
+        // Scenario data parsed from LaTeX
+        const scenarios = [
+            {
+                name: "We Need A Fifth",
+                players: 4,
+                setup: "2T, 2M",
+                roles: [
+                    {type: "Town", count: 2},
+                    {type: "Mafia", count: 2}
+                ],
+                rules: "• D1: T ⊗ → survives + 1-shot dayvig (compulsive)\n• D1: M ⊗ → dies + confirms 1T\n• Daystart, Nightless\n• 1v1 parity → ×",
+                win: "✓: all M dead\n×: all T dead or 1v1",
+                legend: "T=Town, M=Mafia, D1=Day 1\n⊗=voted, ✓=T win, ×=M win"
+            },
+            {
+                name: "Vengeful 4P",
+                players: 4,
+                setup: "2T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 2},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "• GF ⊗ → ✓ instant\n• D1: T ⊗ → † anyone\n  (if † hits GF: no instant ✓)\n• M≥T (parity) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, ⊗=voted\n†=vengekill, ✓=T win, ×=M win"
+            },
+            {
+                name: "Think Twice 4P",
+                players: 4,
+                setup: "2T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 2},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "• GF ⊗ → ✓ instant\n• D1: T ⊗ → T* (revealed, alive til end D2, vote=1.5 on D2)\n• T* dies end D2 with D2 ⊗\n• M≥T (parity by votes) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity by vote weight",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=D1 T revealed (1.5 votes on D2)\n✓=T win, ×=M win"
+            },
+            {
+                name: "Think Twice 4P Potion Variant",
+                players: 4,
+                setup: "2T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 2},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "• GF ⊗ → ✓ instant\n• D1: T ⊗ → T* (immortal, cannot be ⊗, vote=1.5 from D2+)\n• T* persists entire game\n• M≥T (parity by votes) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity by vote weight",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=immortal D1 T revealed (vote=1.5)\n✓=T win, ×=M win"
+            },
+            {
+                name: "Vengeful Fool 4P",
+                players: 4,
+                setup: "1T, 2M, 1F",
+                roles: [
+                    {type: "Town", count: 1},
+                    {type: "Mafia", count: 2},
+                    {type: "Fool", count: 1}
+                ],
+                rules: "• D1: T/F ⊗ → † someone\n  If † M: shooter survives, M dies\n  If † non-M: only voted dies\n• M ⊗ → dies (NO †)\n• Nightless",
+                win: "F: F dies, or F+M shake\n✓: handshake Fool or loop in handshakes\n×: M majority (>50%), or T+M shake\n(F gets 0.5 when T+F in [T][F][M])",
+                legend: "F=Fool, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, F=F win"
+            },
+            {
+                name: "Vengeful 5P",
+                players: 5,
+                setup: "3T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 3},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "• GF ⊗ → ✓ instant\n• D1: T ⊗ → † anyone\n  (if † hits GF: no instant ✓)\n• M≥T (parity) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, ⊗=voted\n†=vengekill, ✓=T win, ×=M win"
+            },
+            {
+                name: "Think Twice 5P",
+                players: 5,
+                setup: "3T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 3},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "• GF ⊗ → ✓ instant\n• D1: T ⊗ → T* (revealed, alive til end D2)\n• T* dies end D2 with D2 ⊗\n• M≥T (parity) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=D1 T revealed (alive through D2)\n✓=T win, ×=M win"
+            },
+            {
+                name: "Vengeful Werewolf 5P",
+                players: 5,
+                setup: "2T, 2M, 1W",
+                roles: [
+                    {type: "Town", count: 2},
+                    {type: "Mafia", count: 2},
+                    {type: "Werewolf", count: 1}
+                ],
+                rules: "• D1: W ⊗ → dies, † anyone\n• D1: T ⊗ → dies, † anyone\n• M ⊗ → dies (NO †)\n• Nightless",
+                win: "W: W † T, or W+M shake\n✓: all M dead, or good handshake\n×: parity, or T+M shake\n(W gets 0.5 when T+W in [T][W][M])",
+                legend: "W=Werewolf, T=Town, M=Mafia, D1=Day 1\n⊗=voted, †=vengekill\n✓=T win, ×=M win, W=W win"
+            },
+            {
+                name: "Think Twice 6P",
+                players: 6,
+                setup: "4T, 1GF, 1M",
+                roles: [
+                    {type: "Town", count: 4},
+                    {type: "Godfather", count: 1},
+                    {type: "Mafia", count: 1}
+                ],
+                rules: "Same as Think Twice 5P:\n• GF ⊗ → ✓ instant\n• D1: T ⊗ → T* (revealed, alive til end D2, vote=1.5 on D2)\n• T* dies end D2 with D2 ⊗\n• M≥T (parity by votes) → ×\n• Nightless",
+                win: "✓: all M dead or GF ⊗\n×: parity by vote weight",
+                legend: "T=Town, M=Mafia, GF=Godfather (mafia)\nD1=Day 1, D2=Day 2, ⊗=voted\nT*=D1 T revealed (1.5 votes on D2)\n✓=T win, ×=M win"
+            },
+            {
+                name: "Vengeful Werewolf 6P",
+                players: 6,
+                setup: "3T, 2M, 1W",
+                roles: [
+                    {type: "Town", count: 3},
+                    {type: "Mafia", count: 2},
+                    {type: "Werewolf", count: 1}
+                ],
+                rules: "• V-Day: W/T ⊗ → dies, † anyone\n• Nightless",
+                win: "W: W † T, or W+M shake\n✓: all M dead, or good handshake\n×: M majority (>50%), or T+M shake\n(W gets 0.5 when T+W in [T][W][M])",
+                legend: "W=Werewolf, T=Town, M=Mafia\nV-Day=others=M+1, ⊗=voted, †=vengekill\n✓=T win, ×=M win, W=W win"
+            },
+            {
+                name: "Lovers Mafia 6P",
+                players: 6,
+                setup: "4T, 2M",
+                roles: [
+                    {type: "Town", count: 4},
+                    {type: "Mafia Lovers", count: 2}
+                ],
+                rules: "• M ⊗ → dies\n• If M ⊗ → partner dies too\n• Nightless",
+                win: "✓: all M dead\n×: M control 50% of town\n(If M ⊗ → instant ✓)",
+                legend: "T=Town, M=Mafia Lovers\n⊗=voted\n✓=T win, ×=M win"
+            },
+            {
+                name: "Sniper 6P",
+                players: 6,
+                setup: "3T, 2M, 1Sn",
+                roles: [
+                    {type: "Town", count: 3},
+                    {type: "Mafia", count: 2},
+                    {type: "Sniper", count: 1}
+                ],
+                rules: "• Anyone can † anyone (any time)\n• † M → M dies (success)\n• † Sn → shooter dies, Sn survives\n• † T → nothing (shot fails)\n• No voting, Nightless",
+                win: "✓: all M dead\n×: M≥others (parity)",
+                legend: "T=Town, M=Mafia, Sn=Sniper\n†=shoot attempt, ✓=T win, ×=M win"
+            },
+            {
+                name: "Mexican 6P",
+                players: 6,
+                setup: "4T (all Sniper), 2M",
+                roles: [
+                    {type: "Town (Sniper)", count: 4},
+                    {type: "Mafia", count: 2}
+                ],
+                rules: "• Night: All T can † anyone\n• † M → M dies (success)\n• † T → shooter dies, target survives\n• Day: Discussion + vote ⊗",
+                win: "✓: all M dead\n×: M≥T (parity)",
+                legend: "T=Town (Sniper), M=Mafia\n†=night shoot, ⊗=voted\n✓=T win, ×=M win"
+            },
+            {
+                name: "Nightless Sheriff 6P",
+                players: 6,
+                setup: "4T, 2M",
+                roles: [
+                    {type: "Town", count: 4},
+                    {type: "Mafia", count: 2}
+                ],
+                rules: "• Day: Vote for Sheriff\n• Sheriff picks 2 for court\n• Sheriff † one of the 2\n• If dead = T on V-day → T gets †\n• No night, no vote to kill",
+                win: "✓: all M dead\n×: M≥T (parity)",
+                legend: "T=Town, M=Mafia\n†=shoot, ✓=T win, ×=M win"
+            }
+        ];
+
+        // Game state
+        var selectedPlayerCount = 0;
+        var selectedScenario = null;
+        var players = [];
+        var currentPlayerIndex = 0;
+
+        function selectPlayerCount(count) {
+            selectedPlayerCount = count;
+            loadSavedPlayers();
+            renderPlayerInputs();
+            
+            // Show input fields and saved list
+            document.getElementById('player-inputs-container').style.display = 'block';
+            document.getElementById('saved-list-container').style.display = 'block';
+            
+            // Prepare scenario list but don't show it yet
+            var availableScenarios = scenarios.filter(s => s.players === count);
+            
+            document.getElementById('player-count-display').innerText = "For " + count + " players";
+            var listEl = document.getElementById('scenario-list');
+            listEl.innerHTML = "";
+            
+            availableScenarios.forEach(scenario => {
+                var btn = document.createElement('div');
+                btn.className = 'scenario-btn';
+                btn.onclick = () => selectScenario(scenario);
+                var emoji = "🎭";
+                if (scenario.name.includes("Vengeful")) emoji = "⚔️";
+                if (scenario.name.includes("Think Twice")) emoji = "🧠";
+                if (scenario.name.includes("Werewolf")) emoji = "🐺";
+                if (scenario.name.includes("Fool")) emoji = "🤡";
+                if (scenario.name.includes("Lovers")) emoji = "❤️";
+                if (scenario.name.includes("Sniper") || scenario.name.includes("Mexican")) emoji = "🎯";
+                if (scenario.name.includes("Sheriff")) emoji = "⭐";
+                var setupText = scenario.setup.replace(/Sn/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/Ta/g, "<span style='font-size: 1.2rem;'>🎯</span>").replace(/GF/g, "<span style='font-size: 1.2rem;'>💼</span>").replace(/W/g, "<span style='font-size: 1.2rem;'>🐺</span>").replace(/F/g, "<span style='font-size: 1.2rem;'>🤡</span>").replace(/M/g, "<span style='font-size: 1.2rem;'>🎩</span>").replace(/T/g, "<span style='font-size: 1.2rem;'>🏛️</span>");
+                btn.innerHTML = '<div class="scenario-name">' + emoji + ' ' + scenario.name + '</div><div class="scenario-setup">Setup: ' + setupText + '</div>';
+                listEl.appendChild(btn);
+            });
+        }
+
+        function proceedToScenarios() {
+            if (selectedPlayerCount === 0) {
+                alert("Please select number of players first");
+                return;
+            }
+            document.getElementById('player-count-screen').classList.add('hidden');
+            document.getElementById('scenario-screen').classList.remove('hidden');
+        }
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('scenario_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            var container = document.getElementById('saved-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                container.innerHTML = '<span style="color:#6b7280; font-size:0.8rem;">No saved names</span>';
+                return;
+            }
+
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() { fillInput(name); };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value.trim() === '') {
+                    inputs[i].value = name;
+                    return;
+                }
+            }
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            if (!container) return;
+            
+            var currentValues = [];
+            var inputs = container.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                currentValues.push(inputs[i].value);
+            }
+
+            container.innerHTML = '';
+            for (var i = 0; i < selectedPlayerCount; i++) {
+                var val = currentValues[i] || '';
+                var placeholder = "Player " + (i + 1);
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = placeholder;
+                input.value = val;
+                container.appendChild(input);
+            }
+            
+            container.style.display = 'block';
+            document.getElementById('saved-list-container').style.display = 'block';
+            document.getElementById('proceed-btn').style.display = 'block';
+        }
+
+        function getRoleEmoji(role) {
+            if (role.includes("Town")) return "🏛️";
+            if (role.includes("Mafia")) return "🎩";
+            if (role.includes("Godfather")) return "💼";
+            if (role.includes("Werewolf")) return "🐺";
+            if (role.includes("Fool")) return "🤡";
+            if (role.includes("Sniper")) return "🎯";
+            return "❓";
+        }
+
+        function addEmojisToRules(rules) {
+            return rules
+                // Replace role combinations first (before single letters)
+                .replace(/T\/F/g, "🏛️/🤡")
+                .replace(/W\/T/g, "🐺/🏛️")
+                .replace(/T\+M/g, "🏛️+🎩")
+                .replace(/W\+M/g, "🐺+🎩")
+                .replace(/T\+W/g, "🏛️+🐺")
+                .replace(/F\+M/g, "🤡+🎩")
+                .replace(/T\+F/g, "🏛️+🤡")
+                // Replace single role references
+                .replace(/Sn/g, "🎯")
+                .replace(/Ta/g, "🎯")
+                .replace(/GF/g, "💼")
+                .replace(/W/g, "🐺")
+                .replace(/F/g, "🤡")
+                .replace(/M/g, "🎩")
+                .replace(/T/g, "🏛️")
+                // Replace other symbols
+                .replace(/⊗/g, "✋")
+                .replace(/†/g, "⚔️")
+                .replace(/✓/g, "🏛️")
+                .replace(/×/g, "🎩")
+                .replace(/D1:/g, "📅 D1:")
+                .replace(/D2:/g, "📅 D2:")
+                .replace(/V-Day:/g, "⚡ V-Day:")
+                .replace(/Nightless/g, "🌙 Nightless")
+                .replace(/parity/g, "⚖️ parity")
+                .replace(/instant/g, "⚡ instant");
+        }
+
+        function selectScenario(scenario) {
+            selectedScenario = scenario;
+            
+            // Set scenario emoji
+            var emoji = "🎭";
+            if (scenario.name.includes("Vengeful")) emoji = "⚔️";
+            if (scenario.name.includes("Think Twice")) emoji = "🧠";
+            if (scenario.name.includes("Werewolf")) emoji = "🐺";
+            if (scenario.name.includes("Fool")) emoji = "🤡";
+            if (scenario.name.includes("Lovers")) emoji = "❤️";
+            if (scenario.name.includes("Takavar") || scenario.name.includes("Mexican")) emoji = "🎯";
+            if (scenario.name.includes("Sheriff")) emoji = "⭐";
+            document.getElementById('scenario-emoji').innerText = emoji;
+            
+            // Format setup with emojis only (no letters)
+            var setupText = scenario.setup;
+            setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
+            setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
+            setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>💼</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
+            setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🎩</span>");
+            setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
+            
+            document.getElementById('scenario-title').innerText = scenario.name;
+            document.getElementById('setup-details').innerHTML = "<strong>👥 Setup:</strong> " + setupText + " (" + scenario.players + " players)";
+            document.getElementById('rules-text').innerHTML = addEmojisToRules(scenario.rules);
+            document.getElementById('win-text').innerHTML = formatWinConditions(addEmojisToRules(scenario.win));
+            document.getElementById('legend-text').innerHTML = addEmojisToRules(scenario.legend);
+            
+            document.getElementById('scenario-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('bottom-bar').classList.remove('hidden');
+        }
+
+        function formatWinConditions(winText) {
+            return winText
+                .replace(/✓/g, '<span class="checkmark">🏛️</span>')
+                .replace(/×/g, '<span class="cross">🎩</span>')
+                .replace(/([A-Z]):/g, '<span class="special-win">$1</span>:');
+        }
+
+        function startDistribution() {
+            if (!selectedScenario) return;
+            
+            // Create role list
+            var roleList = [];
+            selectedScenario.roles.forEach(roleGroup => {
+                for (var i = 0; i < roleGroup.count; i++) {
+                    roleList.push(roleGroup.type);
+                }
+            });
+            
+            // Shuffle roles
+            shuffleArray(roleList);
+            
+            // Collect player names
+            var inputs = document.querySelectorAll('.player-input');
+            playerNames = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                playerNames.push(val);
+                
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            localStorage.setItem('scenario_players', JSON.stringify(savedPlayers));
+            
+            // Create players
+            players = [];
+            for (var i = 0; i < selectedScenario.players; i++) {
+                players.push({
+                    id: i,
+                    role: roleList[i],
+                    name: playerNames[i] || ("Player " + (i + 1))
+                });
+            }
+            
+            currentPlayerIndex = 0;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+            document.getElementById('total-players').innerText = selectedScenario.players;
+            showScreen('pass-screen');
+            updatePassScreen();
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function updatePassScreen() {
+            var pNum = currentPlayerIndex + 1;
+            var playerName = players[currentPlayerIndex].name;
+            document.getElementById('player-num-pass').innerText = pNum;
+            if (document.getElementById('player-name-pass')) {
+                document.getElementById('player-name-pass').innerText = playerName;
+            }
+        }
+
+        function revealRole() {
+            var p = players[currentPlayerIndex];
+            var pNum = currentPlayerIndex + 1;
+
+            document.getElementById('player-name-reveal').innerText = p.name;
+
+            var titleEl = document.getElementById('role-title');
+            var descEl = document.getElementById('role-desc');
+            var mafiaBox = document.getElementById('mafia-team-box');
+            var teammatesList = document.getElementById('teammates-list');
+
+            var roleEmoji = getRoleEmoji(p.role);
+            titleEl.innerHTML = '<span class="role-icon">' + roleEmoji + '</span>' + p.role;
+            
+            // Check if this player is mafia (Mafia or Godfather)
+            var isMafia = p.role.includes("Mafia") || p.role.includes("Godfather");
+            
+            // Set color based on role type
+            if (p.role.includes("Mafia") || p.role === "Mafia") {
+                titleEl.className = "role-title role-mafia";
+                descEl.innerHTML = "🎩 You are <strong>Mafia</strong>. Work with your team to eliminate Town.";
+            } else if (p.role.includes("Town") || p.role === "Town") {
+                titleEl.className = "role-title role-town";
+                descEl.innerHTML = "🏛️ You are <strong>Town</strong>. Find and eliminate the Mafia.";
+                mafiaBox.classList.add('hidden');
+            } else if (p.role.includes("Godfather")) {
+                titleEl.className = "role-title role-mafia";
+                descEl.innerHTML = "💼 You are the <strong>Godfather</strong> (Mafia). Lead your team to victory.";
+            } else if (p.role.includes("Werewolf")) {
+                titleEl.className = "role-title role-special";
+                descEl.innerHTML = "🐺 You are a <strong>Werewolf</strong>. You have your own win condition.";
+                mafiaBox.classList.add('hidden');
+            } else if (p.role.includes("Fool")) {
+                titleEl.className = "role-title role-special";
+                descEl.innerHTML = "🤡 You are the <strong>Fool</strong>. You have your own win condition.";
+                mafiaBox.classList.add('hidden');
+            } else if (p.role.includes("Sniper")) {
+                titleEl.className = "role-title role-special";
+                descEl.innerHTML = "🎯 You are a <strong>Sniper</strong>. You have special shooting abilities.";
+                mafiaBox.classList.add('hidden');
+            } else {
+                titleEl.className = "role-title role-special";
+                descEl.innerHTML = "❓ You have a <strong>special role</strong>. Check the rules carefully.";
+                mafiaBox.classList.add('hidden');
+            }
+
+            // Show mafia teammates if this player is mafia
+            if (isMafia) {
+                var teammates = [];
+                for (var i = 0; i < players.length; i++) {
+                    if (i !== currentPlayerIndex) {
+                        var otherRole = players[i].role;
+                        if (otherRole.includes("Mafia") || otherRole.includes("Godfather")) {
+                            var teammateEmoji = getRoleEmoji(otherRole);
+                            teammates.push({
+                                playerNum: i + 1,
+                                role: otherRole,
+                                emoji: teammateEmoji
+                            });
+                        }
+                    }
+                }
+                
+                if (teammates.length > 0) {
+                    var teammatesHtml = "";
+                    teammates.forEach(function(teammate) {
+                        var teammateName = players[teammate.playerNum - 1].name;
+                        teammatesHtml += '<div class="teammate-item">';
+                        teammatesHtml += '<span style="font-size: 1.5rem; margin-right: 10px;">' + teammate.emoji + '</span>';
+                        teammatesHtml += '<strong>' + teammateName + ':</strong> ' + teammate.role;
+                        teammatesHtml += '</div>';
+                    });
+                    teammatesList.innerHTML = teammatesHtml;
+                    mafiaBox.classList.remove('hidden');
+                } else {
+                    mafiaBox.classList.add('hidden');
+                }
+            }
+
+            // Update Next Button
+            var nextBtn = document.getElementById('next-btn');
+            if (currentPlayerIndex === selectedScenario.players - 1) {
+                nextBtn.innerText = "✅ Finish Distribution";
+                nextBtn.style.backgroundColor = "#4a9eff";
+            } else {
+                nextBtn.innerText = "👁️ Hide & Next Player";
+                nextBtn.style.background = "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)";
+            }
+
+            showScreen('reveal-screen');
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= selectedScenario.players) {
+                finishGame();
+            } else {
+                updatePassScreen();
+                showScreen('pass-screen');
+            }
+        }
+
+        function finishGame() {
+            var html = "<strong>🎭 Scenario:</strong> " + selectedScenario.name + "<br>";
+            
+            // Format setup with emojis only (no letters)
+            var setupText = selectedScenario.setup;
+            setupText = setupText.replace(/Sn/g, "<span style='font-size: 1.3rem;'>🎯</span>");
+            setupText = setupText.replace(/Ta/g, "<span style='font-size: 1.3rem;'>🎯</span>");
+            setupText = setupText.replace(/GF/g, "<span style='font-size: 1.3rem;'>💼</span>");
+            setupText = setupText.replace(/W/g, "<span style='font-size: 1.3rem;'>🐺</span>");
+            setupText = setupText.replace(/F/g, "<span style='font-size: 1.3rem;'>🤡</span>");
+            setupText = setupText.replace(/M/g, "<span style='font-size: 1.3rem;'>🎩</span>");
+            setupText = setupText.replace(/T/g, "<span style='font-size: 1.3rem;'>🏛️</span>");
+            html += "<strong>👥 Setup:</strong> " + setupText + "<br><br>";
+            
+            html += "<strong>📜 Rules:</strong><br>";
+            html += "<div style='font-family: monospace; font-size: 0.85rem; margin-top: 10px; line-height: 1.8;'>" + 
+                    addEmojisToRules(selectedScenario.rules).replace(/\n/g, '<br>') + "</div>";
+            
+            document.getElementById('final-setup').innerHTML = html;
+            showScreen('end-screen');
+        }
+
+        function restartGame() {
+            if (confirm("Start a new game with the same scenario?")) {
+                startDistribution();
+            }
+        }
+
+        function newSetup() {
+            document.getElementById('player-count-screen').classList.remove('hidden');
+            document.getElementById('scenario-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('pass-screen').classList.add('hidden');
+            document.getElementById('reveal-screen').classList.add('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+            selectedScenario = null;
+            players = [];
+        }
+
+        function goBack() {
+            document.getElementById('player-count-screen').classList.remove('hidden');
+            document.getElementById('scenario-screen').classList.add('hidden');
+        }
+
+        function showScreen(id) {
+            var screens = ['pass-screen', 'reveal-screen', 'end-screen', 'setup-screen', 'scenario-screen', 'player-count-screen'];
+            for (var i = 0; i < screens.length; i++) {
+                document.getElementById(screens[i]).classList.add('hidden');
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
