@@ -684,20 +684,37 @@
         var selectedScenario = null;
         var players = [];
         var currentPlayerIndex = 0;
+        var savedPlayers = [];
+        var playerNames = [];
 
         function selectPlayerCount(count) {
             selectedPlayerCount = count;
+            
+            // Show input fields and saved list first
+            var inputsContainer = document.getElementById('player-inputs-container');
+            var savedContainer = document.getElementById('saved-list-container');
+            var proceedBtn = document.getElementById('proceed-btn');
+            
+            if (inputsContainer) {
+                inputsContainer.style.display = 'block';
+            }
+            if (savedContainer) {
+                savedContainer.style.display = 'block';
+            }
+            if (proceedBtn) {
+                proceedBtn.style.display = 'block';
+            }
+            
             loadSavedPlayers();
             renderPlayerInputs();
-            
-            // Show input fields and saved list
-            document.getElementById('player-inputs-container').style.display = 'block';
-            document.getElementById('saved-list-container').style.display = 'block';
             
             // Prepare scenario list but don't show it yet
             var availableScenarios = scenarios.filter(s => s.players === count);
             
-            document.getElementById('player-count-display').innerText = "For " + count + " players";
+            var playerCountDisplay = document.getElementById('player-count-display');
+            if (playerCountDisplay) {
+                playerCountDisplay.innerText = "For " + count + " players";
+            }
             var listEl = document.getElementById('scenario-list');
             listEl.innerHTML = "";
             
@@ -767,7 +784,15 @@
 
         function renderPlayerInputs() {
             var container = document.getElementById('player-inputs-container');
-            if (!container) return;
+            if (!container) {
+                console.error('player-inputs-container not found');
+                return;
+            }
+            
+            if (!selectedPlayerCount || selectedPlayerCount === 0) {
+                console.error('selectedPlayerCount is not set');
+                return;
+            }
             
             var currentValues = [];
             var inputs = container.querySelectorAll('.player-input');
@@ -787,9 +812,24 @@
                 container.appendChild(input);
             }
             
+            // Force display
             container.style.display = 'block';
-            document.getElementById('saved-list-container').style.display = 'block';
-            document.getElementById('proceed-btn').style.display = 'block';
+            container.style.visibility = 'visible';
+            
+            var savedContainer = document.getElementById('saved-list-container');
+            if (savedContainer) {
+                savedContainer.style.display = 'block';
+            }
+            
+            var proceedBtn = document.getElementById('proceed-btn');
+            if (proceedBtn) {
+                proceedBtn.style.display = 'block';
+            }
+            
+            // Scroll to inputs
+            setTimeout(function() {
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
 
         function getRoleEmoji(role) {
