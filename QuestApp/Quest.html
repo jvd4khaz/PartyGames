@@ -1066,7 +1066,7 @@
                 var stored = localStorage.getItem('quest_game_state');
                 if (stored) {
                     var state = JSON.parse(stored);
-                    // Only prompt if there's actually a game in progress (not just saved state from a finished game)
+                    // Only prompt if game is actually in progress (has players and not ended)
                     if (state.players && state.players.length > 0 && !state.isGameEnded) {
                         if (confirm('A game in progress was found. Would you like to restore it?')) {
                             // Restore all game state
@@ -1086,7 +1086,6 @@
                             magicTokenTeamMemberIndex = state.magicTokenTeamMemberIndex;
                             selectedRoles = state.selectedRoles || [];
                             currentDistIndex = state.currentDistIndex;
-                            isGameEnded = state.isGameEnded || false;
                             
                             isGameInProgress = true;
                             preventAccidentalNavigation();
@@ -1105,11 +1104,8 @@
                             }
                             return true;
                         }
-                        // User chose not to restore - DON'T clear saved state, keep it for next time
-                        // Only clear if they explicitly start a new game
-                    } else {
-                        // Saved state is from a finished game, clear it
-                        localStorage.removeItem('quest_game_state');
+                        // User chose not to restore - keep the state saved for next time
+                        // Don't remove it, so they can restore later if they want
                     }
                 }
             } catch (e) {
@@ -2658,8 +2654,6 @@
         function endGame(winner, message) {
             isGameEnded = true;
             isGameInProgress = false;
-            // Clear saved state when game ends
-            localStorage.removeItem('quest_game_state');
             var titleEl = document.getElementById('end-game-title');
             titleEl.innerText = winner.toUpperCase() + ' WINS!';
             titleEl.style.color = winner === 'good' ? '#4CAF50' : '#F44336';
