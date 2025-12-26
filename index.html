@@ -7,15 +7,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Role Apps">
-    <link rel="manifest" href="/manifest.json" id="manifest-link">
     <title>Role Generator Apps</title>
     <script>
-        // Fix manifest URL to use current origin (prevents GitHub Pages 404)
+        // Set manifest URL immediately (before browser reads it) - Android fix
         (function() {
             if (typeof window !== 'undefined' && window.location && window.location.origin) {
-                const manifestLink = document.getElementById('manifest-link');
-                if (manifestLink) {
-                    manifestLink.href = window.location.origin + '/manifest.json';
+                const manifestLink = document.createElement('link');
+                manifestLink.rel = 'manifest';
+                manifestLink.href = window.location.origin + '/manifest.json';
+                manifestLink.id = 'manifest-link';
+                // Insert at the beginning of head to ensure it's read first
+                const firstChild = document.head.firstChild;
+                if (firstChild) {
+                    document.head.insertBefore(manifestLink, firstChild);
+                } else {
+                    document.head.appendChild(manifestLink);
                 }
             }
         })();

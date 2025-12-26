@@ -458,55 +458,56 @@
         var isGameInProgress = false;
         
         // Completely prevent accidental refresh/back navigation
-        function preventAccidentalNavigation() {
-            if (!isGameInProgress) return;
-            
-            // Completely prevent back button - push state and immediately replace
-            history.pushState({page: 'game'}, '', location.href);
-            history.pushState({page: 'game'}, '', location.href);
-            
-            window.onpopstate = function(event) {
-                if (isGameInProgress) {
-                    // Immediately push state back to prevent navigation
-                    history.pushState({page: 'game'}, '', location.href);
-                    // Show warning
-                    alert('Back button is disabled during game. Use game controls to navigate.');
-                }
-            };
-            
-            // Prevent refresh with aggressive warning
-            window.addEventListener('beforeunload', function(e) {
-                if (isGameInProgress) {
-                    e.preventDefault();
-                    e.returnValue = 'Game is in progress! Reloading will lose all progress.';
-                    return e.returnValue;
-                }
-            });
-            
-            // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
-            document.addEventListener('keydown', function(e) {
-                if (isGameInProgress) {
-                    // F5
-                    if (e.key === 'F5' || e.keyCode === 116) {
-                        e.preventDefault();
-                        alert('Refresh is disabled during game. Use game controls to navigate.');
-                        return false;
-                    }
-                    // Ctrl+R or Ctrl+Shift+R
-                    if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
-                        e.preventDefault();
-                        alert('Refresh is disabled during game. Use game controls to navigate.');
-                        return false;
-                    }
-                }
-            });
-            
-            // Disable right-click context menu (which might have refresh option)
+        // Set up event listeners once (always active, check flag when firing)
+        window.addEventListener('beforeunload', function(e) {
             if (isGameInProgress) {
-                document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                e.returnValue = 'بازی در حال انجام است! بارگذاری مجدد باعث از دست رفتن پیشرفت می‌شود.';
+                return e.returnValue;
+            }
+        });
+        
+        // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+        document.addEventListener('keydown', function(e) {
+            if (isGameInProgress) {
+                // F5
+                if (e.key === 'F5' || e.keyCode === 116) {
                     e.preventDefault();
+                    alert('بارگذاری مجدد در طول بازی غیرفعال است. از کنترل‌های بازی برای ناوبری استفاده کنید.');
                     return false;
-                }, false);
+                }
+                // Ctrl+R or Ctrl+Shift+R
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                    e.preventDefault();
+                    alert('بارگذاری مجدد در طول بازی غیرفعال است. از کنترل‌های بازی برای ناوبری استفاده کنید.');
+                    return false;
+                }
+            }
+        });
+        
+        // Disable right-click context menu during game
+        document.addEventListener('contextmenu', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+        
+        // Handle back button
+        window.onpopstate = function(event) {
+            if (isGameInProgress) {
+                // Immediately push state back to prevent navigation
+                history.pushState({page: 'game'}, '', location.href);
+                // Show warning
+                alert('دکمه بازگشت در طول بازی غیرفعال است. از کنترل‌های بازی برای ناوبری استفاده کنید.');
+            }
+        };
+        
+        function preventAccidentalNavigation() {
+            if (isGameInProgress) {
+                // Completely prevent back button - push state and immediately replace
+                history.pushState({page: 'game'}, '', location.href);
+                history.pushState({page: 'game'}, '', location.href);
             }
         }
         
@@ -515,6 +516,7 @@
         
         function startGame() {
             isGameInProgress = true;
+            preventAccidentalNavigation();
             var key = document.getElementById('scenario-select').value;
             var scenario = SCENARIOS[key];
             
@@ -649,4 +651,3 @@
     </script>
 </body>
 </html>
-
