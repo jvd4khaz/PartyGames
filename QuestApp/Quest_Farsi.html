@@ -770,6 +770,25 @@
         </div>
     </div>
 
+    <!-- Card Selection Confirmation Modal -->
+    <div id="quest-card-confirm-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:400px;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 20px; color: var(--accent-color);">تأیید انتخاب نشان</h2>
+            <div id="quest-card-confirm-preview" style="margin: 30px 0; display: flex; justify-content: center;">
+                <!-- Card preview will be inserted here -->
+            </div>
+            <p style="color: var(--text-secondary); margin: 20px 0; text-align: center;">آیا مطمئن هستید که می‌خواهید این نشان را بازی کنید؟</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="action-btn" id="quest-card-confirm-yes" style="flex: 1; padding: 15px 30px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);">
+                    تأیید
+                </button>
+                <button class="secondary-btn" id="quest-card-confirm-no" style="flex: 1; padding: 15px 30px;">
+                    لغو
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Quest Cards Reveal Modal -->
     <div id="quest-cards-reveal-modal" class="modal-overlay hidden">
         <div class="container" style="max-width:90%; max-height:90vh; overflow-y: auto; padding: 15px;">
@@ -778,21 +797,6 @@
             <div id="quest-result-summary" style="margin: 10px 0; padding: 10px; border-radius: 8px; font-size: 0.95rem; font-weight: bold;"></div>
             <button class="action-btn" onclick="closeQuestReveal()" style="margin-top: 8px; padding: 10px 20px; font-size: 0.95rem;">ادامه</button>
             <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.8rem;"></p>
-        </div>
-    </div>
-
-    <!-- Card Selection Confirmation Modal -->
-    <div id="card-confirm-modal" class="modal-overlay hidden">
-        <div class="container" style="max-width:500px;">
-            <h2 style="color: var(--accent-color); margin-bottom: 20px;">تأیید انتخاب نشان</h2>
-            <div id="card-confirm-display" style="margin: 30px 0; text-align: center;">
-                <!-- Card preview will be shown here -->
-            </div>
-            <p style="color: var(--text-secondary); margin: 20px 0; text-align: center;">آیا مطمئن هستید که می‌خواهید این نشان را انتخاب کنید؟</p>
-            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
-                <button class="secondary-btn" onclick="cancelCardSelection()" style="flex: 1; padding: 15px;">لغو</button>
-                <button class="action-btn" onclick="confirmCardSelection()" style="flex: 1; padding: 15px;">تأیید</button>
-            </div>
         </div>
     </div>
 
@@ -964,6 +968,7 @@
         var currentDistIndex = 0;
         var selectedRoles = []; // Roles selected for this game
         var rolesOnGround = []; // Roles selected but not assigned (ambiguity rule)
+        var pendingCardType = null; // Store card type pending confirmation
         
         // Game State
         var currentQuest = 1;
@@ -974,7 +979,6 @@
         var currentTeam = [];
         var questCards = []; // Array of {player, card: 'success' or 'fail'}
         var questCardSelectionMode = 'confirmation'; // 'confirmation' or 'selection'
-        var pendingCardType = null; // Store card type pending confirmation
         var isGameEnded = false;
         var gameLog = [];
         var isGameInProgress = false;
@@ -2062,14 +2066,14 @@
             // Create both card buttons
             var successBtn = document.createElement('button');
             successBtn.className = 'quest-card-display quest-card-success';
-            successBtn.onclick = function() { selectQuestCard('success'); return false; };
+            successBtn.onclick = function() { showCardConfirmation('success'); return false; };
             successBtn.style.cssText = 'cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent; position: relative;';
             successBtn.innerHTML = '<div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✓</div><div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">همراهی</div>';
             successBtn.id = 'success-card-btn';
             
             var failBtn = document.createElement('button');
             failBtn.className = 'quest-card-display quest-card-fail';
-            failBtn.onclick = function() { selectQuestCard('fail'); return false; };
+            failBtn.onclick = function() { showCardConfirmation('fail'); return false; };
             failBtn.style.cssText = 'cursor: pointer; transform: scale(1); border: none; outline: none; -webkit-tap-highlight-color: transparent; position: relative;';
             failBtn.innerHTML = '<div style="font-size: 3rem; margin-bottom: 10px; pointer-events: none;">✗</div><div style="font-size: 1.2rem; font-weight: bold; pointer-events: none;">نیرنگ</div>';
             failBtn.id = 'fail-card-btn';
@@ -2118,6 +2122,40 @@
                 'نشان‌های برگزیده شده: ' + toFarsiNum(questCards.length) + ' / ' + toFarsiNum(teamSize);
         }
 
+        function showCardConfirmation(cardType) {
+            pendingCardType = cardType;
+            var confirmModal = document.getElementById('quest-card-confirm-modal');
+            var preview = document.getElementById('quest-card-confirm-preview');
+            preview.innerHTML = '';
+            
+            // Create preview card matching the selected type
+            var previewCard = document.createElement('div');
+            previewCard.className = 'quest-card-display ' + (cardType === 'success' ? 'quest-card-success' : 'quest-card-fail');
+            previewCard.style.cssText = 'width: 150px; height: 200px; margin: 0 auto;';
+            previewCard.innerHTML = '<div style="font-size: 4rem; margin-bottom: 15px; pointer-events: none;">' + 
+                (cardType === 'success' ? '✓' : '✗') + '</div>' +
+                '<div style="font-size: 1.5rem; font-weight: bold; pointer-events: none;">' + 
+                (cardType === 'success' ? 'همراهی' : 'نیرنگ') + '</div>';
+            preview.appendChild(previewCard);
+            
+            // Set up confirm button
+            var confirmBtn = document.getElementById('quest-card-confirm-yes');
+            confirmBtn.onclick = function() {
+                confirmModal.classList.add('hidden');
+                selectQuestCard(pendingCardType);
+                pendingCardType = null;
+            };
+            
+            // Set up cancel button
+            var cancelBtn = document.getElementById('quest-card-confirm-no');
+            cancelBtn.onclick = function() {
+                confirmModal.classList.add('hidden');
+                pendingCardType = null;
+            };
+            
+            confirmModal.classList.remove('hidden');
+        }
+
         function selectQuestCard(cardType) {
             console.log('selectQuestCard called with:', cardType);
             var config = QUEST_CONFIG[playerCount];
@@ -2127,42 +2165,6 @@
                 console.log('All cards already selected');
                 return;
             }
-            
-            // Store pending card type and show confirmation modal
-            pendingCardType = cardType;
-            showCardConfirmationModal(cardType);
-        }
-
-        function showCardConfirmationModal(cardType) {
-            var modal = document.getElementById('card-confirm-modal');
-            var display = document.getElementById('card-confirm-display');
-            display.innerHTML = '';
-            
-            // Create card preview matching the actual card style
-            var cardDiv = document.createElement('div');
-            cardDiv.className = 'quest-card-display ' + 
-                (cardType === 'success' ? 'quest-card-success' : 'quest-card-fail');
-            cardDiv.style.cssText = 'width: 200px; height: 260px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;';
-            cardDiv.innerHTML = '<div style="font-size: 4rem; margin-bottom: 15px;">' + 
-                (cardType === 'success' ? '✓' : '✗') + 
-                '</div><div style="font-size: 1.5rem; font-weight: bold;">' + 
-                (cardType === 'success' ? 'همراهی' : 'نیرنگ') + 
-                '</div>';
-            display.appendChild(cardDiv);
-            
-            modal.classList.remove('hidden');
-        }
-
-        function confirmCardSelection() {
-            if (pendingCardType === null) {
-                return;
-            }
-            
-            var cardType = pendingCardType;
-            pendingCardType = null;
-            
-            // Hide confirmation modal
-            document.getElementById('card-confirm-modal').classList.add('hidden');
             
             // Check magic token restriction
             // Only restrict if this is the team member with magic token
@@ -2206,17 +2208,10 @@
             } else {
                 // Reset to confirmation mode for next player
                 questCardSelectionMode = 'confirmation';
-                // Ensure quest-card-modal is visible
-                document.getElementById('quest-card-modal').classList.remove('hidden');
                 document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
                 document.getElementById('quest-card-selection-screen').classList.add('hidden');
                 showQuestCardConfirmation();
             }
-        }
-
-        function cancelCardSelection() {
-            pendingCardType = null;
-            document.getElementById('card-confirm-modal').classList.add('hidden');
         }
 
         function revealQuestCards() {
