@@ -751,6 +751,21 @@
         </div>
     </div>
 
+    <!-- Card Selection Confirmation Modal -->
+    <div id="card-confirm-modal" class="modal-overlay hidden">
+        <div class="container" style="max-width:500px;">
+            <h2 style="color: var(--accent-color); margin-bottom: 20px;">Confirm Card Selection</h2>
+            <div id="card-confirm-display" style="margin: 30px 0; text-align: center;">
+                <!-- Card preview will be shown here -->
+            </div>
+            <p style="color: var(--text-secondary); margin: 20px 0; text-align: center;">Are you sure you want to select this card?</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="secondary-btn" onclick="cancelCardSelection()" style="flex: 1; padding: 15px;">Cancel</button>
+                <button class="action-btn" onclick="confirmCardSelection()" style="flex: 1; padding: 15px;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Leader Selection Modal -->
     <div id="leader-select-modal" class="modal-overlay hidden">
@@ -1050,6 +1065,7 @@
         var currentTeam = [];
         var questCards = []; // Array of {player, card: 'success' or 'fail'}
         var questCardSelectionMode = 'confirmation'; // 'confirmation' or 'selection'
+        var pendingCardType = null; // Store card type pending confirmation
         var isGameEnded = false;
         var gameLog = [];
         var amulets = []; // Array of {quest: number, available: boolean, holder: null or playerIndex, checked: []}
@@ -2095,12 +2111,41 @@
                 return;
             }
             
-            // Show confirmation dialog
-            var cardName = cardType === 'success' ? 'SUCCESS (Green)' : 'FAIL (Red)';
-            var confirmed = confirm('Are you sure you want to select ' + cardName + '?\n\nThis action cannot be undone.');
-            if (!confirmed) {
-                return; // User cancelled, don't select the card
+            // Store pending card type and show confirmation modal
+            pendingCardType = cardType;
+            showCardConfirmationModal(cardType);
+        }
+
+        function showCardConfirmationModal(cardType) {
+            var modal = document.getElementById('card-confirm-modal');
+            var display = document.getElementById('card-confirm-display');
+            display.innerHTML = '';
+            
+            // Create card preview matching the actual card style
+            var cardDiv = document.createElement('div');
+            cardDiv.className = 'quest-card-display ' + 
+                (cardType === 'success' ? 'quest-card-success' : 'quest-card-fail');
+            cardDiv.style.cssText = 'width: 200px; height: 260px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;';
+            cardDiv.innerHTML = '<div style="font-size: 4rem; margin-bottom: 15px;">' + 
+                (cardType === 'success' ? '✓' : '✗') + 
+                '</div><div style="font-size: 1.5rem; font-weight: bold;">' + 
+                (cardType === 'success' ? 'SUCCESS' : 'FAIL') + 
+                '</div>';
+            display.appendChild(cardDiv);
+            
+            modal.classList.remove('hidden');
+        }
+
+        function confirmCardSelection() {
+            if (pendingCardType === null) {
+                return;
             }
+            
+            var cardType = pendingCardType;
+            pendingCardType = null;
+            
+            // Hide confirmation modal
+            document.getElementById('card-confirm-modal').classList.add('hidden');
             
             // Check spell restriction
             // Only restrict if this is the team member with spell
@@ -2147,6 +2192,11 @@
                 document.getElementById('quest-card-selection-screen').classList.add('hidden');
                 showQuestCardConfirmation();
             }
+        }
+
+        function cancelCardSelection() {
+            pendingCardType = null;
+            document.getElementById('card-confirm-modal').classList.add('hidden');
         }
 
         function revealQuestCards() {
