@@ -2366,10 +2366,16 @@
             list.innerHTML = '';
             
             players.forEach(function(player, index) {
-                // Cannot check: amulet holder, already checked, amulet holders
-                if (index === holderIndex || checkedByAmulet.indexOf(index) !== -1 || 
-                    amuletHolders.indexOf(index) !== -1) {
-                    return;
+                // Cannot check: amulet holder themselves, already checked players, or other amulet holders
+                // Note: We check holderIndex first, then amuletHolders (which may include current holder, but that's redundant)
+                if (index === holderIndex) {
+                    return; // Can't check yourself
+                }
+                if (checkedByAmulet.indexOf(index) !== -1) {
+                    return; // Can't check someone already checked
+                }
+                if (amuletHolders.indexOf(index) !== -1) {
+                    return; // Can't check other amulet holders
                 }
                 
                 var btn = document.createElement('button');
@@ -2378,6 +2384,18 @@
                 btn.onclick = function() { performAmuletCheck(amulet, index); };
                 list.appendChild(btn);
             });
+            
+            // If no players available, show skip option
+            if (list.children.length === 0) {
+                var skipBtn = document.createElement('button');
+                skipBtn.className = 'secondary-btn';
+                skipBtn.innerText = 'رد کردن...';
+                skipBtn.onclick = function() { 
+                    document.getElementById('amulet-check-modal').classList.add('hidden');
+                    nextQuest();
+                };
+                list.appendChild(skipBtn);
+            }
             
             document.getElementById('amulet-check-modal').classList.remove('hidden');
         }
