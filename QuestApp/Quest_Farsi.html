@@ -2112,6 +2112,13 @@
                 return;
             }
             
+            // Show confirmation dialog
+            var cardName = cardType === 'success' ? 'همراهی (سبز)' : 'نیرنگ (قرمز)';
+            var confirmed = confirm('آیا مطمئن هستید که می‌خواهید ' + cardName + ' را انتخاب کنید؟\n\nاین عمل قابل بازگشت نیست.');
+            if (!confirmed) {
+                return; // User cancelled, don't select the card
+            }
+            
             // Check magic token restriction
             // Only restrict if this is the team member with magic token
             var hasMagic = (magicTokenTeamMemberIndex !== null && questCards.length === magicTokenTeamMemberIndex);
