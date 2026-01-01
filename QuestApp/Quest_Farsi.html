@@ -2204,16 +2204,13 @@
                     revealQuestCards();
                 }, 500);
             } else {
-                // Wait a moment for the confirmation modal to close, then show next player
-                setTimeout(function() {
-                    // Reset to confirmation mode for next player
-                    questCardSelectionMode = 'confirmation';
-                    // Ensure quest-card-modal is visible
-                    document.getElementById('quest-card-modal').classList.remove('hidden');
-                    document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
-                    document.getElementById('quest-card-selection-screen').classList.add('hidden');
-                    showQuestCardConfirmation();
-                }, 100);
+                // Reset to confirmation mode for next player
+                questCardSelectionMode = 'confirmation';
+                // Ensure quest-card-modal is visible
+                document.getElementById('quest-card-modal').classList.remove('hidden');
+                document.getElementById('quest-card-confirmation-screen').classList.remove('hidden');
+                document.getElementById('quest-card-selection-screen').classList.add('hidden');
+                showQuestCardConfirmation();
             }
         }
 
