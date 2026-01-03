@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mafia de Cuba</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --card-bg: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #64ffda;
+            --diamond-color: #ffd700;
+            --thief-color: #ff6b6b;
+            --loyal-color: #4CAF50;
+            --agent-color: #2196F3;
+            --btn-color: #64ffda;
+            --btn-text: #0a192f;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-color); font-weight: 900; }
+        h2 { font-size: 1.2rem; margin: 10px 0; color: var(--text-secondary); }
+        p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+
+        .setup-info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        .player-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        .player-input:focus { outline: 1px solid var(--accent-color); }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+        select:focus { outline: 1px solid var(--accent-color); }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .hidden { display: none !important; }
+
+        .diamond-count {
+            font-size: 3rem;
+            color: var(--diamond-color);
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .character-token {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: rgba(100, 255, 218, 0.2);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .character-token:hover {
+            background: rgba(100, 255, 218, 0.3);
+            transform: scale(1.05);
+        }
+        .character-token.selected {
+            background: var(--accent-color);
+            color: var(--btn-text);
+        }
+
+        .diamond-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .diamond-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--diamond-color);
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--diamond-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .diamond-btn:hover {
+            background: rgba(255, 215, 0, 0.4);
+            transform: scale(1.1);
+        }
+        .diamond-btn.selected {
+            background: var(--diamond-color);
+            color: var(--bg-color);
+        }
+
+        .box-contents {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+
+        .player-info-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: left;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .accusation-btn {
+            background-color: var(--thief-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .player-chip {
+            display: inline-block;
+            background: rgba(100, 255, 218, 0.2);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            margin: 4px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .player-chip:hover {
+            background: rgba(100, 255, 218, 0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Setup Screen -->
+    <div id="setup-screen" class="container">
+        <h1>Mafia de Cuba</h1>
+        <p>Enter player names and select player count</p>
+
+        <div id="game-summary" class="setup-info" style="margin-bottom: 20px;">
+            <!-- Will be populated dynamically -->
+        </div>
+
+        <div class="input-group">
+            <label>Number of Players (6-12)</label>
+            <select id="player-count-select" onchange="updatePlayerInputs(); updateGameSummary();">
+                <option value="6">6 Players</option>
+                <option value="7">7 Players</option>
+                <option value="8" selected>8 Players</option>
+                <option value="9">9 Players</option>
+                <option value="10">10 Players</option>
+                <option value="11">11 Players</option>
+                <option value="12">12 Players</option>
+            </select>
+        </div>
+
+        <div id="player-inputs" style="margin-top: 20px;">
+            <!-- Player inputs will be generated here -->
+        </div>
+
+        <div id="saved-players-list" style="margin-top: 15px; text-align: left;">
+            <!-- Saved player names will appear here -->
+        </div>
+
+        <button class="action-btn" onclick="startSetup()">Start Game</button>
+    </div>
+
+    <!-- 2. Godfather Selection Screen -->
+    <div id="godfather-screen" class="container hidden">
+        <h1>Select Godfather</h1>
+        <p>Choose who will be the Godfather</p>
+        <button class="secondary-btn" onclick="selectRandomGodfather()" style="margin-bottom: 20px;">🎲 Select Randomly</button>
+        <div id="godfather-select-list"></div>
+    </div>
+
+    <!-- 3. Godfather Setup Screen -->
+    <div id="godfather-setup-screen" class="container hidden">
+        <h1>Godfather Setup</h1>
+        <p id="godfather-name-display"></p>
+        <p>Secretly remove 0 to 5 diamonds from the box</p>
+        <div class="diamond-selector">
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(0)">0</button>
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(1)">1</button>
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(2)">2</button>
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(3)">3</button>
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(4)">4</button>
+            <button class="diamond-btn" onclick="selectDiamondsToRemove(5)">5</button>
+        </div>
+        <p id="diamonds-remaining-info" style="margin-top: 20px;"></p>
+        <button class="action-btn" id="confirm-diamonds-btn" onclick="confirmDiamondsRemoval()" disabled>Confirm</button>
+    </div>
+
+    <!-- 4. Character Distribution Screen -->
+    <div id="character-dist-screen" class="container hidden">
+        <h1>Box Setup Complete</h1>
+        <p>The box contains diamonds and character tokens. Players will choose their characters from the box during the theft phase.</p>
+        <div id="character-list"></div>
+        <button class="action-btn" onclick="startDiamondTheft()">Start Diamond Theft Phase</button>
+    </div>
+
+    <!-- 5. Pass Screen -->
+    <div id="pass-screen" class="container hidden">
+        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+            Player <span id="player-num-pass">1</span> of <span id="total-players-pass">8</span>
+        </div>
+        <div style="font-size: 4rem; margin: 20px;">📱</div>
+        <p>Pass device to:</p>
+        <h2 id="pass-target-name" style="font-size:2rem; color:var(--accent-color);">Player Name</h2>
+        <button class="action-btn" onclick="showTakeScreen()">Examine Box & Take</button>
+    </div>
+
+    <!-- 7. First Player Bag Screen -->
+    <div id="first-player-bag-screen" class="container hidden">
+        <h2 id="first-player-bag-name"></h2>
+        <p>You are the first player. You can dismiss a character token into the felt bag.</p>
+        <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            This character will be hidden in the bag and won't be your character. You'll still take something normally after this.
+        </p>
+        
+        <div style="margin: 20px 0;">
+            <p>Select a character token to dismiss into the bag (optional):</p>
+            <div id="bag-character-selector"></div>
+            <button class="secondary-btn" onclick="skipBagDismissal()" style="margin-top: 10px;">Skip - Don't dismiss any character</button>
+        </div>
+    </div>
+
+    <!-- 6. Take Screen -->
+    <div id="take-screen" class="container hidden">
+        <h2 id="take-player-name"></h2>
+        
+        <!-- Box Contents Display -->
+        <div class="box-contents" style="margin-bottom: 20px;">
+            <p>Current box contents:</p>
+            <p>Diamonds: <span id="diamonds-in-box-display" style="color: var(--diamond-color); font-weight: bold; font-size: 1.2rem;">0</span></p>
+            <p>Character tokens: <span id="characters-in-box-display" style="color: var(--accent-color); font-weight: bold;"></span></p>
+        </div>
+        
+        <p>What do you take from the box?</p>
+        
+        <div style="margin: 20px 0;">
+            <p>Choose ONE:</p>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+                Take diamonds (minimum 1) OR take 1 character token
+            </p>
+            <p style="font-weight: bold; margin-bottom: 10px;">Option 1: Take Diamonds</p>
+            <div class="diamond-selector" id="diamond-take-selector"></div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <p style="font-weight: bold; margin-bottom: 10px;">Option 2: Take Character Token</p>
+            <div id="character-take-selector"></div>
+        </div>
+
+        <p id="take-error" style="color: var(--thief-color); display: none;">
+            You must take at least 1 diamond OR 1 character token
+        </p>
+
+        <button class="action-btn" onclick="confirmTake()">Confirm Take</button>
+    </div>
+
+    <!-- 8. Investigation Screen -->
+    <div id="investigation-screen" class="container hidden">
+        <h1>Investigation Phase</h1>
+        <p id="godfather-investigation-name"></p>
+        <p>Interrogate players to recover your diamonds</p>
+        
+        <div id="player-info-list"></div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p>Diamonds recovered: <span id="diamonds-recovered" style="color: var(--diamond-color); font-weight: bold;">0</span> / <span id="total-diamonds-stolen" style="color: var(--diamond-color); font-weight: bold;">0</span></p>
+            <p>Jokers remaining: <span id="jokers-remaining" style="color: var(--accent-color); font-weight: bold;">0</span></p>
+        </div>
+
+        <button class="action-btn" style="background-color: var(--loyal-color);" onclick="endInvestigation()">End Investigation</button>
+    </div>
+
+    <!-- 9. Accusation Screen -->
+    <div id="accusation-screen" class="container hidden">
+        <h1>Accusation</h1>
+        <p>You accused: <span id="accused-player-name" style="color: var(--thief-color); font-weight: bold;"></span></p>
+        <div id="accusation-result"></div>
+        <button class="action-btn" onclick="continueInvestigation()">Continue Investigation</button>
+    </div>
+
+    <!-- 10. Game End Screen -->
+    <div id="game-end-screen" class="container hidden">
+        <h1>Game Over</h1>
+        <div id="game-end-result"></div>
+        <button class="action-btn" onclick="location.reload()">New Game</button>
+    </div>
+
+    <script>
+        // Character distribution by player count
+        const CHARACTER_DIST = {
+            6: { loyal: 1, agents: 1, drivers: 1, jokers: 0 },
+            7: { loyal: 2, agents: 1, drivers: 1, jokers: 0 },
+            8: { loyal: 3, agents: 1, drivers: 1, jokers: 1 },
+            9: { loyal: 4, agents: 1, drivers: 1, jokers: 1 },
+            10: { loyal: 4, agents: 2, drivers: 1, jokers: 1 },
+            11: { loyal: 4, agents: 2, drivers: 2, jokers: 2 },
+            12: { loyal: 5, agents: 2, drivers: 2, jokers: 2 }
+        };
+
+        // Game state
+        var playerCount = 8;
+        var players = [];
+        var godfatherIndex = 0;
+        var diamondsRemovedByGodfather = 0;
+        var boxState = {
+            diamonds: 15,
+            characters: []
+        };
+        var playerTakes = {}; // { playerName: { diamonds: X, character: '...', bagCharacter: '...' } }
+        var currentTheftIndex = 0;
+        var jokersRemaining = 0;
+        var diamondsRecovered = 0;
+        var eliminatedPlayers = [];
+        var gameEnded = false;
+        var firstPlayerBagCharacter = null; // Character token dismissed to bag by first player
+        var firstPlayerBagPrompted = false; // Track if first player has been prompted about bag
+        var savedPlayers = []; // Saved player names
+
+        // Navigation prevention
+        window.addEventListener('beforeunload', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                e.returnValue = 'Game is in progress! Reloading will lose all progress.';
+                return e.returnValue;
+            }
+        });
+        
+        // Disable keyboard shortcuts for refresh (F5, Ctrl+R, Ctrl+Shift+R)
+        document.addEventListener('keydown', function(e) {
+            if (isGameInProgress) {
+                // F5
+                if (e.key === 'F5' || e.keyCode === 116) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+                // Ctrl+R or Ctrl+Shift+R
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R')) {
+                    e.preventDefault();
+                    alert('Refresh is disabled during game. Use game controls to navigate.');
+                    return false;
+                }
+            }
+        });
+        
+        // Disable right-click context menu during game
+        document.addEventListener('contextmenu', function(e) {
+            if (isGameInProgress) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+        
+        // Handle back button
+        window.onpopstate = function(event) {
+            if (isGameInProgress) {
+                // Immediately push state back to prevent navigation
+                history.pushState({page: 'game'}, '', location.href);
+                // Show warning
+                alert('Back button is disabled during game. Use game controls to navigate.');
+            }
+        };
+        
+        function preventAccidentalNavigation() {
+            if (isGameInProgress) {
+                // Completely prevent back button - push state and immediately replace
+                history.pushState({page: 'game'}, '', location.href);
+                history.pushState({page: 'game'}, '', location.href);
+            }
+        }
+
+        // Initialize
+        loadSavedPlayers();
+        updatePlayerInputs();
+        updateGameSummary();
+
+        function updatePlayerInputs() {
+            playerCount = parseInt(document.getElementById('player-count-select').value);
+            var container = document.getElementById('player-inputs');
+            container.innerHTML = '';
+            
+            for (var i = 0; i < playerCount; i++) {
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'player-input';
+                input.placeholder = 'Player ' + (i + 1);
+                // Pre-fill with saved name if available
+                if (savedPlayers[i]) {
+                    input.value = savedPlayers[i];
+                }
+                container.appendChild(input);
+            }
+            
+            renderSavedPlayersList();
+        }
+
+        function renderSavedPlayersList() {
+            var container = document.getElementById('saved-players-list');
+            container.innerHTML = '';
+            
+            if (savedPlayers.length === 0) {
+                return;
+            }
+            
+            var label = document.createElement('p');
+            label.style.fontSize = '0.9rem';
+            label.style.color = 'var(--text-secondary)';
+            label.style.marginBottom = '8px';
+            label.innerHTML = '<strong>Saved players (click to fill):</strong>';
+            container.appendChild(label);
+            
+            savedPlayers.forEach(function(name) {
+                var chip = document.createElement('span');
+                chip.className = 'player-chip';
+                chip.innerText = name;
+                chip.onclick = function() {
+                    fillNextEmptyInput(name);
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        function fillNextEmptyInput(name) {
+            var inputs = document.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (!inputs[i].value.trim()) {
+                    inputs[i].value = name;
+                    inputs[i].focus();
+                    break;
+                }
+            }
+        }
+
+        function updateGameSummary() {
+            var count = parseInt(document.getElementById('player-count-select').value);
+            var dist = CHARACTER_DIST[count];
+            var summaryDiv = document.getElementById('game-summary');
+            
+            var charList = [];
+            if (dist.loyal > 0) {
+                charList.push(dist.loyal + ' Loyal Henchmen');
+            }
+            if (dist.agents > 0) {
+                if (dist.agents === 1) {
+                    charList.push('1 Agent (FBI or CIA)');
+                } else {
+                    charList.push(dist.agents + ' Agents (FBI and CIA)');
+                }
+            }
+            if (dist.drivers > 0) {
+                charList.push(dist.drivers + ' Driver' + (dist.drivers > 1 ? 's' : ''));
+            }
+            
+            var jokerText = dist.jokers === 0 ? 'No Jokers' : dist.jokers + ' Joker' + (dist.jokers > 1 ? 's' : '');
+            
+            summaryDiv.innerHTML = 
+                '<h3 style="color: var(--accent-color); margin-top: 0; margin-bottom: 10px;">Game Summary</h3>' +
+                '<p style="margin-bottom: 10px;"><strong>Setup for ' + count + ' Players:</strong></p>' +
+                '<ul style="text-align: left; margin-left: 20px; margin-bottom: 15px;">' +
+                '<li><strong>Characters in box:</strong> ' + charList.join(', ') + '</li>' +
+                '<li><strong>Jokers:</strong> ' + jokerText + '</li>' +
+                '<li><strong>Diamonds:</strong> 15 total (Godfather removes 0-5 secretly)</li>' +
+                '</ul>' +
+                
+                '<p style="margin-bottom: 10px;"><strong>Game Flow:</strong></p>' +
+                '<ul style="text-align: left; margin-left: 20px; margin-bottom: 15px;">' +
+                '<li><strong>Diamond Theft Phase:</strong> Box passes around. Each player takes diamonds (1+) OR 1 character token.</li>' +
+                '<li><strong>Investigation Phase:</strong> Godfather interrogates players to find Thieves and recover diamonds.</li>' +
+                '</ul>' +
+                
+                '<p style="margin-bottom: 10px;"><strong>Win Conditions:</strong></p>' +
+                '<ul style="text-align: left; margin-left: 20px; margin-bottom: 15px;">' +
+                '<li><strong>Godfather:</strong> Wins if recovers all diamonds</li>' +
+                '<li><strong>Loyal Henchmen:</strong> Win if Godfather recovers all diamonds</li>' +
+                '<li><strong>Thieves:</strong> Win if Godfather eliminated or fails. Thief with most diamonds wins (ties share victory)</li>' +
+                '<li><strong>Agents (FBI/CIA):</strong> Win immediately if accused by Godfather</li>' +
+                '<li><strong>Driver:</strong> Wins if player to their right triumphs</li>' +
+                '<li><strong>Street Urchin:</strong> Wins if a Thief wins</li>' +
+                '</ul>' +
+                
+                '<p style="margin-bottom: 10px;"><strong>Key Rules:</strong></p>' +
+                '<ul style="text-align: left; margin-left: 20px;">' +
+                '<li>First player can dismiss a character token to the felt bag</li>' +
+                '<li>Empty box = automatic Street Urchin</li>' +
+                '<li>Last player can choose to take nothing to become Street Urchin</li>' +
+                '<li>Wrong accusation = Godfather gives Joker (or is eliminated if no Jokers)</li>' +
+                '</ul>';
+        }
+
+        function loadSavedPlayers() {
+            var stored = localStorage.getItem('mafia_de_cuba_players');
+            if (stored) {
+                savedPlayers = JSON.parse(stored);
+            }
+        }
+
+        function savePlayers() {
+            localStorage.setItem('mafia_de_cuba_players', JSON.stringify(savedPlayers));
+        }
+
+        function startSetup() {
+            var inputs = document.querySelectorAll('.player-input');
+            players = [];
+            for (var i = 0; i < inputs.length; i++) {
+                var val = inputs[i].value.trim() || inputs[i].placeholder;
+                var name = val;
+                players.push({
+                    name: name,
+                    character: null,
+                    isGodfather: false
+                });
+                
+                // Save player name if it was entered
+                if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
+                    savedPlayers.push(val);
+                }
+            }
+            
+            // Save to localStorage
+            savePlayers();
+
+            showScreen('godfather-screen');
+            renderGodfatherSelection();
+        }
+
+        function renderGodfatherSelection() {
+            var container = document.getElementById('godfather-select-list');
+            container.innerHTML = '';
+            
+            players.forEach(function(player, index) {
+                var btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.style.marginBottom = '10px';
+                btn.innerText = player.name;
+                btn.onclick = function() {
+                    selectGodfather(index);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function selectRandomGodfather() {
+            var randomIndex = Math.floor(Math.random() * players.length);
+            selectGodfather(randomIndex);
+        }
+
+        function selectGodfather(index) {
+            isGameInProgress = true;
+            preventAccidentalNavigation();
+            godfatherIndex = index;
+            players[index].isGodfather = true;
+            
+            // Set jokers based on player count
+            jokersRemaining = CHARACTER_DIST[playerCount].jokers;
+            
+            document.getElementById('godfather-name-display').innerText = 
+                'Godfather: ' + players[index].name;
+            showScreen('godfather-setup-screen');
+        }
+
+        function selectDiamondsToRemove(count) {
+            diamondsRemovedByGodfather = count;
+            
+            // Update button states
+            var buttons = document.querySelectorAll('#godfather-setup-screen .diamond-btn');
+            buttons.forEach(function(btn, i) {
+                if (i === count) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            
+            var remaining = 15 - count;
+            document.getElementById('diamonds-remaining-info').innerText = 
+                remaining + ' diamonds will remain in the box';
+            document.getElementById('confirm-diamonds-btn').disabled = false;
+        }
+
+        function confirmDiamondsRemoval() {
+            boxState.diamonds = 15 - diamondsRemovedByGodfather;
+            setupBoxWithCharacters();
+        }
+
+        function setupBoxWithCharacters() {
+            var dist = CHARACTER_DIST[playerCount];
+            var characters = [];
+            
+            // Add characters to box (not assigned to players)
+            for (var i = 0; i < dist.loyal; i++) {
+                characters.push('Loyal Henchman');
+            }
+            for (var i = 0; i < dist.agents; i++) {
+                characters.push(i === 0 ? 'FBI Agent' : 'CIA Agent');
+            }
+            for (var i = 0; i < dist.drivers; i++) {
+                characters.push('Driver');
+            }
+            
+            // Shuffle characters
+            shuffleArray(characters);
+            
+            // All characters go in the box initially
+            boxState.characters = characters;
+            
+            // No characters assigned to players yet - they will choose during theft
+            players.forEach(function(player) {
+                if (!player.isGodfather) {
+                    player.character = null; // Will be set when they take a character token
+                }
+            });
+            
+            showScreen('character-dist-screen');
+            renderCharacterDistribution();
+        }
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+
+        function renderCharacterDistribution() {
+            var container = document.getElementById('character-list');
+            container.innerHTML = '';
+            
+            var info = document.createElement('div');
+            info.className = 'setup-info';
+            info.innerHTML = 
+                '<strong>Box Contents:</strong><br>' +
+                'Diamonds: ' + boxState.diamonds + '<br>' +
+                'Character Tokens: ' + boxState.characters.length + '<br><br>' +
+                '<strong>Characters in box:</strong><br>' +
+                boxState.characters.join(', ');
+            container.appendChild(info);
+            
+            var godfatherInfo = document.createElement('div');
+            godfatherInfo.className = 'player-info-card';
+            godfatherInfo.style.marginTop = '20px';
+            godfatherInfo.innerHTML = '<strong>' + players[godfatherIndex].name + ':</strong> Godfather';
+            container.appendChild(godfatherInfo);
+        }
+
+        function startDiamondTheft() {
+            preventAccidentalNavigation();
+            currentTheftIndex = 0;
+            // Start with first player (to left of Godfather)
+            // In clockwise order, that's the player after Godfather
+            currentTheftIndex = (godfatherIndex + 1) % players.length;
+            showPassScreen();
+        }
+
+        function showPassScreen() {
+            var player = players[currentTheftIndex];
+            document.getElementById('player-num-pass').innerText = 
+                (currentTheftIndex > godfatherIndex ? 
+                    currentTheftIndex - godfatherIndex : 
+                    players.length - godfatherIndex + currentTheftIndex);
+            document.getElementById('total-players-pass').innerText = players.length - 1;
+            document.getElementById('pass-target-name').innerText = player.name;
+            showScreen('pass-screen');
+        }
+
+
+        function checkIfFirstPlayer() {
+            // First player is the one to the left of Godfather
+            return currentTheftIndex === (godfatherIndex + 1) % players.length;
+        }
+
+        function showTakeScreen() {
+            var player = players[currentTheftIndex];
+            var isFirstPlayer = checkIfFirstPlayer();
+            
+            // First player gets special bag screen first (only once)
+            if (isFirstPlayer && !firstPlayerBagPrompted && boxState.characters.length > 0) {
+                firstPlayerBagPrompted = true;
+                showFirstPlayerBagScreen();
+                return;
+            }
+            
+            // Check if box is empty - if so, player automatically becomes Street Urchin
+            if (boxState.diamonds === 0 && boxState.characters.length === 0) {
+                player.isStreetUrchin = true;
+                playerTakes[player.name] = { diamonds: 0, character: null, isStreetUrchin: true };
+                
+                // Show empty box message on take screen
+                document.getElementById('take-player-name').innerText = player.name;
+                document.getElementById('diamonds-in-box-display').innerText = '0';
+                document.getElementById('characters-in-box-display').innerText = 'None';
+                
+                // Show special message
+                var takeScreen = document.getElementById('take-screen');
+                var existingMsg = document.getElementById('empty-box-message');
+                if (existingMsg) {
+                    existingMsg.remove();
+                }
+                
+                var emptyMsg = document.createElement('div');
+                emptyMsg.id = 'empty-box-message';
+                emptyMsg.style.background = 'rgba(255, 215, 0, 0.2)';
+                emptyMsg.style.border = '2px solid var(--diamond-color)';
+                emptyMsg.style.padding = '15px';
+                emptyMsg.style.borderRadius = '8px';
+                emptyMsg.style.marginTop = '20px';
+                emptyMsg.innerHTML = '<p style="color: var(--diamond-color); font-weight: bold;">The box is empty! You automatically become a Street Urchin.</p><p style="font-size: 0.9rem; color: var(--text-secondary);">Pretend to take something and pass the box along.</p>';
+                takeScreen.insertBefore(emptyMsg, takeScreen.querySelector('.action-btn'));
+                
+                // Hide selection options and show empty state
+                document.getElementById('diamond-take-selector').style.display = 'none';
+                document.getElementById('character-take-selector').style.display = 'none';
+                var takeScreen = document.getElementById('take-screen');
+                var takePrompt = takeScreen.querySelectorAll('p');
+                takePrompt.forEach(function(p) {
+                    if (p.textContent.includes('What do you take') || p.textContent.includes('Choose ONE')) {
+                        p.style.display = 'none';
+                    }
+                });
+                document.querySelector('#take-screen .action-btn').style.display = 'none';
+                
+                showScreen('take-screen');
+                
+                // Auto-advance after showing empty box
+                setTimeout(function() {
+                    advanceToNextPlayer();
+                }, 3000);
+                return;
+            }
+            
+            // Clear any previous empty message
+            var existingMsg = document.getElementById('empty-box-message');
+            if (existingMsg) {
+                existingMsg.remove();
+            }
+            
+            // Show normal take screen with box contents
+            document.getElementById('take-player-name').innerText = player.name;
+            document.getElementById('diamonds-in-box-display').innerText = boxState.diamonds;
+            
+            var charDisplay = document.getElementById('characters-in-box-display');
+            if (boxState.characters.length === 0) {
+                charDisplay.innerText = 'None';
+            } else {
+                charDisplay.innerText = boxState.characters.join(', ');
+            }
+            
+            // Show selection options (restore visibility)
+            document.getElementById('diamond-take-selector').style.display = '';
+            document.getElementById('character-take-selector').style.display = '';
+            document.getElementById('take-error').style.display = 'none';
+            var takeScreen = document.getElementById('take-screen');
+            var takePrompt = takeScreen.querySelectorAll('p');
+            takePrompt.forEach(function(p) {
+                if (p.textContent.includes('What do you take') || p.textContent.includes('Choose ONE')) {
+                    p.style.display = '';
+                }
+            });
+            document.querySelector('#take-screen .action-btn').style.display = '';
+            
+            // Check if this is the last player
+            var nextIndex = currentTheftIndex + 1;
+            if (nextIndex === godfatherIndex) {
+                nextIndex++;
+            }
+            if (nextIndex >= players.length) {
+                nextIndex = (godfatherIndex + 1) % players.length;
+            }
+            var isLastPlayer = (nextIndex === (godfatherIndex + 1) % players.length);
+            
+            // Show diamond selector
+            var diamondContainer = document.getElementById('diamond-take-selector');
+            diamondContainer.innerHTML = '';
+            var maxDiamonds = boxState.diamonds; // Maximum is the actual number of diamonds in box
+            for (var i = 0; i <= maxDiamonds; i++) {
+                var btn = document.createElement('button');
+                btn.className = 'diamond-btn';
+                btn.innerText = i;
+                btn.onclick = function(count) {
+                    return function() {
+                        selectDiamondsToTake(count);
+                    };
+                }(i);
+                diamondContainer.appendChild(btn);
+            }
+            
+            // Show character selector
+            var charContainer = document.getElementById('character-take-selector');
+            charContainer.innerHTML = '';
+            if (boxState.characters.length === 0) {
+                charContainer.innerHTML = '<p style="color: var(--text-secondary);">No character tokens available</p>';
+            } else {
+                boxState.characters.forEach(function(char) {
+                    var btn = document.createElement('button');
+                    btn.className = 'character-token';
+                    btn.innerText = char;
+                    btn.onclick = function(token) {
+                        return function() {
+                            selectCharacterToTake(token);
+                        };
+                    }(char);
+                    charContainer.appendChild(btn);
+                });
+            }
+            
+            // Show special message for last player
+            if (isLastPlayer) {
+                var specialMsg = document.createElement('p');
+                specialMsg.style.color = 'var(--accent-color)';
+                specialMsg.style.fontWeight = 'bold';
+                specialMsg.style.marginTop = '20px';
+                specialMsg.innerText = 'You are the last player. You can choose to take nothing to become a Street Urchin.';
+                document.getElementById('take-screen').insertBefore(specialMsg, document.getElementById('take-error'));
+            }
+            
+            // Reset selections
+            window.selectedDiamondsToTake = 0;
+            window.selectedCharacterToTake = null;
+            
+            showScreen('take-screen');
+        }
+
+        function showFirstPlayerBagScreen() {
+            var player = players[currentTheftIndex];
+            document.getElementById('first-player-bag-name').innerText = player.name;
+            
+            var charContainer = document.getElementById('bag-character-selector');
+            charContainer.innerHTML = '';
+            
+            if (boxState.characters.length === 0) {
+                charContainer.innerHTML = '<p style="color: var(--text-secondary);">No character tokens available</p>';
+                // Skip to normal take screen
+                setTimeout(function() {
+                    skipBagDismissal();
+                }, 100);
+                return;
+            }
+            
+            boxState.characters.forEach(function(char) {
+                var btn = document.createElement('button');
+                btn.className = 'character-token';
+                btn.innerText = char;
+                btn.onclick = function(token) {
+                    return function() {
+                        selectBagCharacter(token);
+                    };
+                }(char);
+                charContainer.appendChild(btn);
+            });
+            
+            showScreen('first-player-bag-screen');
+        }
+
+        function selectBagCharacter(character) {
+            firstPlayerBagCharacter = character;
+            
+            // Remove from box
+            var charIndex = boxState.characters.indexOf(character);
+            if (charIndex !== -1) {
+                boxState.characters.splice(charIndex, 1);
+            }
+            
+            // Show normal take screen
+            showTakeScreen();
+        }
+
+        function skipBagDismissal() {
+            firstPlayerBagCharacter = null; // Mark as skipped (already prompted, so won't show bag screen again)
+            showTakeScreen();
+        }
+
+        function selectDiamondsToTake(count) {
+            window.selectedDiamondsToTake = count;
+            var buttons = document.querySelectorAll('#diamond-take-selector .diamond-btn');
+            buttons.forEach(function(btn, i) {
+                if (i === count) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            // If diamonds selected, clear character selection
+            if (count > 0) {
+                window.selectedCharacterToTake = null;
+                var charButtons = document.querySelectorAll('#character-take-selector .character-token');
+                charButtons.forEach(function(btn) {
+                    btn.classList.remove('selected');
+                });
+            }
+        }
+
+        function selectCharacterToTake(character) {
+            window.selectedCharacterToTake = character;
+            var buttons = document.querySelectorAll('#character-take-selector .character-token');
+            buttons.forEach(function(btn) {
+                if (btn.innerText === (character || 'None')) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            // If character selected, clear diamond selection
+            if (character !== null) {
+                window.selectedDiamondsToTake = 0;
+                var diamondButtons = document.querySelectorAll('#diamond-take-selector .diamond-btn');
+                diamondButtons.forEach(function(btn) {
+                    btn.classList.remove('selected');
+                });
+            }
+        }
+
+        function confirmTake() {
+            var diamonds = window.selectedDiamondsToTake || 0;
+            var character = window.selectedCharacterToTake;
+            
+            var player = players[currentTheftIndex];
+            
+            // Check if this is the last player
+            var nextIndex = currentTheftIndex + 1;
+            if (nextIndex === godfatherIndex) {
+                nextIndex++;
+            }
+            if (nextIndex >= players.length) {
+                nextIndex = (godfatherIndex + 1) % players.length;
+            }
+            var isLastPlayer = (nextIndex === (godfatherIndex + 1) % players.length);
+            
+            // Special case: last player can choose to become Street Urchin by taking nothing
+            if (isLastPlayer && diamonds === 0 && !character) {
+                player.isStreetUrchin = true;
+                playerTakes[player.name] = { diamonds: 0, character: null, isStreetUrchin: true };
+            } else {
+                // Validation: must take EITHER diamonds (1+) OR character token (not both, not neither)
+                if (diamonds === 0 && !character) {
+                    document.getElementById('take-error').innerText = 'You must take at least 1 diamond OR 1 character token';
+                    document.getElementById('take-error').style.display = 'block';
+                    return;
+                }
+                
+                // Cannot take both
+                if (diamonds > 0 && character) {
+                    document.getElementById('take-error').innerText = 'You can only take diamonds OR a character token, not both';
+                    document.getElementById('take-error').style.display = 'block';
+                    return;
+                }
+                
+                // If taking diamonds, must be at least 1
+                if (diamonds > 0 && diamonds < 1) {
+                    document.getElementById('take-error').innerText = 'You must take at least 1 diamond';
+                    document.getElementById('take-error').style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('take-error').style.display = 'none';
+                
+                // Update box state
+                boxState.diamonds -= diamonds;
+                if (character) {
+                    var charIndex = boxState.characters.indexOf(character);
+                    if (charIndex !== -1) {
+                        boxState.characters.splice(charIndex, 1);
+                        // The character token they take becomes their character
+                        player.character = character;
+                    }
+                }
+                
+                playerTakes[player.name] = {
+                    diamonds: diamonds,
+                    character: character,
+                    isStreetUrchin: false,
+                    bagCharacter: firstPlayerBagCharacter // Track if first player dismissed a character to bag
+                };
+            }
+            
+            // Reset first player bag character and prompt flag for next player
+            firstPlayerBagCharacter = null;
+            firstPlayerBagPrompted = false;
+            
+            advanceToNextPlayer();
+        }
+
+        function advanceToNextPlayer() {
+            // Move to next player
+            currentTheftIndex++;
+            
+            // Wrap around if we've gone past the last player
+            if (currentTheftIndex >= players.length) {
+                currentTheftIndex = 0;
+            }
+            
+            // Skip Godfather
+            if (currentTheftIndex === godfatherIndex) {
+                currentTheftIndex++;
+                // Wrap around again if needed
+                if (currentTheftIndex >= players.length) {
+                    currentTheftIndex = 0;
+                }
+            }
+            
+            // Check if we've completed a full cycle (back to first player)
+            var firstPlayerIndex = (godfatherIndex + 1) % players.length;
+            if (currentTheftIndex === firstPlayerIndex) {
+                // All players have taken, start investigation
+                startInvestigation();
+            } else {
+                showPassScreen();
+            }
+        }
+
+        function startInvestigation() {
+            // Calculate total diamonds stolen
+            var totalStolen = 0;
+            for (var name in playerTakes) {
+                if (!playerTakes[name].isStreetUrchin) {
+                    totalStolen += playerTakes[name].diamonds || 0;
+                }
+            }
+            
+            document.getElementById('total-diamonds-stolen').innerText = totalStolen;
+            document.getElementById('diamonds-recovered').innerText = '0';
+            document.getElementById('jokers-remaining').innerText = jokersRemaining;
+            document.getElementById('godfather-investigation-name').innerText = 
+                'Godfather: ' + players[godfatherIndex].name;
+            
+            renderPlayerInfoList();
+            showScreen('investigation-screen');
+        }
+
+        function renderPlayerInfoList() {
+            var container = document.getElementById('player-info-list');
+            container.innerHTML = '';
+            
+            players.forEach(function(player) {
+                if (player.isGodfather) return;
+                if (eliminatedPlayers.indexOf(player.name) !== -1) return;
+                
+                var div = document.createElement('div');
+                div.className = 'player-info-card';
+                
+                // Character is determined by what they took from the box
+                var take = playerTakes[player.name];
+                var charInfo = 'Unknown';
+                if (player.isStreetUrchin) {
+                    charInfo = 'Street Urchin';
+                } else if (take && take.character) {
+                    charInfo = take.character;
+                } else if (player.character) {
+                    charInfo = player.character;
+                }
+                
+                div.innerHTML = 
+                    '<strong>' + player.name + '</strong><br>' +
+                    '<span style="color: var(--text-secondary); font-size: 0.9rem;">Character: ' + charInfo + '</span><br>' +
+                    '<span style="color: var(--text-secondary); font-size: 0.9rem;">Status: ' + 
+                    (eliminatedPlayers.indexOf(player.name) !== -1 ? 'Eliminated' : 'Active') + '</span>';
+                
+                var accuseBtn = document.createElement('button');
+                accuseBtn.className = 'accusation-btn';
+                accuseBtn.innerText = 'Accuse: "Empty your pockets!"';
+                accuseBtn.onclick = function(p) {
+                    return function() {
+                        makeAccusation(p);
+                    };
+                }(player);
+                div.appendChild(accuseBtn);
+                
+                container.appendChild(div);
+            });
+        }
+
+        function makeAccusation(player) {
+            var take = playerTakes[player.name];
+            var accusedName = player.name;
+            
+            document.getElementById('accused-player-name').innerText = accusedName;
+            
+            var resultDiv = document.getElementById('accusation-result');
+            
+            // Check if player is an Agent (based on what they took)
+            var take = playerTakes[player.name];
+            var playerCharacter = (take && take.character) ? take.character : player.character;
+            
+            if (playerCharacter === 'FBI Agent' || playerCharacter === 'CIA Agent') {
+                // Agent wins immediately
+                resultDiv.innerHTML = 
+                    '<div style="background: rgba(33, 150, 243, 0.2); border: 2px solid var(--agent-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                    '<h2 style="color: var(--agent-color);">Agent Wins!</h2>' +
+                    '<p>' + accusedName + ' is an Agent. The investigation ends and the Agent wins!</p>' +
+                    '</div>';
+                gameEnded = true;
+                showScreen('accusation-screen');
+                setTimeout(function() {
+                    endGame('agent', player);
+                }, 3000);
+                return;
+            }
+            
+            var playerTake = playerTakes[player.name];
+            
+            // Check if player has stolen any diamonds (not just character tokens)
+            // Street Urchins don't count as having stolen diamonds
+            var hasStolenDiamonds = playerTake && !playerTake.isStreetUrchin && playerTake.diamonds > 0;
+            
+            if (hasStolenDiamonds) {
+                // Correct accusation - player is a Thief (has stolen diamonds)
+                var diamondsFound = playerTake.diamonds;
+                diamondsRecovered += diamondsFound;
+                
+                eliminatedPlayers.push(player.name);
+                
+                resultDiv.innerHTML = 
+                    '<div style="background: rgba(255, 107, 107, 0.2); border: 2px solid var(--thief-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                    '<h2 style="color: var(--thief-color);">Thief Found!</h2>' +
+                    '<p>' + accusedName + ' had ' + diamondsFound + ' diamond(s)' + 
+                    (playerTake && playerTake.character ? ' and the ' + playerTake.character + ' token' : '') + '.</p>' +
+                    '<p>Diamonds recovered: ' + diamondsRecovered + '</p>' +
+                    '</div>';
+                
+                // Check if all diamonds recovered
+                var totalStolen = parseInt(document.getElementById('total-diamonds-stolen').innerText);
+                if (diamondsRecovered >= totalStolen) {
+                    gameEnded = true;
+                    showScreen('accusation-screen');
+                    setTimeout(function() {
+                        endGame('godfather');
+                    }, 3000);
+                    return;
+                }
+            } else {
+                // Wrong accusation - player has not stolen any diamonds
+                // (They may have taken only a character token, or be a Street Urchin, or taken nothing)
+                if (jokersRemaining > 0) {
+                    jokersRemaining--;
+                    resultDiv.innerHTML = 
+                        '<div style="background: rgba(255, 215, 0, 0.2); border: 2px solid var(--diamond-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                        '<h2 style="color: var(--diamond-color);">Wrong Accusation!</h2>' +
+                        '<p>' + accusedName + ' did not steal any diamonds. You give them a Joker as apology.</p>' +
+                        '<p>Jokers remaining: ' + jokersRemaining + '</p>' +
+                        '</div>';
+                } else {
+                    // Godfather eliminated - no Jokers left
+                    resultDiv.innerHTML = 
+                        '<div style="background: rgba(255, 107, 107, 0.2); border: 2px solid var(--thief-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                        '<h2 style="color: var(--thief-color);">Godfather Eliminated!</h2>' +
+                        '<p>You have no Jokers left. You are eliminated and the investigation ends.</p>' +
+                        '</div>';
+                    gameEnded = true;
+                    showScreen('accusation-screen');
+                    setTimeout(function() {
+                        endGame('thieves');
+                    }, 3000);
+                    return;
+                }
+            }
+            
+            showScreen('accusation-screen');
+        }
+
+        function continueInvestigation() {
+            document.getElementById('diamonds-recovered').innerText = diamondsRecovered;
+            document.getElementById('jokers-remaining').innerText = jokersRemaining;
+            renderPlayerInfoList();
+            showScreen('investigation-screen');
+        }
+
+        function endInvestigation() {
+            // Check win conditions
+            var totalStolen = parseInt(document.getElementById('total-diamonds-stolen').innerText);
+            if (diamondsRecovered >= totalStolen) {
+                endGame('godfather');
+            } else {
+                endGame('thieves');
+            }
+        }
+
+        function endGame(winner, agentPlayer) {
+            isGameInProgress = false; // Game ended, allow navigation
+            var resultDiv = document.getElementById('game-end-result');
+            
+            if (winner === 'agent' && agentPlayer) {
+                var agentTake = playerTakes[agentPlayer.name];
+                var agentChar = (agentTake && agentTake.character) ? agentTake.character : agentPlayer.character;
+                resultDiv.innerHTML = 
+                    '<div style="background: rgba(33, 150, 243, 0.2); border: 2px solid var(--agent-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                    '<h2 style="color: var(--agent-color);">Agent Wins!</h2>' +
+                    '<p>' + agentPlayer.name + ' (' + agentChar + ') wins the game!</p>' +
+                    '<p>The Agent was accused by the Godfather, ending the investigation.</p>' +
+                    '</div>';
+            } else if (winner === 'godfather') {
+                var loyalHenchmen = [];
+                players.forEach(function(p) {
+                    if (eliminatedPlayers.indexOf(p.name) === -1) {
+                        var take = playerTakes[p.name];
+                        var char = (take && take.character) ? take.character : p.character;
+                        if (char === 'Loyal Henchman') {
+                            loyalHenchmen.push(p);
+                        }
+                    }
+                });
+                
+                var winners = [players[godfatherIndex].name + ' (Godfather)'];
+                loyalHenchmen.forEach(function(p) {
+                    winners.push(p.name + ' (Loyal Henchman)');
+                });
+                
+                // Add Drivers (win if player to their right wins)
+                // First, create a set of winning player names for easier checking
+                var winningNames = [];
+                winners.forEach(function(winner) {
+                    // Extract just the name (remove labels like " (Godfather)" or " (Loyal Henchman)")
+                    var nameMatch = winner.match(/^([^(]+)/);
+                    if (nameMatch) {
+                        winningNames.push(nameMatch[1].trim());
+                    }
+                });
+                
+                players.forEach(function(p, index) {
+                    if (eliminatedPlayers.indexOf(p.name) === -1) {
+                        var take = playerTakes[p.name];
+                        var char = (take && take.character) ? take.character : p.character;
+                        if (char === 'Driver') {
+                            var rightPlayerIndex = (index + 1) % players.length;
+                            var rightPlayer = players[rightPlayerIndex];
+                            // Driver wins if player to their right is a winner
+                            if (winningNames.indexOf(rightPlayer.name) !== -1) {
+                                winners.push(p.name + ' (Driver)');
+                            }
+                        }
+                    }
+                });
+                
+                resultDiv.innerHTML = 
+                    '<div style="background: rgba(76, 175, 80, 0.2); border: 2px solid var(--loyal-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                    '<h2 style="color: var(--loyal-color);">Godfather Wins!</h2>' +
+                    '<p>The Godfather recovered all diamonds!</p>' +
+                    '<p><strong>Winners:</strong></p>' +
+                    '<ul style="text-align: left;">';
+                
+                winners.forEach(function(winner) {
+                    resultDiv.innerHTML += '<li>' + winner + '</li>';
+                });
+                
+                resultDiv.innerHTML += '</ul></div>';
+            } else if (winner === 'thieves') {
+                // Find thief with most diamonds
+                var maxDiamonds = 0;
+                var winningThieves = [];
+                
+                for (var name in playerTakes) {
+                    var take = playerTakes[name];
+                    if (take && !take.isStreetUrchin && take.diamonds > maxDiamonds && eliminatedPlayers.indexOf(name) === -1) {
+                        maxDiamonds = take.diamonds;
+                        winningThieves = [name];
+                    } else if (take && !take.isStreetUrchin && take.diamonds === maxDiamonds && eliminatedPlayers.indexOf(name) === -1) {
+                        winningThieves.push(name);
+                    }
+                }
+                
+                // Add Street Urchins
+                players.forEach(function(p) {
+                    if (p.isStreetUrchin && eliminatedPlayers.indexOf(p.name) === -1) {
+                        winningThieves.push(p.name + ' (Street Urchin)');
+                    }
+                });
+                
+                // Add Drivers (win if player to their right wins)
+                // First, create a set of winning player names (without labels) for easier checking
+                var winningThiefNames = [];
+                winningThieves.forEach(function(winner) {
+                    // Extract just the name (remove labels like " (Street Urchin)")
+                    var nameMatch = winner.match(/^([^(]+)/);
+                    if (nameMatch) {
+                        winningThiefNames.push(nameMatch[1].trim());
+                    }
+                });
+                
+                players.forEach(function(p, index) {
+                    if (eliminatedPlayers.indexOf(p.name) === -1) {
+                        var take = playerTakes[p.name];
+                        var char = (take && take.character) ? take.character : p.character;
+                        if (char === 'Driver') {
+                            var rightPlayerIndex = (index + 1) % players.length;
+                            var rightPlayer = players[rightPlayerIndex];
+                            // Driver wins if player to their right is a winning thief or street urchin
+                            if (winningThiefNames.indexOf(rightPlayer.name) !== -1) {
+                                winningThieves.push(p.name + ' (Driver)');
+                            }
+                        }
+                    }
+                });
+                
+                resultDiv.innerHTML = 
+                    '<div style="background: rgba(255, 107, 107, 0.2); border: 2px solid var(--thief-color); padding: 20px; border-radius: 8px; margin: 20px 0;">' +
+                    '<h2 style="color: var(--thief-color);">Thieves Win!</h2>' +
+                    '<p>The Godfather was eliminated or failed to recover all diamonds.</p>' +
+                    '<p><strong>Winners:</strong></p>' +
+                    '<ul style="text-align: left;">';
+                
+                winningThieves.forEach(function(winner) {
+                    resultDiv.innerHTML += '<li>' + winner + '</li>';
+                });
+                
+                resultDiv.innerHTML += '</ul></div>';
+            } else if (winner === 'agent') {
+                // Handled in makeAccusation
+            }
+            
+            showScreen('game-end-screen');
+        }
+
+        function showScreen(id) {
+            var screens = [
+                'setup-screen', 'godfather-screen', 'godfather-setup-screen', 
+                'character-dist-screen', 'pass-screen', 
+                'first-player-bag-screen', 'take-screen', 'investigation-screen', 'accusation-screen', 'game-end-screen'
+            ];
+            screens.forEach(function(screenId) {
+                document.getElementById(screenId).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+
