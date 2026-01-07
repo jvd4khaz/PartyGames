@@ -652,10 +652,10 @@
         // --- Character Definitions (Trouble Brewing) ---
         var CHARACTERS = {
             // Townsfolk
-            'Washerwoman': { name: 'Washerwoman', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Townsfolk character.', nightOrder: 1 },
-            'Librarian': { name: 'Librarian', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Outsider character.', nightOrder: 2 },
-            'Investigator': { name: 'Investigator', type: 'townsfolk', ability: 'Each night*, learn 1 of 2 players is a specific Minion character.', nightOrder: 3 },
-            'Chef': { name: 'Chef', type: 'townsfolk', ability: 'Each night*, learn how many pairs of evil players are sitting next to each other.', nightOrder: 4 },
+            'Washerwoman': { name: 'Washerwoman', type: 'townsfolk', ability: 'First night: learn 1 of 2 players is a specific Townsfolk character. (You learn this only once.)', nightOrder: 1 },
+            'Librarian': { name: 'Librarian', type: 'townsfolk', ability: 'First night: learn 1 of 2 players is a specific Outsider character. (You learn this only once.)', nightOrder: 2 },
+            'Investigator': { name: 'Investigator', type: 'townsfolk', ability: 'First night: learn 1 of 2 players is a specific Minion character. (You learn this only once.)', nightOrder: 3 },
+            'Chef': { name: 'Chef', type: 'townsfolk', ability: 'First night: learn how many pairs of evil players are sitting next to each other. (You learn this only once.)', nightOrder: 4 },
             'Empath': { name: 'Empath', type: 'townsfolk', ability: 'Each night*, learn how many evil players are sitting next to you (one or both neighbors).', nightOrder: 5 },
             'Fortune Teller': { name: 'Fortune Teller', type: 'townsfolk', ability: 'Each night*, choose two players: learn if one of them is the Demon (Yes/No). You start knowing a good player is the Demon (red herring).', nightOrder: 6 },
             'Undertaker': { name: 'Undertaker', type: 'townsfolk', ability: 'Each day*, if someone was executed yesterday, learn their character.', nightOrder: 7 },
@@ -664,7 +664,7 @@
             'Virgin': { name: 'Virgin', type: 'townsfolk', ability: 'The first time you are nominated, if the nominator is a Townsfolk, they are executed instead.', nightOrder: 10 },
             'Slayer': { name: 'Slayer', type: 'townsfolk', ability: 'Once per game, during the day, choose a player: if they are the Demon, they die.', nightOrder: 11 },
             'Soldier': { name: 'Soldier', type: 'townsfolk', ability: 'You cannot die at night.', nightOrder: 12 },
-            'Mayor': { name: 'Mayor', type: 'townsfolk', ability: 'If only 3 players remain and you die, good wins instead of evil.', nightOrder: 13 },
+            'Mayor': { name: 'Mayor', type: 'townsfolk', ability: 'If only 3 players live & no execution occurs, good wins. If you die at night, another player might die instead.', nightOrder: 13 },
             
             // Outsiders
             'Butler': { name: 'Butler', type: 'outsider', ability: 'Each night*, choose a player: tomorrow, you must vote how they vote.', nightOrder: 14 },
@@ -679,7 +679,7 @@
             'Baron': { name: 'Baron', type: 'minion', ability: 'There are extra Outsiders in play. [+2 Outsiders]', nightOrder: null },
             
             // Demon
-            'Imp': { name: 'Imp', type: 'demon', ability: 'Each night*, choose a player: they die. You are the Demon.', nightOrder: 21 }
+            'Imp': { name: 'Imp', type: 'demon', ability: 'First night: learn 3 roles not in game. Each night*, choose a player: they die. You can kill yourself (a Minion becomes the new Imp).', nightOrder: 21 }
         };
 
         var ROLE_ICONS = {
@@ -3184,10 +3184,10 @@
         }
 
         var ROLE_GUIDE_INFO = {
-            'Washerwoman': { desc: 'Each night, learn one of two players is a specific Townsfolk.', note: 'Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
-            'Librarian': { desc: 'Each night, learn one of two players is a specific Outsider.', note: 'Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
-            'Investigator': { desc: 'Each night, learn one of two players is a specific Minion.', note: 'Storyteller chooses which information to give. Recluse may register as Minion.' },
-            'Chef': { desc: 'Each night, learn how many pairs of evil players are sitting next to each other.', note: 'Counts pairs, not individuals. Recluse may register as evil.' },
+            'Washerwoman': { desc: 'First night: learn one of two players is a specific Townsfolk.', note: 'You learn this only once on the first night. Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
+            'Librarian': { desc: 'First night: learn one of two players is a specific Outsider.', note: 'You learn this only once on the first night. Storyteller chooses which information to give. Info may be false if drunk or poisoned.' },
+            'Investigator': { desc: 'First night: learn one of two players is a specific Minion.', note: 'You learn this only once on the first night. Storyteller chooses which information to give. Recluse may register as Minion.' },
+            'Chef': { desc: 'First night: learn how many pairs of evil players are sitting next to each other.', note: 'You learn this only once on the first night. Counts pairs, not individuals. Recluse may register as evil.' },
             'Empath': { desc: 'Each night, learn how many evil players are sitting next to you.', note: 'Neighbors must be alive. If you are dead, you learn 0. Recluse may register as evil.' },
             'Fortune Teller': { desc: 'Each night, choose two players; learn if one of them is the Demon.', note: 'One good player is a "red herring" (registers as Demon). Info may be false if poisoned.' },
             'Undertaker': { desc: 'Each day, if someone was executed yesterday, learn their character.', note: 'Only works if someone was executed the previous day.' },
@@ -3205,7 +3205,7 @@
             'Spy': { desc: 'You appear as good to all abilities. You can look at the Grimoire.', note: 'You know who the Demon is and all roles.' },
             'Scarlet Woman': { desc: 'If the Demon dies and 5 or more players are alive (before the Demon\'s death), you immediately become the Demon.', note: 'The 5+ players condition is checked before the Demon dies. If fewer than 5 players are alive when the Demon dies, the game ends and evil wins.' },
             'Baron': { desc: 'There are extra Outsiders in play. [+2 Outsiders]', note: 'This is a passive ability applied at game setup. 2 fewer Townsfolk and 2 more Outsiders are distributed.' },
-            'Imp': { desc: 'Each night, choose a player; they die. You can kill yourself.', note: 'If you kill yourself, a Minion becomes the new Imp.' }
+            'Imp': { desc: 'First night: learn 3 roles not in game. Each night, choose a player; they die. You can kill yourself.', note: 'If you kill yourself, a Minion becomes the new Imp. The 3 roles learned are good roles (Townsfolk/Outsiders) not in the game.' }
         };
 
         function showPlayerGuide() {
