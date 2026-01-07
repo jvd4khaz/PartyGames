@@ -352,12 +352,12 @@
             <div class="dist-row"><span class="dist-player">7:</span> <span class="townsfolk-count">5</span> <span class="outsider-count">0</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
             <div class="dist-row"><span class="dist-player">8:</span> <span class="townsfolk-count">5</span> <span class="outsider-count">1</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
             <div class="dist-row"><span class="dist-player">9:</span> <span class="townsfolk-count">5</span> <span class="outsider-count">2</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">10:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">0</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">11:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">1</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">12:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">2</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">13:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">0</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">14:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">1</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
-            <div class="dist-row"><span class="dist-player">15:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">2</span> <span class="minion-count">1</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">10:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">0</span> <span class="minion-count">2</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">11:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">1</span> <span class="minion-count">2</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">12:</span> <span class="townsfolk-count">7</span> <span class="outsider-count">2</span> <span class="minion-count">2</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">13:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">0</span> <span class="minion-count">3</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">14:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">1</span> <span class="minion-count">3</span> <span class="demon-count">1</span></div>
+            <div class="dist-row"><span class="dist-player">15:</span> <span class="townsfolk-count">9</span> <span class="outsider-count">2</span> <span class="minion-count">3</span> <span class="demon-count">1</span></div>
         </div>
         <div class="distribution-legend">
             <span class="legend-item"><span class="townsfolk-count">Townsfolk</span> <span class="outsider-count">Outsider</span> <span class="minion-count">Minion</span> <span class="demon-count">Demon</span></span>
@@ -400,7 +400,7 @@
                 <div class="cheat-sheet-card role-townsfolk">
                     <div class="cs-icon">⚰️</div>
                     <div class="cs-name">Undertaker</div>
-                    <div class="cs-rebus">Night: Who died today? = [Role]</div>
+                    <div class="cs-rebus">Night: Executed yesterday? = [Role]</div>
                 </div>
                 <div class="cheat-sheet-card role-townsfolk">
                     <div class="cs-icon">🛡️</div>
@@ -430,12 +430,7 @@
                 <div class="cheat-sheet-card role-townsfolk">
                     <div class="cs-icon">🗳️</div>
                     <div class="cs-name">Mayor</div>
-                    <div class="cs-rebus">Final 3: If I die, Good wins</div>
-                </div>
-                <div class="cheat-sheet-card role-townsfolk">
-                    <div class="cs-icon">🛎️</div>
-                    <div class="cs-name">Butler</div>
-                    <div class="cs-rebus">Night: Choose Master. Vote with Master</div>
+                    <div class="cs-rebus">Night: Attacked? Another may die. Final 3 & no execution? Good wins</div>
                 </div>
             </div>
         </div>
@@ -444,6 +439,11 @@
         <div class="cheat-sheet-section">
             <div class="cheat-sheet-header cs-outsider-header">Outsiders (Good Team)</div>
             <div class="cheat-sheet-grid">
+                <div class="cheat-sheet-card role-outsider">
+                    <div class="cs-icon">🛎️</div>
+                    <div class="cs-name">Butler</div>
+                    <div class="cs-rebus">Night: Choose Master. Tomorrow: Vote like Master</div>
+                </div>
                 <div class="cheat-sheet-card role-outsider">
                     <div class="cs-icon">🍺</div>
                     <div class="cs-name">Drunk</div>
@@ -469,7 +469,7 @@
                 <div class="cheat-sheet-card role-minion">
                     <div class="cs-icon">☠️</div>
                     <div class="cs-name">Poisoner</div>
-                    <div class="cs-rebus">Night: Poison 1 player (Ability malfunctions)</div>
+                    <div class="cs-rebus">Night: Poison 1 (Ability malfunctions until next night)</div>
                 </div>
                 <div class="cheat-sheet-card role-minion">
                     <div class="cs-icon">🕵️</div>
@@ -479,7 +479,12 @@
                 <div class="cheat-sheet-card role-minion">
                     <div class="cs-icon">💃</div>
                     <div class="cs-name">Scarlet Woman</div>
-                    <div class="cs-rebus">Passive: Imp dies? Become Imp</div>
+                    <div class="cs-rebus">Passive: Imp dies & 5+ alive? Become Imp</div>
+                </div>
+                <div class="cheat-sheet-card role-minion">
+                    <div class="cs-icon">👑</div>
+                    <div class="cs-name">Baron</div>
+                    <div class="cs-rebus">Start: +2 Outsiders in game</div>
                 </div>
             </div>
         </div>
@@ -491,7 +496,7 @@
                 <div class="cheat-sheet-card role-demon">
                     <div class="cs-icon">👹</div>
                     <div class="cs-name">Imp</div>
-                    <div class="cs-rebus">Night: Kill 1. Suicide? New Imp</div>
+                    <div class="cs-rebus">Night 1: Learn 3 roles not in game. Night: Kill 1 (can kill self → Minion becomes Imp)</div>
                 </div>
             </div>
         </div>

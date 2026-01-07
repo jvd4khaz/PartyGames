@@ -698,22 +698,22 @@
             'Chef': 'Start: # of Evil pairs',
             'Empath': 'Night: # of Evil neighbors',
             'Fortune Teller': 'Night: Choose 1. Is Demon? (Red herring)',
-            'Undertaker': 'Night: Who died today? = [Role]',
+            'Undertaker': 'Night: Executed yesterday? = [Role]',
             'Monk': 'Night: Protect 1 player',
             'Ravenkeeper': 'Death Night: Learn 1 player role',
             'Virgin': 'Day: Nominated by Townsfolk? Nominator dies',
             'Slayer': 'Day: Shot Demon? Demon dies',
             'Soldier': 'Night: Cannot die',
-            'Mayor': 'Final 3: If I die, Good wins',
-            'Butler': 'Night: Choose Master. Vote with Master',
+            'Mayor': 'Night: Attacked? Another may die. Final 3 & no execution? Good wins',
+            'Butler': 'Night: Choose Master. Tomorrow: Vote like Master',
             'Drunk': 'You are drunk. Ability fails/lies',
             'Recluse': 'Passive: Register as Evil/Demon',
             'Saint': 'Day: Executed? Evil wins',
-            'Poisoner': 'Night: Poison 1 player (Ability malfunctions)',
+            'Poisoner': 'Night: Poison 1 (Ability malfunctions until next night)',
             'Spy': 'Night: See Grimoire. Register as Good',
-            'Scarlet Woman': 'Passive: Imp dies? Become Imp',
+            'Scarlet Woman': 'Passive: Imp dies & 5+ alive? Become Imp',
             'Baron': 'Start: +2 Outsiders in game',
-            'Imp': 'Night: Kill 1. Self-kill? New Imp'
+            'Imp': 'Night 1: Learn 3 roles not in game. Night: Kill 1 (can kill self → Minion becomes Imp)'
         };
 
         // Character pools by type
@@ -3196,7 +3196,7 @@
             'Virgin': { desc: 'The first time you are nominated, if the nominator is a Townsfolk, they are executed instead.', note: 'Only works once per game. Does not work if drunk.' },
             'Slayer': { desc: 'Once per game, during the day, choose a player; if they are the Demon, they die.', note: 'Can be used during any day phase. Wasted if target is not Demon.' },
             'Soldier': { desc: 'You cannot die at night.', note: 'Still vulnerable to execution.' },
-            'Mayor': { desc: 'If only 3 players remain and no execution occurs, good wins.', note: 'If attacked at night, another player may die instead.' },
+            'Mayor': { desc: 'If only 3 players live & no execution occurs, good wins. If you die at night, another player might die instead.', note: 'Storyteller chooses if night kill redirects. Final day win requires no execution.' },
             'Butler': { desc: 'Each night, choose a player; tomorrow, you must vote how they vote.', note: 'You are an Outsider. You cannot vote differently from your chosen master. If they don\'t vote, you can\'t.' },
             'Drunk': { desc: 'You think you are a Townsfolk, but you are not. You are actually an Outsider.', note: 'Your ability does not work. Storyteller may give false info.' },
             'Recluse': { desc: 'You may register as evil or as a Demon, even if dead.', note: 'Storyteller may show you as evil to other abilities. You are still good.' },
