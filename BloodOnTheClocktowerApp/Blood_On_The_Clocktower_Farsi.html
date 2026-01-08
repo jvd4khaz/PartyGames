@@ -515,6 +515,33 @@
             <div id="teensy-no-baron-distribution" style="font-size:0.85rem; font-weight:bold; color:var(--accent-color); border-top:1px solid rgba(2, 119, 189, 0.3); padding-top:8px; margin-top:8px;"></div>
         </div>
 
+        <div class="input-group" style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
+            <label style="display: block; margin-bottom: 15px; font-weight: bold; color: var(--accent-color);">تنظیمات احتمال نقش‌ها:</label>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
+                    احتمال بارون: <span id="baron-prob-display">75</span>%
+                </label>
+                <input type="range" id="baron-prob-slider" min="0" max="100" value="75" style="width: 100%;" oninput="updateBaronProb()">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 3px;">
+                    <span>0%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
+                    احتمال مست: <span id="drunk-prob-display">75</span>%
+                </label>
+                <input type="range" id="drunk-prob-slider" min="0" max="100" value="75" style="width: 100%;" oninput="updateDrunkProb()">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 3px;">
+                    <span>0%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.8rem; color: #aaa; font-style: italic;">
+                این احتمالات فقط برای اولین جایگاه هر نوع نقش اعمال می‌شود. جایگاه‌های دیگر تصادفی هستند.
+            </div>
+        </div>
+
         <div id="player-inputs-container" style="margin-top:20px;"></div>
         
         <!-- Saved Players List -->
@@ -887,6 +914,8 @@
         var players = [];
         var savedPlayers = [];
         var currentDistIndex = 0;
+        var baronProbability = 75; // Percentage chance for Baron in first minion slot
+        var drunkProbability = 75; // Percentage chance for Drunk in first outsider slot
         
         // Game State
         var currentDay = 1;
@@ -1110,6 +1139,16 @@
             }
         }
 
+        function updateBaronProb() {
+            baronProbability = parseInt(document.getElementById('baron-prob-slider').value);
+            document.getElementById('baron-prob-display').innerText = baronProbability;
+        }
+
+        function updateDrunkProb() {
+            drunkProbability = parseInt(document.getElementById('drunk-prob-slider').value);
+            document.getElementById('drunk-prob-display').innerText = drunkProbability;
+        }
+
         function updatePlayerCount(delta) {
             var newCount = playerCount + delta;
             if (newCount >= 5 && newCount <= 15) {
@@ -1175,11 +1214,24 @@
             var selectedChars = [];
             
             // Select Minions first (to check for Baron)
+            // Baron probability is configurable via slider (default 75%)
             var minionPool = MINION_POOL.slice();
             shuffleArray(minionPool);
             var selectedMinions = [];
             for (var i = 0; i < dist.minions; i++) {
-                selectedMinions.push(minionPool[i]);
+                // If we need minions and Baron is available, use configured probability for first slot only
+                if (i === 0 && dist.minions > 0 && Math.random() * 100 < baronProbability) {
+                    // Use configured probability to force Baron
+                    var baronIndex = minionPool.indexOf('Baron');
+                    if (baronIndex !== -1) {
+                        selectedMinions.push('Baron');
+                        minionPool.splice(baronIndex, 1);
+                    } else {
+                        selectedMinions.push(minionPool[i]);
+                    }
+                } else {
+                    selectedMinions.push(minionPool[i]);
+                }
             }
             
             // Check if Baron is in the game (adds +2 Outsiders)
@@ -1200,13 +1252,13 @@
                 selectedChars.push(townsfolkPool[i]);
             }
             
-            // Select Outsiders - Drunk should have >90% chance
+            // Select Outsiders - Drunk probability is configurable via slider (default 75%)
             var outsiderPool = OUTSIDER_POOL.slice();
             shuffleArray(outsiderPool);
             for (var i = 0; i < adjustedOutsiders; i++) {
-                // If we need outsiders and Drunk is available, >90% chance to include it
-                if (i === 0 && adjustedOutsiders > 0 && Math.random() > 0.1) {
-                    // 90% chance to force Drunk
+                // If we need outsiders and Drunk is available, use configured probability for first slot only
+                if (i === 0 && adjustedOutsiders > 0 && Math.random() * 100 < drunkProbability) {
+                    // Use configured probability to force Drunk
                     var drunkIndex = outsiderPool.indexOf('Drunk');
                     if (drunkIndex !== -1) {
                         selectedChars.push('Drunk');
@@ -2241,7 +2293,7 @@
             var selectedPlayers = [];
             
             players.forEach(function(p) {
-                if (p.alive && p.name !== fortuneTellerPlayer.name) {
+                if (p.alive) {
                     var btn = document.createElement('button');
                     btn.className = 'player-select-btn';
                     btn.style.marginTop = '10px';
@@ -2942,15 +2994,16 @@
             var list = document.getElementById('nomination-votes');
             list.innerHTML = '';
             
-            var livingPlayers = players.filter(p => p.alive && p.name !== virgin.name && p.characterDef.type === 'townsfolk');
+            // Show ALL living players (except Virgin) to avoid revealing who is Townsfolk
+            var livingPlayers = players.filter(p => p.alive && p.name !== virgin.name);
             
             if (livingPlayers.length === 0) {
-                // No Townsfolk to execute, so Virgin is executed normally
+                // No one to execute, so Virgin is executed normally
                 executePlayer(virgin);
                 return;
             }
             
-            list.innerHTML = '<p style="margin-bottom:15px;">باکره فعال شد! انتخاب کنید کدام شهروند باکره را نامزد کرد (به جای او اعدام می‌شود):</p>';
+            list.innerHTML = '<p style="margin-bottom:15px;">باکره فعال شد! انتخاب کنید چه کسی باکره را نامزد کرد. اگر شهروند باشد، به جای او اعدام می‌شود:</p>';
             
             livingPlayers.forEach(function(p) {
                 var btn = document.createElement('button');
@@ -2958,16 +3011,26 @@
                 btn.style.marginTop = '10px';
                 btn.innerText = p.name;
                 btn.onclick = function() {
-                    addLog('باکره فعال شد! ' + p.name + ' به جای ' + virgin.name + ' اعدام شد');
-                    virginTriggered = true;
-                    // Close the modal first
-                    document.getElementById('nomination-modal').classList.add('hidden');
-                    executePlayer(p);
+                    // Check if the selected player is a Townsfolk
+                    if (p.characterDef.type === 'townsfolk') {
+                        addLog('باکره فعال شد! ' + p.name + ' (شهروند) به جای ' + virgin.name + ' اعدام شد');
+                        virginTriggered = true;
+                        // Close the modal first
+                        document.getElementById('nomination-modal').classList.add('hidden');
+                        executePlayer(p);
+                    } else {
+                        // Nominator is not a Townsfolk, so Virgin is executed normally
+                        addLog('باکره فعال شد، اما ' + p.name + ' شهروند نیست. ' + virgin.name + ' به طور عادی اعدام می‌شود.');
+                        virginTriggered = true;
+                        // Close the modal first
+                        document.getElementById('nomination-modal').classList.add('hidden');
+                        executePlayer(virgin);
+                    }
                 };
                 list.appendChild(btn);
             });
             
-            document.getElementById('nomination-text').innerText = 'توانایی باکره فعال شد - نامزدکننده به جای او اعدام می‌شود.';
+            document.getElementById('nomination-text').innerText = 'توانایی باکره فعال شد - نامزدکننده را انتخاب کنید. اگر شهروند باشد، به جای او اعدام می‌شود.';
             document.getElementById('nomination-modal').classList.remove('hidden');
         }
 

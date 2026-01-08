@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mysterium - Ghost & Psychics</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent-color: #8b5cf6;
+            --ghost-color: #7c3aed;
+            --psychic-color: #06b6d4;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --btn-color: #8b5cf6;
+            --btn-text: #ffffff;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+            font-weight: 900;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin: 15px 0 10px 0;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: var(--text-secondary);
+        }
+
+        p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .setup-section {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            background-color: #233554;
+            border: 1px solid #303C55;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            outline: 1px solid var(--accent-color);
+        }
+
+        .action-btn {
+            background-color: var(--btn-color);
+            color: var(--btn-text);
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .role-ghost {
+            background-color: var(--ghost-color);
+            color: white;
+        }
+
+        .role-psychic {
+            background-color: var(--psychic-color);
+            color: white;
+        }
+
+        .game-info {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .round-info {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .psychic-list {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .psychic-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .psychic-card.complete {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .progress-tracker {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .progress-item {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .progress-item.complete {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-color);
+        }
+
+        .progress-item.current {
+            border-color: var(--accent-color);
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .clue-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+
+        .clue-input-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+        }
+
+        .clue-input-group input {
+            flex: 1;
+        }
+
+        .clue-display {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .clue-card {
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid var(--accent-color);
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .guess-section {
+            margin: 15px 0;
+        }
+
+        .guess-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .guess-btn {
+            padding: 12px;
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid var(--accent-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .guess-btn:hover {
+            background: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .guess-btn.selected {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .feedback-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success-color);
+            border-radius: 6px;
+        }
+
+        .feedback-section.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error-color);
+        }
+
+        .final-round {
+            background: rgba(245, 158, 11, 0.1);
+            border: 3px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .final-combination {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .combination-item {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            border: 2px solid var(--error-color);
+        }
+
+        .status-info {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--psychic-color);
+            border: 2px solid var(--psychic-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div id="setupScreen">
+            <h1>🔮 Mysterium</h1>
+            <p style="text-align: center; color: var(--text-secondary);">
+                A cooperative mystery game where the Ghost guides Psychics through visions
+            </p>
+
+            <div class="setup-section">
+                <h2>Game Setup</h2>
+                <div class="input-group">
+                    <label for="playerCount">Number of Psychics (2-6):</label>
+                    <input type="number" id="playerCount" min="2" max="6" value="4">
+                </div>
+                <div class="input-group">
+                    <label for="gameMode">Select Your Role:</label>
+                    <select id="gameMode">
+                        <option value="ghost">Ghost (Gives Clues)</option>
+                        <option value="psychic">Psychic (Solves Mystery)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="psychicName">Your Name (if Psychic):</label>
+                    <input type="text" id="psychicName" placeholder="Enter your name">
+                </div>
+                <button class="action-btn" onclick="startGame()">Start Game</button>
+            </div>
+
+            <div class="setup-section">
+                <h3>How to Play</h3>
+                <p><strong>Ghost:</strong> Secretly assign each Psychic a suspect, location, and weapon. Give them vision cards (Dixit cards) each round to guide them.</p>
+                <p><strong>Psychics:</strong> Receive vision cards each round. Make guesses about your assigned suspect, location, and weapon based on the clues.</p>
+                <p><strong>Goal:</strong> All Psychics must correctly identify their suspect, location, and weapon within 7 rounds. Then work together to find the true culprit in the final round.</p>
+                <p><strong>Note:</strong> Use physical Dixit cards. Enter the card number/name when giving or receiving clues.</p>
+            </div>
+        </div>
+
+        <!-- Ghost Screen -->
+        <div id="ghostScreen" class="hidden">
+            <h1>👻 Ghost View</h1>
+            <div class="round-info">
+                Round: <span id="ghostRound">1</span> / 7
+            </div>
+
+            <div class="game-info">
+                <p><strong>Your Secret Assignments:</strong></p>
+                <div id="ghostAssignments"></div>
+            </div>
+
+            <h2>Give Vision Cards (Dixit Cards)</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                Enter the Dixit card numbers/names you're giving to each Psychic this round.
+            </p>
+            <div id="ghostClueInputs"></div>
+            <button class="action-btn" onclick="ghostSubmitClues()">Submit Clues for This Round</button>
+            <button class="secondary-btn" onclick="showPsychicGuesses()">View Psychic Guesses</button>
+
+            <div id="psychicGuessesDisplay" class="hidden" style="margin-top: 20px;">
+                <h2>Psychic Guesses</h2>
+                <div id="psychicGuessesList"></div>
+                <button class="action-btn" onclick="ghostGiveFeedback()">Give Feedback on Guesses</button>
+            </div>
+
+            <div id="ghostFeedbackSection" class="hidden">
+                <h2>Feedback</h2>
+                <div id="feedbackInputs"></div>
+                <button class="action-btn" onclick="submitFeedback()">Submit Feedback</button>
+            </div>
+
+            <div id="finalRoundGhost" class="hidden">
+                <div class="final-round">
+                    <h2>🌟 Final Round</h2>
+                    <p>All Psychics have identified their cards! Now they must work together to find the true culprit.</p>
+                    <p><strong>The True Culprit:</strong></p>
+                    <div id="trueCulpritDisplay"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Psychic Screen -->
+        <div id="psychicScreen" class="hidden">
+            <h1>🔮 Psychic: <span id="psychicNameDisplay"></span></h1>
+            <div class="round-info">
+                Round: <span id="psychicRound">1</span> / 7
+            </div>
+
+            <div class="progress-tracker">
+                <div class="progress-item" id="suspectProgress">
+                    <div>Suspect</div>
+                    <div id="suspectStatus">❌</div>
+                </div>
+                <div class="progress-item" id="locationProgress">
+                    <div>Location</div>
+                    <div id="locationStatus">❌</div>
+                </div>
+                <div class="progress-item" id="weaponProgress">
+                    <div>Weapon</div>
+                    <div id="weaponStatus">❌</div>
+                </div>
+            </div>
+
+            <div id="clueDisplaySection" class="clue-section">
+                <h2>Your Vision Cards This Round</h2>
+                <div id="currentClues" class="clue-display">
+                    <p style="color: var(--text-secondary);">Waiting for Ghost to give clues...</p>
+                </div>
+            </div>
+
+            <div id="guessSection" class="guess-section">
+                <h2>Make Your Guess</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Select what you think is your assigned card for each category:
+                </p>
+                
+                <div id="suspectGuessSection">
+                    <h3>Suspect</h3>
+                    <div id="suspectGuesses" class="guess-buttons"></div>
+                </div>
+
+                <div id="locationGuessSection">
+                    <h3>Location</h3>
+                    <div id="locationGuesses" class="guess-buttons"></div>
+                </div>
+
+                <div id="weaponGuessSection">
+                    <h3>Weapon</h3>
+                    <div id="weaponGuesses" class="guess-buttons"></div>
+                </div>
+
+                <button class="action-btn" onclick="psychicSubmitGuess()" id="submitGuessBtn" disabled>Submit Guess</button>
+            </div>
+
+            <div id="feedbackDisplay" class="hidden">
+                <h2>Ghost's Feedback</h2>
+                <div id="feedbackContent"></div>
+            </div>
+
+            <div id="finalRoundPsychic" class="hidden">
+                <div class="final-round">
+                    <h2>🌟 Final Round</h2>
+                    <p>You've identified all your cards! Now work with other Psychics to find the true culprit.</p>
+                    <div id="finalCombinationSection">
+                        <h3>Select the True Culprit Combination:</h3>
+                        <div class="final-combination">
+                            <div class="combination-item">
+                                <h4>Suspect</h4>
+                                <div id="finalSuspects" class="guess-buttons"></div>
+                            </div>
+                            <div class="combination-item">
+                                <h4>Location</h4>
+                                <div id="finalLocations" class="guess-buttons"></div>
+                            </div>
+                            <div class="combination-item">
+                                <h4>Weapon</h4>
+                                <div id="finalWeapons" class="guess-buttons"></div>
+                            </div>
+                        </div>
+                        <button class="action-btn" onclick="psychicSubmitFinalGuess()">Submit Final Guess</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="secondary-btn" onclick="resetGame()" style="margin-top: 20px;">Reset Game</button>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            playerCount: 4,
+            currentRound: 1,
+            maxRounds: 7,
+            role: null,
+            psychicName: '',
+            assignments: {},
+            currentClues: {},
+            guesses: {},
+            feedback: {},
+            progress: {},
+            finalRound: false,
+            trueCulprit: null
+        };
+
+        // Game data based on player count
+        const gameData = {
+            2: { suspects: 4, locations: 4, weapons: 4 },
+            3: { suspects: 5, locations: 5, weapons: 5 },
+            4: { suspects: 6, locations: 6, weapons: 6 },
+            5: { suspects: 7, locations: 7, weapons: 7 },
+            6: { suspects: 8, locations: 8, weapons: 8 }
+        };
+
+        const suspects = ['Suspect 1', 'Suspect 2', 'Suspect 3', 'Suspect 4', 'Suspect 5', 'Suspect 6', 'Suspect 7', 'Suspect 8'];
+        const locations = ['Location 1', 'Location 2', 'Location 3', 'Location 4', 'Location 5', 'Location 6', 'Location 7', 'Location 8'];
+        const weapons = ['Weapon 1', 'Weapon 2', 'Weapon 3', 'Weapon 4', 'Weapon 5', 'Weapon 6', 'Weapon 7', 'Weapon 8'];
+
+        function startGame() {
+            gameState.playerCount = parseInt(document.getElementById('playerCount').value);
+            gameState.role = document.getElementById('gameMode').value;
+            gameState.psychicName = document.getElementById('psychicName').value.trim() || 'Psychic';
+
+            if (gameState.role === 'psychic' && !gameState.psychicName) {
+                alert('Please enter your name');
+                return;
+            }
+
+            // Save to localStorage
+            saveGameState();
+
+            document.getElementById('setupScreen').classList.add('hidden');
+
+            if (gameState.role === 'ghost') {
+                setupGhostGame();
+            } else {
+                loadGameState();
+                setupPsychicGame();
+            }
+        }
+
+        function saveGameState() {
+            localStorage.setItem('mysterium_gameState', JSON.stringify(gameState));
+        }
+
+        function loadGameState() {
+            const saved = localStorage.getItem('mysterium_gameState');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                // Merge saved state with current
+                Object.assign(gameState, savedState);
+            }
+        }
+
+        function setupGhostGame() {
+            // Check if game already exists
+            loadGameState();
+            
+            // Only initialize if assignments don't exist
+            if (Object.keys(gameState.assignments).length === 0) {
+                // Generate random assignments for each psychic
+                const data = gameData[gameState.playerCount];
+                const availableSuspects = [...Array(data.suspects).keys()].map(i => suspects[i]);
+                const availableLocations = [...Array(data.locations).keys()].map(i => locations[i]);
+                const availableWeapons = [...Array(data.weapons).keys()].map(i => weapons[i]);
+
+                for (let i = 1; i <= gameState.playerCount; i++) {
+                    const suspect = availableSuspects[Math.floor(Math.random() * availableSuspects.length)];
+                    const location = availableLocations[Math.floor(Math.random() * availableLocations.length)];
+                    const weapon = availableWeapons[Math.floor(Math.random() * availableWeapons.length)];
+
+                    gameState.assignments[`psychic${i}`] = { suspect, location, weapon };
+                    gameState.progress[`psychic${i}`] = { suspect: false, location: false, weapon: false };
+                }
+
+                // Select true culprit (one of the assigned combinations)
+                const randomPsychic = `psychic${Math.floor(Math.random() * gameState.playerCount) + 1}`;
+                gameState.trueCulprit = { ...gameState.assignments[randomPsychic] };
+                
+                saveGameState();
+            }
+
+            document.getElementById('ghostScreen').classList.remove('hidden');
+            document.getElementById('ghostRound').textContent = gameState.currentRound;
+            displayGhostAssignments();
+            setupGhostClueInputs();
+            
+            // Check if final round
+            if (gameState.finalRound) {
+                document.getElementById('finalRoundGhost').classList.remove('hidden');
+                displayTrueCulprit();
+            }
+        }
+
+        function displayGhostAssignments() {
+            const container = document.getElementById('ghostAssignments');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const key = `psychic${i}`;
+                const assignment = gameState.assignments[key];
+                const progress = gameState.progress[key];
+
+                const div = document.createElement('div');
+                div.style.margin = '10px 0';
+                div.style.padding = '10px';
+                div.style.background = 'rgba(0,0,0,0.2)';
+                div.style.borderRadius = '6px';
+                div.innerHTML = `
+                    <strong>Psychic ${i}:</strong><br>
+                    Suspect: ${assignment.suspect} ${progress.suspect ? '✅' : '❌'}<br>
+                    Location: ${assignment.location} ${progress.location ? '✅' : '❌'}<br>
+                    Weapon: ${assignment.weapon} ${progress.weapon ? '✅' : '❌'}
+                `;
+                container.appendChild(div);
+            }
+
+            if (gameState.trueCulprit) {
+                const trueDiv = document.createElement('div');
+                trueDiv.style.margin = '15px 0';
+                trueDiv.style.padding = '15px';
+                trueDiv.style.background = 'rgba(245, 158, 11, 0.2)';
+                trueDiv.style.border = '2px solid var(--warning-color)';
+                trueDiv.style.borderRadius = '6px';
+                trueDiv.innerHTML = `
+                    <strong>🌟 True Culprit (Final Round):</strong><br>
+                    Suspect: ${gameState.trueCulprit.suspect}<br>
+                    Location: ${gameState.trueCulprit.location}<br>
+                    Weapon: ${gameState.trueCulprit.weapon}
+                `;
+                container.appendChild(trueDiv);
+            }
+        }
+
+        function setupGhostClueInputs() {
+            const container = document.getElementById('ghostClueInputs');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const div = document.createElement('div');
+                div.className = 'clue-section';
+                div.innerHTML = `
+                    <h3>Psychic ${i}</h3>
+                    <div class="clue-input-group">
+                        <input type="text" id="clue_psychic${i}" placeholder="Enter Dixit card number/name">
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function ghostSubmitClues() {
+            loadGameState();
+            gameState.currentClues = {};
+            
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const input = document.getElementById(`clue_psychic${i}`);
+                const clue = input.value.trim();
+                if (clue) {
+                    gameState.currentClues[`psychic${i}`] = clue;
+                }
+            }
+
+            if (Object.keys(gameState.currentClues).length === 0) {
+                alert('Please enter at least one clue');
+                return;
+            }
+
+            saveGameState();
+            alert('Clues submitted! Pass the device to Psychics to view clues and make guesses.');
+        }
+
+        function showPsychicGuesses() {
+            const display = document.getElementById('psychicGuessesDisplay');
+            const list = document.getElementById('psychicGuessesList');
+            
+            display.classList.remove('hidden');
+            list.innerHTML = '';
+
+            if (Object.keys(gameState.guesses).length === 0) {
+                list.innerHTML = '<p>No guesses submitted yet.</p>';
+                return;
+            }
+
+            for (const [psychicKey, guess] of Object.entries(gameState.guesses)) {
+                const div = document.createElement('div');
+                div.className = 'psychic-card';
+                div.innerHTML = `
+                    <h3>${psychicKey.replace('psychic', 'Psychic ')}</h3>
+                    <p>Suspect: ${guess.suspect || 'Not guessed'}</p>
+                    <p>Location: ${guess.location || 'Not guessed'}</p>
+                    <p>Weapon: ${guess.weapon || 'Not guessed'}</p>
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        function ghostGiveFeedback() {
+            const section = document.getElementById('ghostFeedbackSection');
+            const inputs = document.getElementById('feedbackInputs');
+            
+            section.classList.remove('hidden');
+            inputs.innerHTML = '';
+
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const key = `psychic${i}`;
+                const guess = gameState.guesses[key];
+                if (!guess) continue;
+
+                const div = document.createElement('div');
+                div.className = 'clue-section';
+                div.innerHTML = `
+                    <h3>Psychic ${i}</h3>
+                    <p>Suspect: ${guess.suspect || 'N/A'}</p>
+                    <select id="feedback_suspect_${key}">
+                        <option value="">Select feedback</option>
+                        <option value="correct">✅ Correct</option>
+                        <option value="wrong">❌ Wrong</option>
+                    </select>
+                    <p>Location: ${guess.location || 'N/A'}</p>
+                    <select id="feedback_location_${key}">
+                        <option value="">Select feedback</option>
+                        <option value="correct">✅ Correct</option>
+                        <option value="wrong">❌ Wrong</option>
+                    </select>
+                    <p>Weapon: ${guess.weapon || 'N/A'}</p>
+                    <select id="feedback_weapon_${key}">
+                        <option value="">Select feedback</option>
+                        <option value="correct">✅ Correct</option>
+                        <option value="wrong">❌ Wrong</option>
+                    </select>
+                `;
+                inputs.appendChild(div);
+            }
+        }
+
+        function submitFeedback() {
+            loadGameState();
+            gameState.feedback = {};
+
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const key = `psychic${i}`;
+                const assignment = gameState.assignments[key];
+                const guess = gameState.guesses[key];
+                const progress = gameState.progress[key];
+
+                if (!guess) continue;
+
+                const feedback = {
+                    suspect: document.getElementById(`feedback_suspect_${key}`)?.value || 'wrong',
+                    location: document.getElementById(`feedback_location_${key}`)?.value || 'wrong',
+                    weapon: document.getElementById(`feedback_weapon_${key}`)?.value || 'wrong'
+                };
+
+                // Auto-check based on actual assignments
+                if (guess.suspect === assignment.suspect) {
+                    progress.suspect = true;
+                    feedback.suspect = 'correct';
+                } else {
+                    feedback.suspect = 'wrong';
+                }
+
+                if (guess.location === assignment.location) {
+                    progress.location = true;
+                    feedback.location = 'correct';
+                } else {
+                    feedback.location = 'wrong';
+                }
+
+                if (guess.weapon === assignment.weapon) {
+                    progress.weapon = true;
+                    feedback.weapon = 'correct';
+                } else {
+                    feedback.weapon = 'wrong';
+                }
+
+                gameState.feedback[key] = feedback;
+            }
+
+            // Check if all psychics are complete
+            let allComplete = true;
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const progress = gameState.progress[`psychic${i}`];
+                if (!progress.suspect || !progress.location || !progress.weapon) {
+                    allComplete = false;
+                    break;
+                }
+            }
+
+            if (allComplete) {
+                gameState.finalRound = true;
+                document.getElementById('finalRoundGhost').classList.remove('hidden');
+                displayTrueCulprit();
+            } else {
+                // Advance to next round
+                if (gameState.currentRound < gameState.maxRounds) {
+                    gameState.currentRound++;
+                    gameState.guesses = {};
+                    gameState.currentClues = {};
+                    gameState.feedback = {};
+                    document.getElementById('ghostRound').textContent = gameState.currentRound;
+                    setupGhostClueInputs();
+                    document.getElementById('psychicGuessesDisplay').classList.add('hidden');
+                    document.getElementById('ghostFeedbackSection').classList.add('hidden');
+                } else {
+                    alert('Game Over! Maximum rounds reached.');
+                }
+            }
+
+            saveGameState();
+            displayGhostAssignments();
+            alert('Feedback submitted! Psychics can now view their results.');
+        }
+
+        function displayTrueCulprit() {
+            const container = document.getElementById('trueCulpritDisplay');
+            container.innerHTML = `
+                <div style="font-size: 1.2rem; margin: 10px 0;">
+                    <div>Suspect: ${gameState.trueCulprit.suspect}</div>
+                    <div>Location: ${gameState.trueCulprit.location}</div>
+                    <div>Weapon: ${gameState.trueCulprit.weapon}</div>
+                </div>
+            `;
+        }
+
+        function setupPsychicGame() {
+            loadGameState();
+            
+            if (Object.keys(gameState.assignments).length === 0) {
+                alert('Game not set up yet. Ghost must start the game first.');
+                document.getElementById('setupScreen').classList.remove('hidden');
+                return;
+            }
+            
+            // Find which psychic number this player is
+            let psychicNumber = null;
+            const psychicNames = JSON.parse(localStorage.getItem('mysterium_psychicNames') || '{}');
+            
+            // Check if name already exists
+            for (const [key, name] of Object.entries(psychicNames)) {
+                if (name === gameState.psychicName) {
+                    psychicNumber = parseInt(key.replace('psychic', ''));
+                    break;
+                }
+            }
+            
+            // If new name, assign next available number
+            if (!psychicNumber) {
+                for (let i = 1; i <= gameState.playerCount; i++) {
+                    if (!psychicNames[`psychic${i}`]) {
+                        psychicNumber = i;
+                        psychicNames[`psychic${i}`] = gameState.psychicName;
+                        localStorage.setItem('mysterium_psychicNames', JSON.stringify(psychicNames));
+                        break;
+                    }
+                }
+            }
+            
+            if (!psychicNumber) {
+                alert('All psychic slots are taken. Please use a different name or reset the game.');
+                return;
+            }
+            
+            gameState.psychicNumber = psychicNumber;
+            gameState.psychicKey = `psychic${psychicNumber}`;
+            
+            document.getElementById('psychicScreen').classList.remove('hidden');
+            document.getElementById('psychicNameDisplay').textContent = gameState.psychicName;
+            
+            updatePsychicProgress();
+            setupPsychicGuessButtons();
+            displayCurrentClues();
+            displayPsychicFeedback();
+            checkFinalRound();
+        }
+
+        function updatePsychicProgress() {
+            loadGameState();
+            document.getElementById('psychicRound').textContent = gameState.currentRound;
+            
+            const progress = gameState.progress[gameState.psychicKey] || { suspect: false, location: false, weapon: false };
+            
+            // Update progress indicators
+            const suspectEl = document.getElementById('suspectProgress');
+            const locationEl = document.getElementById('locationProgress');
+            const weaponEl = document.getElementById('weaponProgress');
+            
+            suspectEl.className = 'progress-item' + (progress.suspect ? ' complete' : '');
+            locationEl.className = 'progress-item' + (progress.location ? ' complete' : '');
+            weaponEl.className = 'progress-item' + (progress.weapon ? ' complete' : '');
+            
+            document.getElementById('suspectStatus').textContent = progress.suspect ? '✅' : '❌';
+            document.getElementById('locationStatus').textContent = progress.location ? '✅' : '❌';
+            document.getElementById('weaponStatus').textContent = progress.weapon ? '✅' : '❌';
+            
+            // Hide completed sections
+            if (progress.suspect) {
+                document.getElementById('suspectGuessSection').style.display = 'none';
+            }
+            if (progress.location) {
+                document.getElementById('locationGuessSection').style.display = 'none';
+            }
+            if (progress.weapon) {
+                document.getElementById('weaponGuessSection').style.display = 'none';
+            }
+        }
+
+        function displayCurrentClues() {
+            loadGameState();
+            const clues = gameState.currentClues[gameState.psychicKey];
+            const container = document.getElementById('currentClues');
+            
+            if (clues) {
+                container.innerHTML = '';
+                const clueCard = document.createElement('div');
+                clueCard.className = 'clue-card';
+                clueCard.textContent = clues;
+                container.appendChild(clueCard);
+            } else {
+                container.innerHTML = '<p style="color: var(--text-secondary);">Waiting for Ghost to give clues...</p>';
+            }
+        }
+
+        function setupPsychicGuessButtons() {
+            const data = gameData[gameState.playerCount];
+            
+            setupGuessButtons('suspect', data.suspects);
+            setupGuessButtons('location', data.locations);
+            setupGuessButtons('weapon', data.weapons);
+        }
+
+        function setupGuessButtons(category, count) {
+            const container = document.getElementById(`${category}Guesses`);
+            container.innerHTML = '';
+
+            const items = category === 'suspect' ? suspects : (category === 'location' ? locations : weapons);
+
+            for (let i = 0; i < count; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'guess-btn';
+                btn.textContent = items[i];
+                btn.dataset.category = category;
+                btn.dataset.value = items[i];
+                btn.onclick = () => selectGuess(category, items[i]);
+                container.appendChild(btn);
+            }
+        }
+
+        let selectedGuesses = { suspect: null, location: null, weapon: null };
+
+        function selectGuess(category, value) {
+            selectedGuesses[category] = value;
+            
+            // Update button styles
+            document.querySelectorAll(`.guess-btn[data-category="${category}"]`).forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.value === value) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            // Enable submit button if all categories selected
+            const allSelected = selectedGuesses.suspect && selectedGuesses.location && selectedGuesses.weapon;
+            document.getElementById('submitGuessBtn').disabled = !allSelected;
+        }
+
+        function psychicSubmitGuess() {
+            loadGameState();
+            
+            if (!selectedGuesses.suspect || !selectedGuesses.location || !selectedGuesses.weapon) {
+                alert('Please select one option for each category');
+                return;
+            }
+            
+            gameState.guesses[gameState.psychicKey] = { ...selectedGuesses };
+            saveGameState();
+            
+            alert('Guess submitted! Pass the device back to the Ghost to review your guesses.');
+        }
+
+        function displayPsychicFeedback() {
+            loadGameState();
+            const feedback = gameState.feedback[gameState.psychicKey];
+            
+            if (!feedback) {
+                return;
+            }
+            
+            const section = document.getElementById('feedbackDisplay');
+            const content = document.getElementById('feedbackContent');
+            
+            section.classList.remove('hidden');
+            
+            let html = '<div>';
+            if (feedback.suspect === 'correct') {
+                html += '<div class="status-success">✅ Suspect: Correct!</div>';
+            } else if (feedback.suspect === 'wrong') {
+                html += '<div class="status-error">❌ Suspect: Wrong</div>';
+            }
+            
+            if (feedback.location === 'correct') {
+                html += '<div class="status-success">✅ Location: Correct!</div>';
+            } else if (feedback.location === 'wrong') {
+                html += '<div class="status-error">❌ Location: Wrong</div>';
+            }
+            
+            if (feedback.weapon === 'correct') {
+                html += '<div class="status-success">✅ Weapon: Correct!</div>';
+            } else if (feedback.weapon === 'wrong') {
+                html += '<div class="status-error">❌ Weapon: Wrong</div>';
+            }
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+
+        function checkFinalRound() {
+            loadGameState();
+            if (gameState.finalRound) {
+                document.getElementById('finalRoundPsychic').classList.remove('hidden');
+                setupFinalRoundButtons();
+            }
+        }
+
+        function setupFinalRoundButtons() {
+            loadGameState();
+            const data = gameData[gameState.playerCount];
+            
+            // Get all identified cards from all psychics
+            const allIdentified = {
+                suspects: new Set(),
+                locations: new Set(),
+                weapons: new Set()
+            };
+            
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const progress = gameState.progress[`psychic${i}`];
+                const assignment = gameState.assignments[`psychic${i}`];
+                
+                if (progress.suspect) allIdentified.suspects.add(assignment.suspect);
+                if (progress.location) allIdentified.locations.add(assignment.location);
+                if (progress.weapon) allIdentified.weapons.add(assignment.weapon);
+            }
+            
+            // Display buttons for final round
+            setupFinalButtons('finalSuspects', Array.from(allIdentified.suspects), 'suspect');
+            setupFinalButtons('finalLocations', Array.from(allIdentified.locations), 'location');
+            setupFinalButtons('finalWeapons', Array.from(allIdentified.weapons), 'weapon');
+        }
+
+        function setupFinalButtons(containerId, items, category) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'guess-btn';
+                btn.textContent = item;
+                btn.dataset.category = category;
+                btn.dataset.value = item;
+                btn.onclick = () => selectFinalGuess(category, item);
+                container.appendChild(btn);
+            });
+        }
+
+        let selectedFinalGuesses = { suspect: null, location: null, weapon: null };
+
+        function selectFinalGuess(category, value) {
+            selectedFinalGuesses[category] = value;
+            
+            document.querySelectorAll(`#final${category.charAt(0).toUpperCase() + category.slice(1)}s .guess-btn`).forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.value === value) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function psychicSubmitFinalGuess() {
+            loadGameState();
+            
+            // Get selected final combination
+            const finalSuspect = document.querySelector('#finalSuspects .guess-btn.selected')?.dataset.value;
+            const finalLocation = document.querySelector('#finalLocations .guess-btn.selected')?.dataset.value;
+            const finalWeapon = document.querySelector('#finalWeapons .guess-btn.selected')?.dataset.value;
+
+            if (!finalSuspect || !finalLocation || !finalWeapon) {
+                alert('Please select one option for each category');
+                return;
+            }
+
+            const isCorrect = finalSuspect === gameState.trueCulprit.suspect &&
+                            finalLocation === gameState.trueCulprit.location &&
+                            finalWeapon === gameState.trueCulprit.weapon;
+
+            if (isCorrect) {
+                alert('🎉 Success! You found the true culprit! The mystery is solved!');
+            } else {
+                alert('❌ Not quite right. The mystery remains unsolved. Try again or discuss with other Psychics.');
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Are you sure you want to reset the game? This will clear all game data.')) {
+                localStorage.removeItem('mysterium_gameState');
+                localStorage.removeItem('mysterium_psychicNames');
+                location.reload();
+            }
+        }
+
+        // Check for existing game on load
+        window.addEventListener('load', () => {
+            loadGameState();
+            if (gameState.role && Object.keys(gameState.assignments).length > 0) {
+                // Game exists, show appropriate screen
+                document.getElementById('setupScreen').classList.add('hidden');
+                if (gameState.role === 'ghost') {
+                    document.getElementById('ghostScreen').classList.remove('hidden');
+                    document.getElementById('ghostRound').textContent = gameState.currentRound;
+                    displayGhostAssignments();
+                    setupGhostClueInputs();
+                    if (gameState.finalRound) {
+                        document.getElementById('finalRoundGhost').classList.remove('hidden');
+                        displayTrueCulprit();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
