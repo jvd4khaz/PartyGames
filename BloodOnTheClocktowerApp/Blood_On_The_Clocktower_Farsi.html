@@ -2990,16 +2990,6 @@
         function processExecution(target) {
             document.getElementById('nomination-modal').classList.add('hidden');
             
-            // Check for Virgin ability (if nominated by Townsfolk, nominator dies instead)
-            if (target.characterDef.name === 'باکره' && !virginTriggered) {
-                var confirmMsg = target.name + ' باکره است. اگر توسط یک شهروند نامزد شود، نامزدکننده به جای او اعدام می‌شود. آیا نامزدکننده یک شهروند بود؟';
-                if (confirm(confirmMsg)) {
-                    // Show selection for who the nominator was
-                    showVirginExecution(target);
-                    return;
-                }
-            }
-            
             // Check for Saint
             if (target.characterDef.name === 'قدیس') {
                 if (confirm('هشدار: ' + target.name + ' قدیس است. اگر اعدام شود، شریر برنده می‌شود! آیا با اعدام ادامه دهید؟')) {
@@ -3015,20 +3005,15 @@
             executePlayer(target);
         }
 
-        function showVirginExecution(virgin) {
+        function openVirginAbility() {
             var list = document.getElementById('nomination-votes');
             list.innerHTML = '';
             
-            // Show ALL living players (except Virgin) to avoid revealing who is Townsfolk
-            var livingPlayers = players.filter(p => p.alive && p.name !== virgin.name);
+            var livingPlayers = players.filter(p => p.alive);
             
-            if (livingPlayers.length === 0) {
-                // No one to execute, so Virgin is executed normally
-                executePlayer(virgin);
-                return;
-            }
-            
-            list.innerHTML = '<p style="margin-bottom:15px;">باکره فعال شد! انتخاب کنید چه کسی باکره را نامزد کرد. اگر شهروند باشد، به جای او اعدام می‌شود:</p>';
+            list.innerHTML = '<p style="margin-bottom:15px;"><strong>باکره:</strong> اولین باری که نامزد می‌شوید، اگر نامزدکننده شهروند باشد، او به جای شما اعدام می‌شود.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px; color: var(--text-secondary); font-size: 0.9rem;">هر بازیکنی می‌تواند ادعای باکره بودن کند. اگر توانایی فعال شود، نامزدکننده فوراً اعدام می‌شود.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px;"><strong>بازیکنی که ادعای باکره بودن دارد را انتخاب کنید:</strong></p>';
             
             livingPlayers.forEach(function(p) {
                 var btn = document.createElement('button');
@@ -3036,27 +3021,84 @@
                 btn.style.marginTop = '10px';
                 btn.innerText = p.name;
                 btn.onclick = function() {
-                    // Check if the selected player is a Townsfolk
-                    if (p.characterDef.type === 'townsfolk') {
-                        addLog('باکره فعال شد! ' + p.name + ' (شهروند) به جای ' + virgin.name + ' اعدام شد');
-                    virginTriggered = true;
-                    // Close the modal first
-                    document.getElementById('nomination-modal').classList.add('hidden');
-                    executePlayer(p);
-                    } else {
-                        // Nominator is not a Townsfolk, so Virgin is executed normally
-                        addLog('باکره فعال شد، اما ' + p.name + ' شهروند نیست. ' + virgin.name + ' به طور عادی اعدام می‌شود.');
-                        virginTriggered = true;
-                        // Close the modal first
-                        document.getElementById('nomination-modal').classList.add('hidden');
-                        executePlayer(virgin);
-                    }
+                    selectVirginNominator(p);
                 };
                 list.appendChild(btn);
             });
             
-            document.getElementById('nomination-text').innerText = 'توانایی باکره فعال شد - نامزدکننده را انتخاب کنید. اگر شهروند باشد، به جای او اعدام می‌شود.';
+            document.getElementById('nomination-text').innerText = 'توانایی باکره: انتخاب مدعی';
             document.getElementById('nomination-modal').classList.remove('hidden');
+        }
+
+        function selectVirginNominator(virginClaimant) {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            list.innerHTML = '<div style="margin-bottom:15px;"><strong>مدعی باکره:</strong> ' + virginClaimant.name + '</div>';
+            list.innerHTML += '<div style="margin-bottom:15px;"><strong>انتخاب نامزدکننده:</strong></div>';
+            
+            var livingPlayers = players.filter(p => p.alive && p.name !== virginClaimant.name);
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    processVirginAbility(virginClaimant, p);
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function processVirginAbility(virginClaimant, nominator) {
+            document.getElementById('nomination-modal').classList.add('hidden');
+            
+            var isRealVirgin = virginClaimant.characterDef.name === 'باکره';
+            var isNominatorTownsfolk = nominator.characterDef.type === 'townsfolk';
+            var hasTriggered = virginTriggered;
+            
+            var resultContent = document.getElementById('slayer-result-content');
+            
+            if (isRealVirgin && !hasTriggered) {
+                virginTriggered = true;
+                
+                if (isNominatorTownsfolk) {
+                    // Nominator executed
+                    executePlayer(nominator);
+                    addLog('توانایی باکره فعال شد! ' + nominator.name + ' (شهروند) ' + virginClaimant.name + ' را نامزد کرد و به جای او اعدام شد.');
+                    
+                    // Show result
+                    resultContent.innerHTML = 
+                        '<div style="font-size: 2rem; margin-bottom: 15px;">🕯️</div>' +
+                        '<div style="font-size: 1.5rem; font-weight: bold; color: var(--good-color); margin-bottom: 10px;">باکره فعال شد!</div>' +
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' یک شهروند بود و فوراً اعدام شد.</p>';
+                    resultContent.style.background = 'rgba(123, 31, 162, 0.2)';
+                    resultContent.style.border = '2px solid var(--accent-color)';
+                } else {
+                    // Nothing happens
+                    addLog('باکره (' + virginClaimant.name + ') توسط ' + nominator.name + ' (غیر شهروند) نامزد شد. توانایی فعال شد اما اعدامی رخ نداد.');
+                    
+                    resultContent.innerHTML = 
+                        '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
+                        '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">بدون اثر</div>' +
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' شهروند نیست. نامزدی به طور عادی ادامه می‌یابد.</p>';
+                    resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
+                    resultContent.style.border = '2px solid var(--text-secondary)';
+                }
+            } else {
+                // Not Virgin or already triggered
+                addLog(virginClaimant.name + ' ادعای باکره بودن کرد اما توانایی فعال نشد (باکره نیست یا قبلاً استفاده شده).');
+                
+                resultContent.innerHTML = 
+                    '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
+                    '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">بدون اثر</div>' +
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">توانایی فعال نشد. نامزدی به طور عادی ادامه می‌یابد.</p>';
+                resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
+                resultContent.style.border = '2px solid var(--text-secondary)';
+            }
+            
+            document.getElementById('slayer-result-modal').classList.remove('hidden');
         }
 
         function executePlayer(player) {

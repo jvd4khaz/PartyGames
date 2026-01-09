@@ -2907,16 +2907,6 @@
         function processExecution(target) {
             document.getElementById('nomination-modal').classList.add('hidden');
             
-            // Check for Virgin ability (if nominated by Townsfolk, nominator dies instead)
-            if (target.characterDef.name === 'Virgin' && !virginTriggered) {
-                var confirmMsg = target.name + ' is the Virgin. If nominated by a Townsfolk, the nominator is executed instead. Was the nominator a Townsfolk?';
-                if (confirm(confirmMsg)) {
-                    // Show selection for who the nominator was
-                    showVirginExecution(target);
-                    return;
-                }
-            }
-            
             // Check for Saint
             if (target.characterDef.name === 'Saint') {
                 if (confirm('WARNING: ' + target.name + ' is the Saint. If executed, Evil wins! Continue with execution?')) {
@@ -2932,20 +2922,15 @@
             executePlayer(target);
         }
 
-        function showVirginExecution(virgin) {
+        function openVirginAbility() {
             var list = document.getElementById('nomination-votes');
             list.innerHTML = '';
             
-            // Show ALL living players (except Virgin) to avoid revealing who is Townsfolk
-            var livingPlayers = players.filter(p => p.alive && p.name !== virgin.name);
+            var livingPlayers = players.filter(p => p.alive);
             
-            if (livingPlayers.length === 0) {
-                // No one to execute, so Virgin is executed normally
-                executePlayer(virgin);
-                return;
-            }
-            
-            list.innerHTML = '<p style="margin-bottom:15px;">Virgin triggered! Select who nominated the Virgin. If they are a Townsfolk, they are executed instead:</p>';
+            list.innerHTML = '<p style="margin-bottom:15px;"><strong>Virgin:</strong> The first time you are nominated, if the nominator is a Townsfolk, they are executed instead.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px; color: var(--text-secondary); font-size: 0.9rem;">Any player can claim to be the Virgin. If the ability triggers, the nominator is executed immediately.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px;"><strong>Select the player claiming to be Virgin:</strong></p>';
             
             livingPlayers.forEach(function(p) {
                 var btn = document.createElement('button');
@@ -2953,27 +2938,84 @@
                 btn.style.marginTop = '10px';
                 btn.innerText = p.name;
                 btn.onclick = function() {
-                    // Check if the selected player is a Townsfolk
-                    if (p.characterDef.type === 'townsfolk') {
-                        addLog('Virgin triggered! ' + p.name + ' (Townsfolk) is executed instead of ' + virgin.name);
-                    virginTriggered = true;
-                    // Close the modal first
-                    document.getElementById('nomination-modal').classList.add('hidden');
-                    executePlayer(p);
-                    } else {
-                        // Nominator is not a Townsfolk, so Virgin is executed normally
-                        addLog('Virgin triggered, but ' + p.name + ' is not a Townsfolk. ' + virgin.name + ' is executed normally.');
-                        virginTriggered = true;
-                        // Close the modal first
-                        document.getElementById('nomination-modal').classList.add('hidden');
-                        executePlayer(virgin);
-                    }
+                    selectVirginNominator(p);
                 };
                 list.appendChild(btn);
             });
             
-            document.getElementById('nomination-text').innerText = 'Virgin ability activated - select the nominator. If they are a Townsfolk, they are executed instead.';
+            document.getElementById('nomination-text').innerText = 'Virgin Ability: Select Claimant';
             document.getElementById('nomination-modal').classList.remove('hidden');
+        }
+
+        function selectVirginNominator(virginClaimant) {
+            var list = document.getElementById('nomination-votes');
+            list.innerHTML = '';
+            
+            list.innerHTML = '<div style="margin-bottom:15px;"><strong>Virgin Claimant:</strong> ' + virginClaimant.name + '</div>';
+            list.innerHTML += '<div style="margin-bottom:15px;"><strong>Select Nominator:</strong></div>';
+            
+            var livingPlayers = players.filter(p => p.alive && p.name !== virginClaimant.name);
+            
+            livingPlayers.forEach(function(p) {
+                var btn = document.createElement('button');
+                btn.className = 'player-select-btn';
+                btn.style.marginTop = '10px';
+                btn.innerText = p.name;
+                btn.onclick = function() {
+                    processVirginAbility(virginClaimant, p);
+                };
+                list.appendChild(btn);
+            });
+        }
+
+        function processVirginAbility(virginClaimant, nominator) {
+            document.getElementById('nomination-modal').classList.add('hidden');
+            
+            var isRealVirgin = virginClaimant.characterDef.name === 'Virgin';
+            var isNominatorTownsfolk = nominator.characterDef.type === 'townsfolk';
+            var hasTriggered = virginTriggered;
+            
+            var resultContent = document.getElementById('slayer-result-content');
+            
+            if (isRealVirgin && !hasTriggered) {
+                virginTriggered = true;
+                
+                if (isNominatorTownsfolk) {
+                    // Nominator executed
+                    executePlayer(nominator);
+                    addLog('Virgin ability triggered! ' + nominator.name + ' (Townsfolk) nominated ' + virginClaimant.name + ' and was executed instead.');
+                    
+                    // Show result
+                    resultContent.innerHTML = 
+                        '<div style="font-size: 2rem; margin-bottom: 15px;">🕯️</div>' +
+                        '<div style="font-size: 1.5rem; font-weight: bold; color: var(--good-color); margin-bottom: 10px;">VIRGIN TRIGGERED!</div>' +
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' was a Townsfolk and is executed immediately.</p>';
+                    resultContent.style.background = 'rgba(123, 31, 162, 0.2)';
+                    resultContent.style.border = '2px solid var(--accent-color)';
+                } else {
+                    // Nothing happens
+                    addLog('Virgin (' + virginClaimant.name + ') was nominated by ' + nominator.name + ' (Not Townsfolk). Ability triggered but no execution.');
+                    
+                    resultContent.innerHTML = 
+                        '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
+                        '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">NO EFFECT</div>' +
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' is NOT a Townsfolk. The nomination continues normally.</p>';
+                    resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
+                    resultContent.style.border = '2px solid var(--text-secondary)';
+                }
+            } else {
+                // Not Virgin or already triggered
+                addLog(virginClaimant.name + ' claimed Virgin but ability did not trigger (Not Virgin or already used).');
+                
+                resultContent.innerHTML = 
+                    '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
+                    '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">NO EFFECT</div>' +
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">The ability did not trigger. The nomination continues normally.</p>';
+                resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
+                resultContent.style.border = '2px solid var(--text-secondary)';
+            }
+            
+            document.getElementById('slayer-result-modal').classList.remove('hidden');
         }
 
         function executePlayer(player) {
