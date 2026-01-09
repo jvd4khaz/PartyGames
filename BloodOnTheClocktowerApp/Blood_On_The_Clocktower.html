@@ -1926,13 +1926,14 @@
             var info = '';
             var trueInfo = ''; // Store true info to calculate incorrect version when poisoned
             var trueTargets = []; // Store true target players for incorrect info generation
-            var isDrunk = player.character === 'Drunk'; // Track if this is Drunk (gets random) vs poisoned (gets incorrect)
+            var isDrunk = player.character === 'Drunk'; // Track if this is Drunk (75% incorrect, 25% random) vs poisoned (100% incorrect)
             
             // Drunk's ability "malfunctions" - they think they are a Townsfolk but get false/arbitrary info
-            // Drunk gets RANDOM info, not incorrect info (different from Poisoner)
+            // We treat them as poisoned for the purpose of generating info
             if (isDrunk) {
-                isPoisoned = true; // Use poisoned flag to trigger false info generation
-                // But we'll handle it differently - random instead of incorrect
+                isPoisoned = true;
+                // Don't return early - let the code generate info for their fake role (charName)
+                // The isPoisoned flag will ensure the info is randomized/false where applicable
             }
             
             // Storyteller discretion - simplified version
@@ -2042,11 +2043,11 @@
             if (isPoisoned && info !== '' && trueInfo !== '') {
                 // Give false information
                 if (isDrunk) {
-                    // Drunk: 80% incorrect (like Poisoner), 20% random
-                    var useIncorrect = Math.random() < 0.8;
+                    // Drunk: 75% incorrect (like Poisoner), 25% random
+                    var useIncorrect = Math.random() < 0.75;
                     
                     if (useIncorrect) {
-                        // 80%: Give INCORRECT information (opposite/wrong version of the truth)
+                        // 75%: Give INCORRECT information (opposite/wrong version of the truth)
                         if (charName === 'Chef') {
                             // Extract the true count and give a different number
                             var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
@@ -2097,7 +2098,7 @@
                             }
                         }
                     } else {
-                        // 20%: Get RANDOM information (not necessarily incorrect, just arbitrary)
+                        // 25%: Get RANDOM information (not necessarily incorrect, just arbitrary)
                         var randomPlayer = players[Math.floor(Math.random() * players.length)];
                         while (!randomPlayer.alive || randomPlayer.name === player.name) {
                             randomPlayer = players[Math.floor(Math.random() * players.length)];
@@ -2433,28 +2434,28 @@
             var isRedHerring1 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player1.index;
             var isRedHerring2 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player2.index;
             
-                if (isPoisoned) {
+            var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
+            
+            if (isPoisoned) {
                 // Poisoned - give false information
                 if (isDrunk) {
-                    // Drunk: 80% incorrect (like Poisoner), 20% random
-                    var useIncorrect = Math.random() < 0.8;
+                    // Drunk: 75% incorrect (opposite of truth), 25% random
+                    var useIncorrect = Math.random() < 0.75;
                     if (useIncorrect) {
-                        // 80%: Give INCORRECT information (opposite of truth)
-                        var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
+                        // 75%: Give INCORRECT information (opposite of truth)
                         info = wouldBeYes ? 'NO' : 'YES'; // Give opposite answer
                     } else {
-                        // 20%: Get RANDOM answer (50/50)
+                        // 25%: Get RANDOM answer (50/50)
                         info = Math.random() > 0.5 ? 'YES' : 'NO';
                     }
                 } else {
                     // Poisoned by Poisoner: give INCORRECT information (opposite of truth)
-                    var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
                     info = wouldBeYes ? 'NO' : 'YES'; // Give opposite answer
                 }
-            } else if (isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2) {
+            } else if (wouldBeYes) {
                 // One of them is the Demon (or Recluse) OR the red herring
                 info = 'YES';
-                    } else {
+            } else {
                 // Neither is the Demon nor the red herring
                 info = 'NO';
             }
@@ -3563,24 +3564,6 @@
             html += '<div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
             html += '<strong>Evil Team Wins If:</strong><br>';
             html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">Only two players remain alive (the Demon and one other).</span>';
-            html += '</div>';
-            html += '</div>';
-
-            html += '<div style="margin-bottom: 30px;">';
-            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">Storyteller Implementation Notes</h2>';
-            html += '<div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">';
-            html += '<strong style="color: #ffc107;">Important Implementation Details:</strong><br><br>';
-            html += '<ul style="margin: 10px 0; padding-left: 25px; font-size: 0.9rem; line-height: 2;">';
-            html += '<li><strong>Poisoned by Poisoner:</strong> Receives <strong>INCORRECT</strong> information (opposite of truth). Chef gets wrong number, Empath gets wrong count, Fortune Teller gets opposite YES/NO, etc.</li>';
-            html += '<li><strong>Drunk:</strong> Receives <strong>80% INCORRECT</strong> information (like Poisoner) and <strong>20% RANDOM</strong> information (arbitrary).</li>';
-            html += '<li><strong>Voting Threshold:</strong> At least half of living players (ceil(living/2)), not majority. For 10 players: 5 votes, for 11 players: 6 votes.</li>';
-            html += '<li><strong>Virgin Ability:</strong> Manual action button (like Slayer). Anyone can claim, but only real Virgin triggers. Nominator dies if they are Townsfolk.</li>';
-            html += '<li><strong>Slayer Ability:</strong> Manual action button. Anyone can claim, but only real Slayer can kill Demon.</li>';
-            html += '<li><strong>Drunk/Slayer/Virgin:</strong> Drunk cannot use Slayer or Virgin abilities even if they think they are those roles (checks use real character, not fake).</li>';
-            html += '<li><strong>All Players Wake at Night:</strong> All living players are included in night order to prevent meta-gaming, even passive roles see "No Action" button.</li>';
-            html += '<li><strong>Imp Bluffs:</strong> If no Outsiders in game, Imp only gets Townsfolk bluffs (no Outsider bluffs).</li>';
-            html += '<li><strong>Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only).</li>';
-            html += '</ul>';
             html += '</div>';
             html += '</div>';
 
