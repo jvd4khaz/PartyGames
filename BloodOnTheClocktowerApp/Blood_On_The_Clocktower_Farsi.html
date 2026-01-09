@@ -1417,7 +1417,13 @@
                 
                 if (charName === 'شیطان') {
                     // Imp Info: 3 Roles not in game
-                    var allGoodRoles = TOWNSFOLK_POOL.concat(OUTSIDER_POOL);
+                    // If no Outsiders are in the game, only use Townsfolk as bluffs
+                    var outsidersInGame = players.some(p => p.characterDef.type === 'outsider');
+                    var allGoodRoles = TOWNSFOLK_POOL.slice();
+                    if (outsidersInGame) {
+                        allGoodRoles = allGoodRoles.concat(OUTSIDER_POOL);
+                    }
+                    
                     var rolesInGame = players.map(p => {
                         for (var key in CHARACTERS) {
                             if (CHARACTERS[key].name === p.characterDef.name) return key;
@@ -2456,7 +2462,13 @@
                 addLog('شب اول: شیطان کسی را نمی‌کشد');
                 
                 // Get all possible GOOD roles (Townsfolk and Outsiders only - not Minions/Demons)
-                var allGoodRoles = TOWNSFOLK_POOL.concat(OUTSIDER_POOL);
+                // If no Outsiders are in the game, only use Townsfolk as bluffs
+                var outsidersInGame = players.some(p => p.characterDef.type === 'outsider');
+                var allGoodRoles = TOWNSFOLK_POOL.slice();
+                if (outsidersInGame) {
+                    allGoodRoles = allGoodRoles.concat(OUTSIDER_POOL);
+                }
+                
                 // Get roles in the game
                 var rolesInGame = players.map(p => {
                     // Find the character key from the characterDef
