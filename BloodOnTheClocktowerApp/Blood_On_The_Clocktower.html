@@ -2743,6 +2743,7 @@
         function processSlayerAbility(slayerClaimant, target) {
             document.getElementById('nomination-modal').classList.add('hidden');
             
+            // Check REAL character (not fakeCharacterDef) - Drunk cannot use abilities even if they think they are Slayer
             var isRealSlayer = slayerClaimant.characterDef.name === 'Slayer';
             var isTargetDemon = target.characterDef.type === 'demon';
             var slayerHasUsed = slayerUsed;
@@ -2990,6 +2991,7 @@
                 virginClaimants.push(virginClaimant.index);
             }
             
+            // Check REAL character (not fakeCharacterDef) - Drunk cannot use abilities even if they think they are Virgin
             var isRealVirgin = virginClaimant.characterDef.name === 'Virgin';
             var isNominatorTownsfolk = nominator.characterDef.type === 'townsfolk';
             var hasTriggered = virginTriggered;
