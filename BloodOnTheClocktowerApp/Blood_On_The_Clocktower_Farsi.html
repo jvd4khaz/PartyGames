@@ -3061,6 +3061,12 @@
             var hasTriggered = virginTriggered;
             
             var resultContent = document.getElementById('slayer-result-content');
+            var modalTitle = document.querySelector('#slayer-result-modal h2');
+            
+            // Change modal title for Virgin
+            if (modalTitle) {
+                modalTitle.innerText = 'نتیجه باکره';
+            }
             
             if (isRealVirgin && !hasTriggered) {
                 virginTriggered = true;
@@ -3074,7 +3080,7 @@
                     resultContent.innerHTML = 
                         '<div style="font-size: 2rem; margin-bottom: 15px;">🕯️</div>' +
                         '<div style="font-size: 1.5rem; font-weight: bold; color: var(--good-color); margin-bottom: 10px;">باکره فعال شد!</div>' +
-                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' یک شهروند بود و فوراً اعدام شد.</p>';
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' مرد.</p>';
                     resultContent.style.background = 'rgba(123, 31, 162, 0.2)';
                     resultContent.style.border = '2px solid var(--accent-color)';
                 } else {
@@ -3084,7 +3090,7 @@
                     resultContent.innerHTML = 
                         '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
                         '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">بدون اثر</div>' +
-                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' شهروند نیست. نامزدی به طور عادی ادامه می‌یابد.</p>';
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' زنده ماند.</p>';
                     resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
                     resultContent.style.border = '2px solid var(--text-secondary)';
                 }
@@ -3095,7 +3101,7 @@
                 resultContent.innerHTML = 
                     '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
                     '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">بدون اثر</div>' +
-                    '<p style="font-size: 1.1rem; color: var(--text-primary);">توانایی فعال نشد. نامزدی به طور عادی ادامه می‌یابد.</p>';
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">' + virginClaimant.name + ' زنده ماند.</p>';
                 resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
                 resultContent.style.border = '2px solid var(--text-secondary)';
             }

@@ -2978,6 +2978,12 @@
             var hasTriggered = virginTriggered;
             
             var resultContent = document.getElementById('slayer-result-content');
+            var modalTitle = document.querySelector('#slayer-result-modal h2');
+            
+            // Change modal title for Virgin
+            if (modalTitle) {
+                modalTitle.innerText = 'Virgin Ability Result';
+            }
             
             if (isRealVirgin && !hasTriggered) {
                 virginTriggered = true;
@@ -2991,7 +2997,7 @@
                     resultContent.innerHTML = 
                         '<div style="font-size: 2rem; margin-bottom: 15px;">🕯️</div>' +
                         '<div style="font-size: 1.5rem; font-weight: bold; color: var(--good-color); margin-bottom: 10px;">VIRGIN TRIGGERED!</div>' +
-                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' was a Townsfolk and is executed immediately.</p>';
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' died.</p>';
                     resultContent.style.background = 'rgba(123, 31, 162, 0.2)';
                     resultContent.style.border = '2px solid var(--accent-color)';
                 } else {
@@ -3001,7 +3007,7 @@
                     resultContent.innerHTML = 
                         '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
                         '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">NO EFFECT</div>' +
-                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' is NOT a Townsfolk. The nomination continues normally.</p>';
+                        '<p style="font-size: 1.1rem; color: var(--text-primary);">' + nominator.name + ' survived.</p>';
                     resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
                     resultContent.style.border = '2px solid var(--text-secondary)';
                 }
@@ -3012,7 +3018,7 @@
                 resultContent.innerHTML = 
                     '<div style="font-size: 2rem; margin-bottom: 15px;">❌</div>' +
                     '<div style="font-size: 1.5rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 10px;">NO EFFECT</div>' +
-                    '<p style="font-size: 1.1rem; color: var(--text-primary);">The ability did not trigger. The nomination continues normally.</p>';
+                    '<p style="font-size: 1.1rem; color: var(--text-primary);">' + virginClaimant.name + ' survived.</p>';
                 resultContent.style.background = 'rgba(255, 255, 255, 0.1)';
                 resultContent.style.border = '2px solid var(--text-secondary)';
             }
