@@ -374,6 +374,8 @@
             <div class="score-box" style="flex: 1.5;">
                 <span class="score-label" id="score-agents-label">ماموریت‌های انجام شده</span>
                 <span id="agent-score" class="score-value agent-score">0</span>
+                <span class="score-label" style="margin-top: 10px; color: var(--insider-color);">ماموریت‌های ناموفق</span>
+                <span id="failed-score" class="score-value insider-score">0</span>
             </div>
             <div class="score-box" style="flex: 1; border-right: 1px solid #444; padding-right: 10px;">
                 <span class="score-label">قوانین سریع</span>
@@ -472,6 +474,26 @@
     </div>
 </div>
 
+<!-- Vote Prompt Modal -->
+<div id="vote-prompt-modal" class="modal hidden" onclick="closeVotePrompt()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="text-align: center;">
+        <span class="close-btn" onclick="closeVotePrompt()">&times;</span>
+        <h2 style="color: var(--accent-color); margin-top: 10px;">🗳️ رای‌گیری نهایی</h2>
+        <div style="padding: 20px 0; color: #000;">
+            <p style="font-size: 1.1rem; margin-bottom: 15px;">زمان رای‌گیری نهایی رسیده است!</p>
+            <p style="font-size: 0.95rem; color: #333; margin-bottom: 20px;">
+                ماموریت‌های موفق: <b id="vote-success-count" style="color: var(--agent-color);">0</b><br>
+                ماموریت‌های ناموفق: <b id="vote-fail-count" style="color: var(--insider-color);">0</b>
+            </p>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">
+                اکثریت روی نفوذی = برد مامورها<br>
+                رای اشتباه = برد نفوذی
+            </p>
+            <button onclick="closeVotePrompt()" style="background-color: var(--accent-color); color: #000; padding: 14px 24px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%;">شروع رای‌گیری</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // --- Localization ---
     let currentLang = 'fa'; // Default to Farsi
@@ -532,7 +554,7 @@
                 &nbsp;&nbsp;• جمع‌آوری <span id='rule-token-limit'>--</span> ژتون (فیزیکی بشمارید)، یا<br>
                 &nbsp;&nbsp;• در رای‌گیری نهایی مامورها اشتباه رای دهند.</p>
                 <p>🃏 <b>دست:</b> مامورها باید از خال پیروی کنند. 🎭 <b>نفوذی</b> می‌تواند تقلب کند.</p>
-                <p>🌰 <b>ژتون:</b> استفاده از ژتون فقط بعد از انتخاب کارت اعمال می‌شود.</p>
+                <p>🌰 <b>ژتون:</b> استفاده از ژتون فقط بعد از انتخاب کارت اعمال می‌شود. ژتون نمی‌تواند توسط حاکم یا مامورهای شناسایی شده استفاده شود.</p>
                 <p>🗳️ <b>رای‌گیری نهایی:</b> زمانی که کارت‌ها تمام شد (۲ کارت باقی مانده برای ۳-۴ نفر، ۱ کارت برای ۵ نفر)، رای‌گیری انجام می‌شود.</p>
             `,
             suits: {
@@ -650,10 +672,12 @@
         currentMission: null,
         currentTrump: null,
         missionsCompleted: 0,
+        missionsFailed: 0, // Track failed missions
         roundsPlayed: 0,
         playerCount: 4,
         winLimitMissions: 8,
         winLimitTokens: 5,
+        maxFailedMissions: 0, // Calculated based on player count
         usedMissions: [], // Track indices of used missions to ensure uniqueness
         includeRisky: true, // Whether to include risky missions
         assignedMissions: [], // Missions with assigned trump suits for this game
@@ -730,12 +754,7 @@
             input.className = 'player-input';
             input.placeholder = `بازیکن ${i + 1}`;
             input.id = `player-${i}`;
-            // Try to use last game's players first, then saved players
-            if (lastGamePlayers[i]) {
-                input.value = lastGamePlayers[i];
-            } else if (savedPlayers[i]) {
-                input.value = savedPlayers[i];
-            }
+            // Don't auto-fill names - user must enter them manually or use saved list chips
             list.appendChild(input);
         }
         
@@ -792,6 +811,8 @@
         gameState.stopAt = WIN_CONFIG[gameState.playerCount].stopAt;
         gameState.agentCount = WIN_CONFIG[gameState.playerCount].agents;
         gameState.includeRisky = document.getElementById('include-risky').checked;
+        // Calculate max failed missions: cardsDealt - stopAt (max possible missions)
+        gameState.maxFailedMissions = gameState.cardsDealt - gameState.stopAt;
         
         // Start role distribution
         gameState.currentDistIndex = 0;
@@ -883,6 +904,7 @@
 
     function initGame() {
         gameState.missionsCompleted = 0;
+        gameState.missionsFailed = 0;
         gameState.roundsPlayed = 0;
         gameState.candidateMissions = [];
         gameState.usedMissions = []; // Reset used missions
@@ -1011,10 +1033,18 @@
             gameState.missionsCompleted++;
             updateScoreboard();
             if (checkWinCondition()) return; // Stop if game over
-            // Removed alert as per user request
         } else {
-             // Removed alert as per user request
+            gameState.missionsFailed++;
+            updateScoreboard();
         }
+        
+        // Check if total missions reached limit (cardsDealt - stopAt)
+        const totalMissions = gameState.missionsCompleted + gameState.missionsFailed;
+        if (totalMissions >= gameState.maxFailedMissions) {
+            showVotePrompt();
+            return;
+        }
+        
         // Proceed to next turn
         gameState.roundsPlayed++;
         startTurn();
@@ -1034,7 +1064,11 @@
     }
 
     function updateScoreboard() {
-        document.getElementById('agent-score').innerText = `${gameState.missionsCompleted}/${gameState.winLimitMissions}`; 
+        document.getElementById('agent-score').innerText = `${gameState.missionsCompleted}/${gameState.winLimitMissions}`;
+        const failedScoreEl = document.getElementById('failed-score');
+        if (failedScoreEl) {
+            failedScoreEl.innerText = `${gameState.missionsFailed}/${gameState.maxFailedMissions}`;
+        }
     }
 
     function updateUIText() {
@@ -1086,9 +1120,24 @@
         renderMission(); 
     }
 
+    function showVotePrompt() {
+        const modal = document.getElementById('vote-prompt-modal');
+        // Update dynamic content
+        const successEl = document.getElementById('vote-success-count');
+        const failEl = document.getElementById('vote-fail-count');
+        if (successEl) successEl.innerText = gameState.missionsCompleted;
+        if (failEl) failEl.innerText = gameState.missionsFailed;
+        modal.classList.remove('hidden');
+    }
+
+    function closeVotePrompt() {
+        document.getElementById('vote-prompt-modal').classList.add('hidden');
+    }
+
     function triggerFinalVote() {
-        const msg = TEXTS[currentLang].voteMsg;
-        alert(msg);
+        // Vote prompt is now handled by the native modal (showVotePrompt)
+        // This function is kept for the manual vote button but no alert needed
+        showVotePrompt();
     }
 
     function toggleMissions() {
