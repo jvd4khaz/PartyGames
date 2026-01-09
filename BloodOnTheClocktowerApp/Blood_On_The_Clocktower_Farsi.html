@@ -1227,7 +1227,7 @@
                         selectedMinions.push('Baron');
                         minionPool.splice(baronIndex, 1);
                     } else {
-                        selectedMinions.push(minionPool[i]);
+                selectedMinions.push(minionPool[i]);
                     }
                 } else {
                     selectedMinions.push(minionPool[i]);
@@ -1715,14 +1715,14 @@
                     var charDef = player.characterDef;
                     // Drunk uses their fake character for night order
                     var displayCharDef = player.fakeCharacterDef || charDef;
-                    // Only include players with night abilities (check real character, but use fake for display)
-                    if (charDef.nightOrder) {
-                        currentNightOrder.push({
-                            order: charDef.nightOrder, // Keep for game mechanics (poisoning timing, etc.)
-                            player: player,
-                            character: displayCharDef // Use fake character for Drunk
-                        });
-                    }
+                    
+                    // ALWAYS include all living players in night order to prevent meta-gaming
+                    // (Everyone wakes up, even if just to see "No Action")
+                    currentNightOrder.push({
+                        order: charDef.nightOrder || 100, // Keep for mechanics, use 100 for passive roles
+                        player: player,
+                        character: displayCharDef // Use fake character for Drunk
+                    });
                 }
             });
             
@@ -3014,10 +3014,10 @@
                     // Check if the selected player is a Townsfolk
                     if (p.characterDef.type === 'townsfolk') {
                         addLog('باکره فعال شد! ' + p.name + ' (شهروند) به جای ' + virgin.name + ' اعدام شد');
-                        virginTriggered = true;
-                        // Close the modal first
-                        document.getElementById('nomination-modal').classList.add('hidden');
-                        executePlayer(p);
+                    virginTriggered = true;
+                    // Close the modal first
+                    document.getElementById('nomination-modal').classList.add('hidden');
+                    executePlayer(p);
                     } else {
                         // Nominator is not a Townsfolk, so Virgin is executed normally
                         addLog('باکره فعال شد، اما ' + p.name + ' شهروند نیست. ' + virgin.name + ' به طور عادی اعدام می‌شود.');
