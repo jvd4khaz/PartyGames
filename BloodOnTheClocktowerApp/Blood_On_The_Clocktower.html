@@ -2537,6 +2537,7 @@
             // Calculate important day phase info
             var livingPlayers = players.filter(p => p.alive);
             var livingCount = livingPlayers.length;
+            var livingNames = livingPlayers.map(p => p.name).join(', ');
             var deadCount = players.length - livingCount;
             var votesNeeded = Math.floor(livingCount / 2) + 1; // Majority = more than half
             
