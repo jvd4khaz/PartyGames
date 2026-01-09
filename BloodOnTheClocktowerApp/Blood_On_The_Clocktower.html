@@ -2539,7 +2539,7 @@
             var livingCount = livingPlayers.length;
             var livingNames = livingPlayers.map(p => p.name).join(', ');
             var deadCount = players.length - livingCount;
-            var votesNeeded = Math.floor(livingCount / 2) + 1; // Majority = more than half
+            var votesNeeded = Math.ceil(livingCount / 2); // At least 50% of living players
             
             // Check for special conditions
             var specialConditions = '';
@@ -2790,7 +2790,7 @@
             // Return to day phase - restore the proper day phase layout
             var livingPlayers = players.filter(p => p.alive);
             var livingCount = livingPlayers.length;
-            var votesNeeded = Math.floor(livingCount / 2) + 1;
+            var votesNeeded = Math.ceil(livingCount / 2);
             
             // Check for special conditions
             var specialConditions = '';
