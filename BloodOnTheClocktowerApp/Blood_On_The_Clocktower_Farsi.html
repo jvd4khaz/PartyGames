@@ -934,6 +934,7 @@
         var butlerChoices = {}; // Track Butler's choices
         var slayerUsed = false;
         var virginTriggered = false;
+        var virginClaimants = []; // Track which players have claimed to be Virgin
         var fortuneTellerRedHerrings = {}; // Track red herring player for each Fortune Teller {playerIndex: redHerringPlayerIndex}
 
         // Completely prevent accidental refresh/back navigation
@@ -1018,6 +1019,7 @@
                         butlerChoices: butlerChoices,
                         slayerUsed: slayerUsed,
                         virginTriggered: virginTriggered,
+                        virginClaimants: virginClaimants,
                         fortuneTellerRedHerrings: fortuneTellerRedHerrings,
                         currentDistIndex: currentDistIndex
                     };
@@ -1057,6 +1059,7 @@
                         butlerChoices = state.butlerChoices || {};
                         slayerUsed = state.slayerUsed;
                         virginTriggered = state.virginTriggered;
+                        virginClaimants = state.virginClaimants || [];
                         fortuneTellerRedHerrings = state.fortuneTellerRedHerrings || {};
                         currentDistIndex = state.currentDistIndex;
                         
@@ -1323,6 +1326,7 @@
             butlerChoices = {};
             slayerUsed = false;
             virginTriggered = false;
+            virginClaimants = [];
             fortuneTellerRedHerrings = {};
             executions = 0;
             lastExecutionDay = 0;
@@ -3011,10 +3015,18 @@
             var list = document.getElementById('nomination-votes');
             list.innerHTML = '';
             
-            var livingPlayers = players.filter(p => p.alive);
+            // Filter out players who have already claimed Virgin
+            var livingPlayers = players.filter(p => p.alive && virginClaimants.indexOf(p.index) === -1);
+            
+            if (livingPlayers.length === 0) {
+                list.innerHTML = '<p style="margin-bottom:15px; color: var(--text-secondary);">همه بازیکنان زنده قبلاً ادعای باکره بودن کرده‌اند.</p>';
+                document.getElementById('nomination-text').innerText = 'توانایی باکره: همه ادعا کرده‌اند';
+                document.getElementById('nomination-modal').classList.remove('hidden');
+                return;
+            }
             
             list.innerHTML = '<p style="margin-bottom:15px;"><strong>باکره:</strong> اولین باری که نامزد می‌شوید، اگر نامزدکننده شهروند باشد، او به جای شما اعدام می‌شود.</p>';
-            list.innerHTML += '<p style="margin-bottom:15px; color: var(--text-secondary); font-size: 0.9rem;">هر بازیکنی می‌تواند ادعای باکره بودن کند. اگر توانایی فعال شود، نامزدکننده فوراً اعدام می‌شود.</p>';
+            list.innerHTML += '<p style="margin-bottom:15px; color: var(--text-secondary); font-size: 0.9rem;">هر بازیکنی می‌تواند ادعای باکره بودن کند (یک بار در بازی). اگر توانایی فعال شود، نامزدکننده فوراً اعدام می‌شود.</p>';
             list.innerHTML += '<p style="margin-bottom:15px;"><strong>بازیکنی که ادعای باکره بودن دارد را انتخاب کنید:</strong></p>';
             
             livingPlayers.forEach(function(p) {
@@ -3055,6 +3067,11 @@
 
         function processVirginAbility(virginClaimant, nominator) {
             document.getElementById('nomination-modal').classList.add('hidden');
+            
+            // Mark this player as having claimed Virgin (can only claim once)
+            if (virginClaimants.indexOf(virginClaimant.index) === -1) {
+                virginClaimants.push(virginClaimant.index);
+            }
             
             var isRealVirgin = virginClaimant.characterDef.name === 'باکره';
             var isNominatorTownsfolk = nominator.characterDef.type === 'townsfolk';
