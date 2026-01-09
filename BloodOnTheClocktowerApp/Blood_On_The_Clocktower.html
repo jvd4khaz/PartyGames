@@ -1926,13 +1926,13 @@
             var info = '';
             var trueInfo = ''; // Store true info to calculate incorrect version when poisoned
             var trueTargets = []; // Store true target players for incorrect info generation
+            var isDrunk = player.character === 'Drunk'; // Track if this is Drunk (gets random) vs poisoned (gets incorrect)
             
             // Drunk's ability "malfunctions" - they think they are a Townsfolk but get false/arbitrary info
-            // We treat them as poisoned for the purpose of generating info
-            if (player.character === 'Drunk') {
-                isPoisoned = true;
-                // Don't return early - let the code generate info for their fake role (charName)
-                // The isPoisoned flag will ensure the info is randomized/false where applicable
+            // Drunk gets RANDOM info, not incorrect info (different from Poisoner)
+            if (isDrunk) {
+                isPoisoned = true; // Use poisoned flag to trigger false info generation
+                // But we'll handle it differently - random instead of incorrect
             }
             
             // Storyteller discretion - simplified version
@@ -2040,54 +2040,89 @@
             }
             
             if (isPoisoned && info !== '' && trueInfo !== '') {
-                // Give INCORRECT information (opposite/wrong version of the truth)
-                if (charName === 'Chef') {
-                    // Extract the true count and give a different number
-                    var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
-                    var fakeCount;
-                    // Give a different number - if 0, give 1-2; if >0, give 0 or a different number
-                    if (trueCount === 0) {
-                        fakeCount = Math.floor(Math.random() * 2) + 1; // 1 or 2
-                    } else {
-                        // Give 0 or a number different from true count
-                        var options = [0];
-                        for (var i = 0; i <= 3; i++) {
-                            if (i !== trueCount) options.push(i);
+                // Give false information
+                if (isDrunk) {
+                    // Drunk gets RANDOM information (not necessarily incorrect, just arbitrary)
+                    var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    while (!randomPlayer.alive || randomPlayer.name === player.name) {
+                        randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    }
+                    if (charName === 'Chef') {
+                        // Chef: Generate realistic random pair count
+                        var maxPairs = Math.min(3, Math.floor(players.length / 4));
+                        var fakeCount = Math.floor(Math.random() * (maxPairs + 1));
+                        if (Math.random() > 0.3 && fakeCount > 2) {
+                            fakeCount = Math.floor(Math.random() * 3);
                         }
-                        fakeCount = options[Math.floor(Math.random() * options.length)];
-                    }
-                    info = 'There are ' + fakeCount + ' pair(s) of evil players sitting next to each other';
-                } else if (charName === 'Empath') {
-                    // Extract the true count and give a different number
-                    var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
-                    var fakeCount;
-                    // Give a different number (0, 1, or 2, but not the true count)
-                    var options = [0, 1, 2].filter(n => n !== trueCount);
-                    fakeCount = options[Math.floor(Math.random() * options.length)];
-                    info = 'There ' + (fakeCount === 1 ? 'is' : 'are') + ' ' + fakeCount + ' evil player(s) sitting next to you';
-                } else {
-                    // For Washerwoman, Librarian, Investigator: give different player names
-                    // Use players NOT in the true targets
-                    var allPlayers = players.filter(p => p.alive && p.name !== player.name);
-                    var wrongTargets = allPlayers.filter(p => {
-                        return trueTargets.every(t => t.name !== p.name);
-                    });
-                    if (wrongTargets.length === 0) {
-                        // If all players are in true targets, just pick different ones
-                        wrongTargets = allPlayers;
-                    }
-                    if (wrongTargets.length >= 2) {
-                        shuffleArray(wrongTargets);
-                        var wrong1 = wrongTargets[0];
-                        var wrong2 = wrongTargets[1];
-                        var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
-                        info = wrong1.name + ' or ' + wrong2.name + ' is the ' + roleName;
-                    } else if (wrongTargets.length === 1) {
-                        // Only one wrong target available, use it twice
-                        var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
-                        info = wrongTargets[0].name + ' or ' + wrongTargets[0].name + ' is the ' + roleName;
+                        info = 'There are ' + fakeCount + ' pair(s) of evil players sitting next to each other';
+                    } else if (charName === 'Empath') {
+                        // Empath: Random 0-2
+                        var fakeCount = Math.floor(Math.random() * 3);
+                        info = 'There ' + (fakeCount === 1 ? 'is' : 'are') + ' ' + fakeCount + ' evil player(s) sitting next to you';
                     } else {
-                        info = trueInfo; // Can't give wrong info if no other players
+                        // For Washerwoman, Librarian, Investigator: random player names
+                        var allPlayers = players.filter(p => p.alive && p.name !== player.name);
+                        if (allPlayers.length >= 2) {
+                            shuffleArray(allPlayers);
+                            var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
+                            info = allPlayers[0].name + ' or ' + allPlayers[1].name + ' is the ' + roleName;
+                        } else if (allPlayers.length === 1) {
+                            var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
+                            info = allPlayers[0].name + ' or ' + allPlayers[0].name + ' is the ' + roleName;
+                        } else {
+                            info = trueInfo; // Can't give random info if no other players
+                        }
+                    }
+                } else {
+                    // Poisoned by Poisoner: Give INCORRECT information (opposite/wrong version of the truth)
+                    if (charName === 'Chef') {
+                        // Extract the true count and give a different number
+                        var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
+                        var fakeCount;
+                        // Give a different number - if 0, give 1-2; if >0, give 0 or a different number
+                        if (trueCount === 0) {
+                            fakeCount = Math.floor(Math.random() * 2) + 1; // 1 or 2
+                        } else {
+                            // Give 0 or a number different from true count
+                            var options = [0];
+                            for (var i = 0; i <= 3; i++) {
+                                if (i !== trueCount) options.push(i);
+                            }
+                            fakeCount = options[Math.floor(Math.random() * options.length)];
+                        }
+                        info = 'There are ' + fakeCount + ' pair(s) of evil players sitting next to each other';
+                    } else if (charName === 'Empath') {
+                        // Extract the true count and give a different number
+                        var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
+                        var fakeCount;
+                        // Give a different number (0, 1, or 2, but not the true count)
+                        var options = [0, 1, 2].filter(n => n !== trueCount);
+                        fakeCount = options[Math.floor(Math.random() * options.length)];
+                        info = 'There ' + (fakeCount === 1 ? 'is' : 'are') + ' ' + fakeCount + ' evil player(s) sitting next to you';
+                    } else {
+                        // For Washerwoman, Librarian, Investigator: give different player names
+                        // Use players NOT in the true targets
+                        var allPlayers = players.filter(p => p.alive && p.name !== player.name);
+                        var wrongTargets = allPlayers.filter(p => {
+                            return trueTargets.every(t => t.name !== p.name);
+                        });
+                        if (wrongTargets.length === 0) {
+                            // If all players are in true targets, just pick different ones
+                            wrongTargets = allPlayers;
+                        }
+                        if (wrongTargets.length >= 2) {
+                            shuffleArray(wrongTargets);
+                            var wrong1 = wrongTargets[0];
+                            var wrong2 = wrongTargets[1];
+                            var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
+                            info = wrong1.name + ' or ' + wrong2.name + ' is the ' + roleName;
+                        } else if (wrongTargets.length === 1) {
+                            // Only one wrong target available, use it twice
+                            var roleName = charName === 'Washerwoman' ? 'Washerwoman' : (charName === 'Librarian' ? 'Librarian' : 'Investigator');
+                            info = wrongTargets[0].name + ' or ' + wrongTargets[0].name + ' is the ' + roleName;
+                        } else {
+                            info = trueInfo; // Can't give wrong info if no other players
+                        }
                     }
                 }
             }
@@ -2312,7 +2347,8 @@
 
         function giveFortuneTellerInfo(fortuneTellerPlayer, selectedPlayerIndices, isPoisoned) {
             // Drunk's ability doesn't work - treat as poisoned
-            if (fortuneTellerPlayer.character === 'Drunk') {
+            var isDrunk = fortuneTellerPlayer.character === 'Drunk';
+            if (isDrunk) {
                 isPoisoned = true;
             }
             
@@ -2342,10 +2378,15 @@
             var isRedHerring2 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player2.index;
             
                 if (isPoisoned) {
-                // Poisoned - give INCORRECT information (opposite of truth)
-                // Calculate what the truth would be, then give the opposite
-                var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
-                info = wouldBeYes ? 'NO' : 'YES'; // Give opposite answer
+                // Poisoned - give false information
+                if (isDrunk) {
+                    // Drunk gets RANDOM answer (50/50)
+                    info = Math.random() > 0.5 ? 'YES' : 'NO';
+                } else {
+                    // Poisoned by Poisoner: give INCORRECT information (opposite of truth)
+                    var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
+                    info = wouldBeYes ? 'NO' : 'YES'; // Give opposite answer
+                }
             } else if (isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2) {
                 // One of them is the Demon (or Recluse) OR the red herring
                 info = 'YES';
@@ -3458,6 +3499,24 @@
             html += '<div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
             html += '<strong>Evil Team Wins If:</strong><br>';
             html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">Only two players remain alive (the Demon and one other).</span>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">Storyteller Implementation Notes</h2>';
+            html += '<div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">';
+            html += '<strong style="color: #ffc107;">Important Implementation Details:</strong><br><br>';
+            html += '<ul style="margin: 10px 0; padding-left: 25px; font-size: 0.9rem; line-height: 2;">';
+            html += '<li><strong>Poisoned by Poisoner:</strong> Receives <strong>INCORRECT</strong> information (opposite of truth). Chef gets wrong number, Empath gets wrong count, Fortune Teller gets opposite YES/NO, etc.</li>';
+            html += '<li><strong>Drunk:</strong> Receives <strong>RANDOM</strong> information (arbitrary, not necessarily incorrect). This is different from poisoning.</li>';
+            html += '<li><strong>Voting Threshold:</strong> At least half of living players (ceil(living/2)), not majority. For 10 players: 5 votes, for 11 players: 6 votes.</li>';
+            html += '<li><strong>Virgin Ability:</strong> Manual action button (like Slayer). Anyone can claim, but only real Virgin triggers. Nominator dies if they are Townsfolk.</li>';
+            html += '<li><strong>Slayer Ability:</strong> Manual action button. Anyone can claim, but only real Slayer can kill Demon.</li>';
+            html += '<li><strong>Drunk/Slayer/Virgin:</strong> Drunk cannot use Slayer or Virgin abilities even if they think they are those roles (checks use real character, not fake).</li>';
+            html += '<li><strong>All Players Wake at Night:</strong> All living players are included in night order to prevent meta-gaming, even passive roles see "No Action" button.</li>';
+            html += '<li><strong>Imp Bluffs:</strong> If no Outsiders in game, Imp only gets Townsfolk bluffs (no Outsider bluffs).</li>';
+            html += '<li><strong>Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only).</li>';
+            html += '</ul>';
             html += '</div>';
             html += '</div>';
 

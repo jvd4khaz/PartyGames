@@ -1997,13 +1997,13 @@
             var info = '';
             var trueInfo = ''; // Store true info to calculate incorrect version when poisoned
             var trueTargets = []; // Store true target players for incorrect info generation
+            var isDrunk = player.character === 'Drunk'; // Track if this is Drunk (gets random) vs poisoned (gets incorrect)
             
             // Drunk's ability "malfunctions" - they think they are a Townsfolk but get false/arbitrary info
-            // We treat them as poisoned for the purpose of generating info
-            if (player.character === 'Drunk') {
-                isPoisoned = true;
-                // Don't return early - let the code generate info for their fake role (charName)
-                // The isPoisoned flag will ensure the info is randomized/false where applicable
+            // Drunk gets RANDOM info, not incorrect info (different from Poisoner)
+            if (isDrunk) {
+                isPoisoned = true; // Use poisoned flag to trigger false info generation
+                // But we'll handle it differently - random instead of incorrect
             }
             
             // Storyteller discretion - simplified version
@@ -2111,8 +2111,42 @@
             }
             
             if (isPoisoned && info !== '' && trueInfo !== '') {
-                // Give INCORRECT information (opposite/wrong version of the truth)
-                if (charName === 'آشپز') {
+                // Give false information
+                if (isDrunk) {
+                    // Drunk gets RANDOM information (not necessarily incorrect, just arbitrary)
+                    var randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    while (!randomPlayer.alive || randomPlayer.name === player.name) {
+                        randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    }
+                    if (charName === 'آشپز') {
+                        // Chef: Generate realistic random pair count
+                        var maxPairs = Math.min(3, Math.floor(players.length / 4));
+                        var fakeCount = Math.floor(Math.random() * (maxPairs + 1));
+                        if (Math.random() > 0.3 && fakeCount > 2) {
+                            fakeCount = Math.floor(Math.random() * 3);
+                        }
+                        info = fakeCount + ' جفت بازیکن شریر کنار هم نشسته ' + (fakeCount === 1 ? 'است' : 'اند');
+                    } else if (charName === 'هم‌دل') {
+                        // Empath: Random 0-2
+                        var fakeCount = Math.floor(Math.random() * 3);
+                        info = fakeCount + ' بازیکن شریر کنار شما نشسته ' + (fakeCount === 1 ? 'است' : 'اند');
+                    } else {
+                        // For Washerwoman, Librarian, Investigator: random player names
+                        var allPlayers = players.filter(p => p.alive && p.name !== player.name);
+                        if (allPlayers.length >= 2) {
+                            shuffleArray(allPlayers);
+                            var roleName = charName === 'رخت‌شوی' ? 'رخت‌شوی' : (charName === 'کتابدار' ? 'کتابدار' : 'بازپرس');
+                            info = allPlayers[0].name + ' یا ' + allPlayers[1].name + ' ' + roleName + ' است';
+                        } else if (allPlayers.length === 1) {
+                            var roleName = charName === 'رخت‌شوی' ? 'رخت‌شوی' : (charName === 'کتابدار' ? 'کتابدار' : 'بازپرس');
+                            info = allPlayers[0].name + ' یا ' + allPlayers[0].name + ' ' + roleName + ' است';
+                        } else {
+                            info = trueInfo; // Can't give random info if no other players
+                        }
+                    }
+                } else {
+                    // Poisoned by Poisoner: Give INCORRECT information (opposite/wrong version of the truth)
+                    if (charName === 'آشپز') {
                     // Extract the true count and give a different number
                     var trueCount = parseInt(trueInfo.match(/\d+/)[0]);
                     var fakeCount;
@@ -2383,7 +2417,8 @@
 
         function giveFortuneTellerInfo(fortuneTellerPlayer, selectedPlayerIndices, isPoisoned) {
             // Drunk's ability doesn't work - treat as poisoned
-            if (fortuneTellerPlayer.character === 'Drunk') {
+            var isDrunk = fortuneTellerPlayer.character === 'Drunk';
+            if (isDrunk) {
                 isPoisoned = true;
             }
             
@@ -2413,10 +2448,15 @@
             var isRedHerring2 = fortuneTellerRedHerrings[fortuneTellerPlayer.index] === player2.index;
             
                 if (isPoisoned) {
-                // Poisoned - give INCORRECT information (opposite of truth)
-                // Calculate what the truth would be, then give the opposite
-                var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
-                info = wouldBeYes ? 'خیر' : 'بله'; // Give opposite answer
+                // Poisoned - give false information
+                if (isDrunk) {
+                    // Drunk gets RANDOM answer (50/50)
+                    info = Math.random() > 0.5 ? 'بله' : 'خیر';
+                } else {
+                    // Poisoned by Poisoner: give INCORRECT information (opposite of truth)
+                    var wouldBeYes = isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2;
+                    info = wouldBeYes ? 'خیر' : 'بله'; // Give opposite answer
+                }
             } else if (isDemon1 || isDemon2 || isRedHerring1 || isRedHerring2) {
                 // One of them is the Demon (or Recluse) OR the red herring
                 info = 'بله';
@@ -3538,6 +3578,24 @@
             html += '<div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
             html += '<strong>تیم شریر برنده می‌شود اگر:</strong><br>';
             html += '<span style="font-size: 0.9rem; color: var(--text-secondary);">فقط دو بازیکن زنده بماند (شیطان و یک نفر دیگر).</span>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<h2 style="color: var(--accent-color); margin-top: 20px; margin-bottom: 10px;">یادداشت‌های پیاده‌سازی قصه‌گو</h2>';
+            html += '<div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #ffc107;">';
+            html += '<strong style="color: #ffc107;">جزئیات مهم پیاده‌سازی:</strong><br><br>';
+            html += '<ul style="margin: 10px 0; padding-right: 25px; font-size: 0.9rem; line-height: 2;">';
+            html += '<li><strong>مسموم شده توسط مسموم‌کننده:</strong> اطلاعات <strong>نادرست</strong> دریافت می‌کند (مخالف حقیقت). آشپز عدد اشتباه، هم‌دل تعداد اشتباه، فال‌گیر پاسخ مخالف بله/خیر و غیره می‌گیرد.</li>';
+            html += '<li><strong>مست:</strong> اطلاعات <strong>تصادفی</strong> دریافت می‌کند (دلخواه، نه لزوماً نادرست). این با مسمومیت متفاوت است.</li>';
+            html += '<li><strong>آستانه رای‌گیری:</strong> حداقل نیمی از بازیکنان زنده (ceil(زنده/2))، نه اکثریت. برای ۱۰ بازیکن: ۵ رای، برای ۱۱ بازیکن: ۶ رای.</li>';
+            html += '<li><strong>توانایی باکره:</strong> دکمه اقدام دستی (مثل سلاخ). هر کسی می‌تواند ادعا کند، اما فقط باکره واقعی فعال می‌شود. نامزدکننده می‌میرد اگر شهروند باشد.</li>';
+            html += '<li><strong>توانایی سلاخ:</strong> دکمه اقدام دستی. هر کسی می‌تواند ادعا کند، اما فقط سلاخ واقعی می‌تواند شیطان را بکشد.</li>';
+            html += '<li><strong>مست/سلاخ/باکره:</strong> مست نمی‌تواند از توانایی‌های سلاخ یا باکره استفاده کند حتی اگر فکر کند آن نقش‌هاست (بررسی‌ها از شخصیت واقعی استفاده می‌کنند، نه جعلی).</li>';
+            html += '<li><strong>همه بازیکنان در شب بیدار می‌شوند:</strong> همه بازیکنان زنده در ترتیب شب گنجانده می‌شوند تا از متا-گیمینگ جلوگیری شود، حتی نقش‌های منفعل دکمه "بدون اقدام" می‌بینند.</li>';
+            html += '<li><strong>بلوف‌های شیطان:</strong> اگر هیچ غریبه‌ای در بازی نباشد، شیطان فقط بلوف شهروند می‌گیرد (بدون بلوف غریبه).</li>';
+            html += '<li><strong>احتمال بارون/مست:</strong> قابل تنظیم از طریق اسلایدرها در تنظیمات (پیش‌فرض ۷۵٪ فقط برای اولین اسلات).</li>';
+            html += '</ul>';
             html += '</div>';
             html += '</div>';
 
