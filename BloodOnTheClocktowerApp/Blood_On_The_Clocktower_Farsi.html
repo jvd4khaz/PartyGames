@@ -606,14 +606,13 @@
         <!-- Phase Display -->
         <div id="phase-display" class="phase-display" style="position: relative;">
             <div id="phase-title" class="phase-title"></div>
-            <!-- Timer and Bell (compact, inside box, top right) -->
-            <div id="day-timer-bell-container" class="hidden" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; align-items: center; z-index: 10;">
-                <!-- Timer -->
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                    <div id="day-timer" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: monospace; line-height: 1;">05:00</div>
-                    <button id="timer-reset-btn" class="secondary-btn" onclick="resetDayTimer()" style="padding: 4px 10px; font-size: 0.75rem; line-height: 1.2;">بازنشانی</button>
-                </div>
-                <!-- Bell -->
+            <!-- Timer (top left) -->
+            <div id="day-timer-container" class="hidden" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 10;">
+                <div id="day-timer" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: monospace; line-height: 1;">05:00</div>
+                <button id="timer-reset-btn" class="secondary-btn" onclick="resetDayTimer()" style="padding: 4px 10px; font-size: 0.75rem; line-height: 1.2;">بازنشانی</button>
+            </div>
+            <!-- Bell (top right) -->
+            <div id="day-bell-container" class="hidden" style="position: absolute; top: 10px; right: 10px; z-index: 10;">
                 <button id="bell-btn" onclick="ringBell()" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); border: 2px solid #ffb74d; color: #fff; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.6); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 16px rgba(255, 152, 0, 0.8)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(255, 152, 0, 0.6)';" title="زنگ زدن">🔔</button>
             </div>
             <div id="phase-content"></div>
@@ -1372,14 +1371,24 @@
             var baronSelected = false;
             for (var i = 0; i < dist.minions; i++) {
                 // If we need minions and Baron is available, use configured probability for first slot only
-                if (i === 0 && dist.minions > 0 && Math.random() * 100 < baronProbability) {
-                    // Use configured probability to force Baron
-                    var baronIndex = minionPool.indexOf('Baron');
-                    if (baronIndex !== -1) {
-                        selectedMinions.push('Baron');
-                        minionPool.splice(baronIndex, 1);
-                        baronSelected = true;
+                if (i === 0 && dist.minions > 0) {
+                    if (Math.random() * 100 < baronProbability) {
+                        // Use configured probability to force Baron
+                        var baronIndex = minionPool.indexOf('Baron');
+                        if (baronIndex !== -1) {
+                            selectedMinions.push('Baron');
+                            minionPool.splice(baronIndex, 1);
+                            baronSelected = true;
+                        } else {
+                            selectedMinions.push(minionPool[i]);
+                        }
                     } else {
+                        // Probability check failed (or probability is 0) - remove Baron from pool
+                        var baronIndex = minionPool.indexOf('Baron');
+                        if (baronIndex !== -1) {
+                            minionPool.splice(baronIndex, 1);
+                        }
+                        baronSelected = true; // Mark as processed
                         selectedMinions.push(minionPool[i]);
                     }
                 } else {
@@ -1419,14 +1428,24 @@
             var drunkSelected = false;
             for (var i = 0; i < adjustedOutsiders; i++) {
                 // If we need outsiders and Drunk is available, use configured probability for first slot only
-                if (i === 0 && adjustedOutsiders > 0 && Math.random() * 100 < drunkProbability) {
-                    // Use configured probability to force Drunk
-                    var drunkIndex = outsiderPool.indexOf('Drunk');
-                    if (drunkIndex !== -1) {
-                        selectedChars.push('Drunk');
-                        outsiderPool.splice(drunkIndex, 1);
-                        drunkSelected = true;
+                if (i === 0 && adjustedOutsiders > 0) {
+                    if (Math.random() * 100 < drunkProbability) {
+                        // Use configured probability to force Drunk
+                        var drunkIndex = outsiderPool.indexOf('Drunk');
+                        if (drunkIndex !== -1) {
+                            selectedChars.push('Drunk');
+                            outsiderPool.splice(drunkIndex, 1);
+                            drunkSelected = true;
+                        } else {
+                            selectedChars.push(outsiderPool[i]);
+                        }
                     } else {
+                        // Probability check failed (or probability is 0) - remove Drunk from pool
+                        var drunkIndex = outsiderPool.indexOf('Drunk');
+                        if (drunkIndex !== -1) {
+                            outsiderPool.splice(drunkIndex, 1);
+                        }
+                        drunkSelected = true; // Mark as processed
                         selectedChars.push(outsiderPool[i]);
                     }
                 } else {
@@ -1504,9 +1523,13 @@
             if (typeof stopDayTimer === 'function') {
                 stopDayTimer();
             }
-            var timerBellContainer = document.getElementById('day-timer-bell-container');
-            if (timerBellContainer) {
-                timerBellContainer.classList.add('hidden');
+            var timerContainer = document.getElementById('day-timer-container');
+            var bellContainer = document.getElementById('day-bell-container');
+            if (timerContainer) {
+                timerContainer.classList.add('hidden');
+            }
+            if (bellContainer) {
+                bellContainer.classList.add('hidden');
             }
             
             currentDistIndex = 0;
@@ -2960,7 +2983,8 @@
             document.getElementById('phase-title').innerText = 'روز ' + currentDay;
             
             // Show timer and bell for day phase
-            document.getElementById('day-timer-bell-container').classList.remove('hidden');
+            document.getElementById('day-timer-container').classList.remove('hidden');
+            document.getElementById('day-bell-container').classList.remove('hidden');
             
             // Start timer (5 minutes for first day, can be adjusted)
             startDayTimer();
@@ -3118,7 +3142,8 @@
             checkWinConditions();
             
             // Hide timer and bell during night phase (will be shown again in startDayPhase)
-            document.getElementById('day-timer-bell-container').classList.add('hidden');
+            document.getElementById('day-timer-container').classList.add('hidden');
+            document.getElementById('day-bell-container').classList.add('hidden');
             stopDayTimer();
             
             // Start the day phase
@@ -3533,9 +3558,13 @@
         function endDay() {
             // Stop timer when day ends
             stopDayTimer();
-            var timerBellContainer = document.getElementById('day-timer-bell-container');
-            if (timerBellContainer) {
-                timerBellContainer.classList.add('hidden');
+            var timerContainer = document.getElementById('day-timer-container');
+            var bellContainer = document.getElementById('day-bell-container');
+            if (timerContainer) {
+                timerContainer.classList.add('hidden');
+            }
+            if (bellContainer) {
+                bellContainer.classList.add('hidden');
             }
             
             var living = players.filter(p => p.alive).length;
