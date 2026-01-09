@@ -1340,8 +1340,10 @@
         }
 
         function updateDistScreen() {
-            document.getElementById('dist-player-num').innerText = currentDistIndex + 1;
-            document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+            if (players.length > 0 && currentDistIndex < players.length) {
+                document.getElementById('dist-player-num').innerText = currentDistIndex + 1;
+                document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+            }
         }
 
         function revealRole() {
