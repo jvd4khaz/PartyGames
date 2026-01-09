@@ -2592,9 +2592,9 @@
             // First night: Designate a red herring if not already set
             if (currentDay === 1 && !fortuneTellerRedHerrings[fortuneTellerPlayer.index]) {
                 // Select a random good player (not the Demon or Minions) as the red herring
+                // Fortune Teller CAN be their own red herring
                 var goodPlayers = players.filter(p => 
                     p.alive && 
-                    p.index !== fortuneTellerPlayer.index && 
                     p.characterDef.type !== 'demon' && 
                     p.characterDef.type !== 'minion'
                 );
@@ -2992,7 +2992,7 @@
                 '<li><strong style="color: var(--text-primary);">Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only). If not selected in first slot, they are removed from the pool for subsequent slots - probability directly reflects their chance of being in the game.</li>' +
                 '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
                 '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
-                '<li><strong style="color: var(--text-primary);">Fortune Teller Red Herring:</strong> One good player is randomly selected as the red herring on the first night (automated random selection, not storyteller choice).</li>' +
+                '<li><strong style="color: var(--text-primary);">Fortune Teller:</strong> Can choose themselves as one of the two players to check. The red herring (one good player who registers as Demon) is randomly selected on the first night and CAN be the Fortune Teller themselves.</li>' +
                 '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
                 '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
                 '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
@@ -3247,7 +3247,7 @@
                 '<li><strong style="color: var(--text-primary);">Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only). If not selected in first slot, they are removed from the pool for subsequent slots - probability directly reflects their chance of being in the game.</li>' +
                 '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
                 '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
-                '<li><strong style="color: var(--text-primary);">Fortune Teller Red Herring:</strong> One good player is randomly selected as the red herring on the first night (automated random selection, not storyteller choice).</li>' +
+                '<li><strong style="color: var(--text-primary);">Fortune Teller:</strong> Can choose themselves as one of the two players to check. The red herring (one good player who registers as Demon) is randomly selected on the first night and CAN be the Fortune Teller themselves.</li>' +
                 '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
                 '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
                 '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
