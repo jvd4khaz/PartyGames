@@ -604,8 +604,18 @@
         </div>
 
         <!-- Phase Display -->
-        <div id="phase-display" class="phase-display">
+        <div id="phase-display" class="phase-display" style="position: relative;">
             <div id="phase-title" class="phase-title"></div>
+            <!-- Timer and Bell (compact, inside box, top right) -->
+            <div id="day-timer-bell-container" class="hidden" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; align-items: center; z-index: 10;">
+                <!-- Timer -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <div id="day-timer" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: monospace; line-height: 1;">05:00</div>
+                    <button id="timer-reset-btn" class="secondary-btn" onclick="resetDayTimer()" style="padding: 4px 10px; font-size: 0.75rem; line-height: 1.2;">بازنشانی</button>
+                </div>
+                <!-- Bell -->
+                <button id="bell-btn" onclick="ringBell()" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); border: 2px solid #ffb74d; color: #fff; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.6); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 16px rgba(255, 152, 0, 0.8)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(255, 152, 0, 0.6)';" title="زنگ زدن">🔔</button>
+            </div>
             <div id="phase-content"></div>
         </div>
 
@@ -936,6 +946,144 @@
         var virginTriggered = false;
         var virginClaimants = []; // Track which players have claimed to be Virgin
         var fortuneTellerRedHerrings = {}; // Track red herring player for each Fortune Teller {playerIndex: redHerringPlayerIndex}
+        
+        // Timer variables
+        var dayTimerInterval = null;
+        var dayTimerSeconds = 0; // Total seconds remaining
+        var dayTimerDefaultMinutes = 5; // Default 5 minutes for first day
+        
+        // Timer functions (defined early so they can be called from startRoleDistribution)
+        function stopDayTimer() {
+            if (dayTimerInterval) {
+                clearInterval(dayTimerInterval);
+                dayTimerInterval = null;
+            }
+        }
+        
+        function startDayTimer() {
+            // Stop any existing timer
+            stopDayTimer();
+            
+            // Set timer duration (5 minutes for first day, default for others)
+            if (currentDay === 1) {
+                dayTimerSeconds = dayTimerDefaultMinutes * 60;
+            } else {
+                dayTimerSeconds = dayTimerDefaultMinutes * 60; // Can be made configurable
+            }
+            
+            updateTimerDisplay();
+            
+            // Start countdown
+            dayTimerInterval = setInterval(function() {
+                dayTimerSeconds--;
+                updateTimerDisplay();
+                
+                if (dayTimerSeconds <= 0) {
+                    stopDayTimer();
+                    ringBell(); // Ring bell when timer finishes
+                    addLog('تایمر روز تمام شد!');
+                }
+            }, 1000);
+        }
+        
+        function resetDayTimer() {
+            startDayTimer();
+        }
+        
+        function updateTimerDisplay() {
+            var minutes = Math.floor(dayTimerSeconds / 60);
+            var seconds = dayTimerSeconds % 60;
+            var display = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            
+            var timerEl = document.getElementById('day-timer');
+            if (timerEl) {
+                timerEl.textContent = display;
+                
+                // Change color when time is running low
+                if (dayTimerSeconds <= 30) {
+                    timerEl.style.color = '#f44336'; // Red
+                } else if (dayTimerSeconds <= 60) {
+                    timerEl.style.color = '#ff9800'; // Orange
+                } else {
+                    timerEl.style.color = 'var(--accent-color)';
+                }
+            }
+        }
+        
+        function ringBell() {
+            // Create and play bell sound (more realistic bell tone)
+            try {
+                var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Bell sound: multiple harmonics for richer tone
+                var baseFreq = 523.25; // C5 note
+                var duration = 0.6;
+                var t = audioContext.currentTime;
+                
+                // Create multiple oscillators for harmonics (bell-like sound)
+                var harmonics = [
+                    { freq: baseFreq, gain: 0.4 },      // Fundamental
+                    { freq: baseFreq * 2, gain: 0.2 },  // Octave
+                    { freq: baseFreq * 3, gain: 0.15 }, // Fifth
+                    { freq: baseFreq * 4.76, gain: 0.1 } // Minor third
+                ];
+                
+                harmonics.forEach(function(harmonic, index) {
+                    var osc = audioContext.createOscillator();
+                    var gain = audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.frequency.value = harmonic.freq;
+                    osc.type = 'sine';
+                    
+                    // Bell envelope: quick attack, slow decay
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(harmonic.gain, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+                    
+                    osc.start(t);
+                    osc.stop(t + duration);
+                });
+                
+                // Second strike after delay (like a real bell)
+                setTimeout(function() {
+                    var t2 = audioContext.currentTime;
+                    harmonics.forEach(function(harmonic) {
+                        var osc = audioContext.createOscillator();
+                        var gain = audioContext.createGain();
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.frequency.value = harmonic.freq * 1.05; // Slightly higher for second strike
+                        osc.type = 'sine';
+                        
+                        gain.gain.setValueAtTime(0, t2);
+                        gain.gain.linearRampToValueAtTime(harmonic.gain * 0.6, t2 + 0.01);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t2 + duration * 0.8);
+                        
+                        osc.start(t2);
+                        osc.stop(t2 + duration * 0.8);
+                    });
+                }, 300);
+            } catch (e) {
+                // Audio context might not be available, silently fail
+                console.log('Bell sound not available:', e);
+            }
+            
+            // Visual feedback
+            var bellBtn = document.getElementById('bell-btn');
+            if (bellBtn) {
+                bellBtn.style.transform = 'scale(1.2)';
+                setTimeout(function() {
+                    bellBtn.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            addLog('🔔 زنگ به صدا درآمد!');
+        }
 
         // Completely prevent accidental refresh/back navigation
         var isGameInProgress = false;
@@ -1221,6 +1369,7 @@
             var minionPool = MINION_POOL.slice();
             shuffleArray(minionPool);
             var selectedMinions = [];
+            var baronSelected = false;
             for (var i = 0; i < dist.minions; i++) {
                 // If we need minions and Baron is available, use configured probability for first slot only
                 if (i === 0 && dist.minions > 0 && Math.random() * 100 < baronProbability) {
@@ -1229,10 +1378,19 @@
                     if (baronIndex !== -1) {
                         selectedMinions.push('Baron');
                         minionPool.splice(baronIndex, 1);
+                        baronSelected = true;
                     } else {
-                selectedMinions.push(minionPool[i]);
+                        selectedMinions.push(minionPool[i]);
                     }
                 } else {
+                    // For slots after the first, remove Baron from pool if it wasn't selected in first slot
+                    if (!baronSelected && i > 0) {
+                        var baronIndex = minionPool.indexOf('Baron');
+                        if (baronIndex !== -1) {
+                            minionPool.splice(baronIndex, 1);
+                        }
+                        baronSelected = true; // Mark as processed so we don't remove it multiple times
+                    }
                     selectedMinions.push(minionPool[i]);
                 }
             }
@@ -1258,6 +1416,7 @@
             // Select Outsiders - Drunk probability is configurable via slider (default 75%)
             var outsiderPool = OUTSIDER_POOL.slice();
             shuffleArray(outsiderPool);
+            var drunkSelected = false;
             for (var i = 0; i < adjustedOutsiders; i++) {
                 // If we need outsiders and Drunk is available, use configured probability for first slot only
                 if (i === 0 && adjustedOutsiders > 0 && Math.random() * 100 < drunkProbability) {
@@ -1266,10 +1425,19 @@
                     if (drunkIndex !== -1) {
                         selectedChars.push('Drunk');
                         outsiderPool.splice(drunkIndex, 1);
+                        drunkSelected = true;
                     } else {
                         selectedChars.push(outsiderPool[i]);
                     }
                 } else {
+                    // For slots after the first, remove Drunk from pool if it wasn't selected in first slot
+                    if (!drunkSelected && i > 0) {
+                        var drunkIndex = outsiderPool.indexOf('Drunk');
+                        if (drunkIndex !== -1) {
+                            outsiderPool.splice(drunkIndex, 1);
+                        }
+                        drunkSelected = true; // Mark as processed so we don't remove it multiple times
+                    }
                     selectedChars.push(outsiderPool[i]);
                 }
             }
@@ -1331,6 +1499,15 @@
             executions = 0;
             lastExecutionDay = 0;
             gameLog = [];
+            
+            // Reset timer (if elements exist)
+            if (typeof stopDayTimer === 'function') {
+                stopDayTimer();
+            }
+            var timerBellContainer = document.getElementById('day-timer-bell-container');
+            if (timerBellContainer) {
+                timerBellContainer.classList.add('hidden');
+            }
             
             currentDistIndex = 0;
             document.getElementById('dist-total-players').innerText = playerCount;
@@ -2782,6 +2959,12 @@
             document.getElementById('phase-display').className = 'phase-display phase-day';
             document.getElementById('phase-title').innerText = 'روز ' + currentDay;
             
+            // Show timer and bell for day phase
+            document.getElementById('day-timer-bell-container').classList.remove('hidden');
+            
+            // Start timer (5 minutes for first day, can be adjusted)
+            startDayTimer();
+            
             // Calculate important day phase info
             var livingPlayers = players.filter(p => p.alive);
             var livingCount = livingPlayers.length;
@@ -2864,19 +3047,25 @@
                 '</div>' +
                 '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; text-align: right; direction: rtl;">' +
                 '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; direction: rtl;">' +
-                '<span style="font-size: 1.2rem;">📋</span><span>قوانین تفصیلی اعدام</span>' +
+                '<span style="font-size: 1.2rem;">⚙️</span><span>یادداشت‌های مهم پیاده‌سازی</span>' +
                 '</summary>' +
                 '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
                 '<ul style="margin: 0; padding-right: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
-                '<li><strong style="color: var(--text-primary);">نامزدکردن:</strong> هر بازیکن زنده می‌تواند بازیکن دیگری را نامزد کند</li>' +
-                '<li><strong style="color: var(--text-primary);">یک نامزدی به ازای هر بازیکن:</strong> هر بازیکن یک بار در روز نامزد می‌کند</li>' +
-                '<li><strong style="color: var(--text-primary);">رای‌گیری:</strong> بعد از نامزدکردن، همه بازیکنان می‌توانند رای دهند</li>' +
-                '<li><strong style="color: var(--text-primary);">محدودیت رای مرده‌ها:</strong> بازیکنان مرده یک رای در کل بازی دارند</li>' +
-                '<li><strong style="color: var(--text-primary);">آستانه اعدام:</strong> ' + votesNeeded + '+ رای لازم است</li>' +
-                '<li><strong style="color: var(--text-primary);">یک اعدام در روز:</strong> حداکثر یک اعدام در روز (بیشترین رای)</li>' +
-                '<li><strong style="color: var(--text-primary);">بدون فاش‌سازی:</strong> شخصیت اعدام‌شدگان فاش نمی‌شود</li>' +
-                '<li><strong style="color: var(--text-primary);">مرده‌ها می‌توانند صحبت کنند:</strong> بازیکنان مرده در بحث‌ها شرکت می‌کنند</li>' +
-                '<li><strong style="color: var(--text-primary);">سلاخ:</strong> در طول روز قابل استفاده است (یک بار)</li>' +
+                '<li><strong style="color: var(--text-primary);">مسموم شده توسط زهرآگین:</strong> اطلاعات <strong>۱۰۰٪ نادرست</strong> دریافت می‌کند (مخالف حقیقت). آشپز عدد اشتباه، هم‌دل تعداد اشتباه، فال‌گیر پاسخ مخالف بله/خیر می‌گیرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مست:</strong> <strong>۷۵٪ اطلاعات نادرست</strong> دریافت می‌کند (مثل زهرآگین) و <strong>۲۵٪ اطلاعات تصادفی</strong> (دلخواه).</li>' +
+                '<li><strong style="color: var(--text-primary);">توانایی باکره:</strong> دکمه اقدام دستی (مثل سلاخ). هر کسی می‌تواند ادعا کند، اما فقط باکره واقعی فعال می‌شود. نامزدکننده می‌میرد اگر شهروند باشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">توانایی سلاخ:</strong> دکمه اقدام دستی. هر کسی می‌تواند ادعا کند، اما فقط سلاخ واقعی می‌تواند شیطان را بکشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مست/سلاخ/باکره:</strong> مست نمی‌تواند از توانایی‌های سلاخ یا باکره استفاده کند حتی اگر فکر کند آن نقش‌هاست (بررسی‌ها از شخصیت واقعی استفاده می‌کنند، نه جعلی).</li>' +
+                '<li><strong style="color: var(--text-primary);">همه بازیکنان در شب بیدار می‌شوند:</strong> همه بازیکنان زنده در ترتیب شب گنجانده می‌شوند تا از متا-گیمینگ جلوگیری شود، حتی نقش‌های منفعل دکمه "بدون اقدام" می‌بینند.</li>' +
+                '<li><strong style="color: var(--text-primary);">بلوف‌های شیطان:</strong> اگر هیچ غریبه‌ای در بازی نباشد، شیطان فقط بلوف شهروند می‌گیرد (بدون بلوف غریبه).</li>' +
+                '<li><strong style="color: var(--text-primary);">احتمال بارون/مست:</strong> قابل تنظیم از طریق اسلایدرها در تنظیمات (پیش‌فرض ۷۵٪ فقط برای اولین اسلات). اگر در اولین اسلات انتخاب نشوند، از مجموعه برای اسلات‌های بعدی حذف می‌شوند - احتمال مستقیماً نشان‌دهنده شانس حضور آنها در بازی است.</li>' +
+                '<li><strong style="color: var(--text-primary);">گوشه‌نشین:</strong> همیشه به عنوان <strong>شریر (شیطان)</strong> برای آشپز و هم‌دل ثبت می‌شود (۱۰۰٪ احتمال). همیشه به عنوان <strong>شیطان</strong> برای فال‌گیر ثبت می‌شود (۱۰۰٪ احتمال). این یک انتخاب ثابت پیاده‌سازی است، نه اختیار قصه‌گو.</li>' +
+                '<li><strong style="color: var(--text-primary);">جاسوس:</strong> همیشه به عنوان <strong>خوب</strong> برای همه توانایی‌های اطلاعاتی ظاهر می‌شود (آشپز، هم‌دل، فال‌گیر، بازپرس و غیره)، حتی اگر خادم شیطانی باشد. هرگز به عنوان شریر ثبت نمی‌شود.</li>' +
+                '<li><strong style="color: var(--text-primary);">نشان کاذب فال‌گیر:</strong> یک بازیکن خوب به صورت تصادفی در شب اول به عنوان نشان کاذب انتخاب می‌شود (انتخاب تصادفی خودکار، نه انتخاب قصه‌گو).</li>' +
+                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، یک خادم شیطانی زنده به صورت تصادفی به شیطان جدید تبدیل می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">شهردار:</strong> اگر در شب مورد حمله قرار گیرد، ممکن است بازیکن دیگری به جای او بمیرد (خودکار نیست - نیاز به مداخله دستی قصه‌گو). اگر دقیقاً ۳ بازیکن در پایان روز زنده باشند (شامل شهردار) و هیچ اعدامی در آن روز رخ نداده باشد، خوب‌ها برنده می‌شوند. شهردار باید زنده باشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">رای‌دهی پیشخدمت:</strong> انتخاب ارباب پیشخدمت ثبت و در کتاب طلسم نشان داده می‌شود، اما رای‌دهی به صورت خودکار اعمال نمی‌شود. قصه‌گو باید به صورت دستی اطمینان حاصل کند که پیشخدمت مانند ارباب خود رای می‌دهد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مرده‌شوی:</strong> فقط درباره بازیکنان اعدام شده یاد می‌گیرد (نه مرگ‌های شب). اطلاعات در شب داده می‌شود، اما فقط اگر کسی روز قبل اعدام شده باشد.</li>' +
                 '</ul>' +
                 '</div>' +
                 '</details>' +
@@ -2927,6 +3116,10 @@
             
             // Check win conditions after night deaths
             checkWinConditions();
+            
+            // Hide timer and bell during night phase (will be shown again in startDayPhase)
+            document.getElementById('day-timer-bell-container').classList.add('hidden');
+            stopDayTimer();
             
             // Start the day phase
             startDayPhase();
@@ -3106,19 +3299,25 @@
                 '</div>' +
                 '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; text-align: right; direction: rtl;">' +
                 '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; direction: rtl;">' +
-                '<span style="font-size: 1.2rem;">📋</span><span>قوانین تفصیلی اعدام</span>' +
+                '<span style="font-size: 1.2rem;">⚙️</span><span>یادداشت‌های مهم پیاده‌سازی</span>' +
                 '</summary>' +
                 '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
                 '<ul style="margin: 0; padding-right: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
-                '<li><strong style="color: var(--text-primary);">نامزدکردن:</strong> هر بازیکن زنده می‌تواند بازیکن دیگری را نامزد کند</li>' +
-                '<li><strong style="color: var(--text-primary);">یک نامزدی به ازای هر بازیکن:</strong> هر بازیکن یک بار در روز نامزد می‌کند</li>' +
-                '<li><strong style="color: var(--text-primary);">رای‌گیری:</strong> بعد از نامزدکردن، همه بازیکنان می‌توانند رای دهند</li>' +
-                '<li><strong style="color: var(--text-primary);">محدودیت رای مرده‌ها:</strong> بازیکنان مرده یک رای در کل بازی دارند</li>' +
-                '<li><strong style="color: var(--text-primary);">آستانه اعدام:</strong> ' + votesNeeded + '+ رای لازم است</li>' +
-                '<li><strong style="color: var(--text-primary);">یک اعدام در روز:</strong> حداکثر یک اعدام در روز (بیشترین رای)</li>' +
-                '<li><strong style="color: var(--text-primary);">بدون فاش‌سازی:</strong> شخصیت اعدام‌شدگان فاش نمی‌شود</li>' +
-                '<li><strong style="color: var(--text-primary);">مرده‌ها می‌توانند صحبت کنند:</strong> بازیکنان مرده در بحث‌ها شرکت می‌کنند</li>' +
-                '<li><strong style="color: var(--text-primary);">سلاخ:</strong> در طول روز قابل استفاده است (یک بار)</li>' +
+                '<li><strong style="color: var(--text-primary);">مسموم شده توسط زهرآگین:</strong> اطلاعات <strong>۱۰۰٪ نادرست</strong> دریافت می‌کند (مخالف حقیقت). آشپز عدد اشتباه، هم‌دل تعداد اشتباه، فال‌گیر پاسخ مخالف بله/خیر می‌گیرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مست:</strong> <strong>۷۵٪ اطلاعات نادرست</strong> دریافت می‌کند (مثل زهرآگین) و <strong>۲۵٪ اطلاعات تصادفی</strong> (دلخواه).</li>' +
+                '<li><strong style="color: var(--text-primary);">توانایی باکره:</strong> دکمه اقدام دستی (مثل سلاخ). هر کسی می‌تواند ادعا کند، اما فقط باکره واقعی فعال می‌شود. نامزدکننده می‌میرد اگر شهروند باشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">توانایی سلاخ:</strong> دکمه اقدام دستی. هر کسی می‌تواند ادعا کند، اما فقط سلاخ واقعی می‌تواند شیطان را بکشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مست/سلاخ/باکره:</strong> مست نمی‌تواند از توانایی‌های سلاخ یا باکره استفاده کند حتی اگر فکر کند آن نقش‌هاست (بررسی‌ها از شخصیت واقعی استفاده می‌کنند، نه جعلی).</li>' +
+                '<li><strong style="color: var(--text-primary);">همه بازیکنان در شب بیدار می‌شوند:</strong> همه بازیکنان زنده در ترتیب شب گنجانده می‌شوند تا از متا-گیمینگ جلوگیری شود، حتی نقش‌های منفعل دکمه "بدون اقدام" می‌بینند.</li>' +
+                '<li><strong style="color: var(--text-primary);">بلوف‌های شیطان:</strong> اگر هیچ غریبه‌ای در بازی نباشد، شیطان فقط بلوف شهروند می‌گیرد (بدون بلوف غریبه).</li>' +
+                '<li><strong style="color: var(--text-primary);">احتمال بارون/مست:</strong> قابل تنظیم از طریق اسلایدرها در تنظیمات (پیش‌فرض ۷۵٪ فقط برای اولین اسلات). اگر در اولین اسلات انتخاب نشوند، از مجموعه برای اسلات‌های بعدی حذف می‌شوند - احتمال مستقیماً نشان‌دهنده شانس حضور آنها در بازی است.</li>' +
+                '<li><strong style="color: var(--text-primary);">گوشه‌نشین:</strong> همیشه به عنوان <strong>شریر (شیطان)</strong> برای آشپز و هم‌دل ثبت می‌شود (۱۰۰٪ احتمال). همیشه به عنوان <strong>شیطان</strong> برای فال‌گیر ثبت می‌شود (۱۰۰٪ احتمال). این یک انتخاب ثابت پیاده‌سازی است، نه اختیار قصه‌گو.</li>' +
+                '<li><strong style="color: var(--text-primary);">جاسوس:</strong> همیشه به عنوان <strong>خوب</strong> برای همه توانایی‌های اطلاعاتی ظاهر می‌شود (آشپز، هم‌دل، فال‌گیر، بازپرس و غیره)، حتی اگر خادم شیطانی باشد. هرگز به عنوان شریر ثبت نمی‌شود.</li>' +
+                '<li><strong style="color: var(--text-primary);">نشان کاذب فال‌گیر:</strong> یک بازیکن خوب به صورت تصادفی در شب اول به عنوان نشان کاذب انتخاب می‌شود (انتخاب تصادفی خودکار، نه انتخاب قصه‌گو).</li>' +
+                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، یک خادم شیطانی زنده به صورت تصادفی به شیطان جدید تبدیل می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">شهردار:</strong> اگر در شب مورد حمله قرار گیرد، ممکن است بازیکن دیگری به جای او بمیرد (خودکار نیست - نیاز به مداخله دستی قصه‌گو). اگر دقیقاً ۳ بازیکن در پایان روز زنده باشند (شامل شهردار) و هیچ اعدامی در آن روز رخ نداده باشد، خوب‌ها برنده می‌شوند. شهردار باید زنده باشد.</li>' +
+                '<li><strong style="color: var(--text-primary);">رای‌دهی پیشخدمت:</strong> انتخاب ارباب پیشخدمت ثبت و در کتاب طلسم نشان داده می‌شود، اما رای‌دهی به صورت خودکار اعمال نمی‌شود. قصه‌گو باید به صورت دستی اطمینان حاصل کند که پیشخدمت مانند ارباب خود رای می‌دهد.</li>' +
+                '<li><strong style="color: var(--text-primary);">مرده‌شوی:</strong> فقط درباره بازیکنان اعدام شده یاد می‌گیرد (نه مرگ‌های شب). اطلاعات در شب داده می‌شود، اما فقط اگر کسی روز قبل اعدام شده باشد.</li>' +
                 '</ul>' +
                 '</div>' +
                 '</details>' +
@@ -3332,10 +3531,27 @@
         }
 
         function endDay() {
+            // Stop timer when day ends
+            stopDayTimer();
+            var timerBellContainer = document.getElementById('day-timer-bell-container');
+            if (timerBellContainer) {
+                timerBellContainer.classList.add('hidden');
+            }
+            
             var living = players.filter(p => p.alive).length;
             if (living <= 2) {
                 endGame('evil', 'Only ' + living + ' players remain! Evil wins!');
                 return;
+            }
+            
+            // Check for Mayor's win condition: if exactly 3 players alive, Mayor is alive, and no execution occurred today
+            if (living === 3 && lastExecutionDay !== currentDay) {
+                var mayor = players.find(p => p.alive && p.characterDef.name === 'شهردار');
+                if (mayor) {
+                    // No execution happened today, exactly 3 players remain, and Mayor is alive - good wins
+                    endGame('good', 'شرط برنده شهردار: ۳ بازیکن زنده (شامل شهردار) و هیچ اعدامی امروز رخ نداد! خوبی برنده شد!');
+                    return;
+                }
             }
             
             currentDay++;
@@ -3354,6 +3570,7 @@
             
             addLog('شب ' + currentDay + ' شروع می‌شود.');
         }
+        
 
         function checkWinConditions() {
             var living = players.filter(p => p.alive).length;
@@ -3364,15 +3581,7 @@
                 return;
             }
             
-            // Check for Mayor's special win condition: if only 3 players remain and Mayor dies, good wins
-            if (living === 3) {
-                var mayor = players.find(p => p.character === 'Mayor');
-                if (mayor && !mayor.alive) {
-                    // Mayor died with exactly 3 players remaining - good wins
-                    endGame('good', 'شهردار با فقط ۳ بازیکن باقی‌مانده مرد! خوبی برنده شد!');
-                    return;
-                }
-            }
+            // Mayor win condition is checked in endDay() function, not here
             
             if (living <= 2) {
                 endGame('evil', 'فقط ' + living + ' بازیکن باقی مانده! شریر برنده شد!');

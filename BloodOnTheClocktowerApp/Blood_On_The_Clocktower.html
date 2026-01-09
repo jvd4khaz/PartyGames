@@ -543,8 +543,18 @@
         </div>
 
         <!-- Phase Display -->
-        <div id="phase-display" class="phase-display">
+        <div id="phase-display" class="phase-display" style="position: relative;">
             <div id="phase-title" class="phase-title"></div>
+            <!-- Timer and Bell (compact, inside box, top right) -->
+            <div id="day-timer-bell-container" class="hidden" style="position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; align-items: center; z-index: 10;">
+                <!-- Timer -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <div id="day-timer" style="font-size: 1.5rem; font-weight: bold; color: var(--accent-color); text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-family: monospace; line-height: 1;">05:00</div>
+                    <button id="timer-reset-btn" class="secondary-btn" onclick="resetDayTimer()" style="padding: 4px 10px; font-size: 0.75rem; line-height: 1.2;">Reset</button>
+                </div>
+                <!-- Bell -->
+                <button id="bell-btn" onclick="ringBell()" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); border: 2px solid #ffb74d; color: #fff; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 152, 0, 0.6); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; padding: 0;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 16px rgba(255, 152, 0, 0.8)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(255, 152, 0, 0.6)';" title="Ring Bell">🔔</button>
+            </div>
             <div id="phase-content"></div>
         </div>
 
@@ -948,6 +958,144 @@
         var virginTriggered = false;
         var virginClaimants = []; // Track which players have claimed to be Virgin
         var fortuneTellerRedHerrings = {}; // Track red herring player for each Fortune Teller {playerIndex: redHerringPlayerIndex}
+        
+        // Timer variables
+        var dayTimerInterval = null;
+        var dayTimerSeconds = 0; // Total seconds remaining
+        var dayTimerDefaultMinutes = 5; // Default 5 minutes for first day
+        
+        // Timer functions (defined early so they can be called from startRoleDistribution)
+        function stopDayTimer() {
+            if (dayTimerInterval) {
+                clearInterval(dayTimerInterval);
+                dayTimerInterval = null;
+            }
+        }
+        
+        function startDayTimer() {
+            // Stop any existing timer
+            stopDayTimer();
+            
+            // Set timer duration (5 minutes for first day, default for others)
+            if (currentDay === 1) {
+                dayTimerSeconds = dayTimerDefaultMinutes * 60;
+            } else {
+                dayTimerSeconds = dayTimerDefaultMinutes * 60; // Can be made configurable
+            }
+            
+            updateTimerDisplay();
+            
+            // Start countdown
+            dayTimerInterval = setInterval(function() {
+                dayTimerSeconds--;
+                updateTimerDisplay();
+                
+                if (dayTimerSeconds <= 0) {
+                    stopDayTimer();
+                    ringBell(); // Ring bell when timer finishes
+                    addLog('Day timer finished!');
+                }
+            }, 1000);
+        }
+        
+        function resetDayTimer() {
+            startDayTimer();
+        }
+        
+        function updateTimerDisplay() {
+            var minutes = Math.floor(dayTimerSeconds / 60);
+            var seconds = dayTimerSeconds % 60;
+            var display = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            
+            var timerEl = document.getElementById('day-timer');
+            if (timerEl) {
+                timerEl.textContent = display;
+                
+                // Change color when time is running low
+                if (dayTimerSeconds <= 30) {
+                    timerEl.style.color = '#f44336'; // Red
+                } else if (dayTimerSeconds <= 60) {
+                    timerEl.style.color = '#ff9800'; // Orange
+                } else {
+                    timerEl.style.color = 'var(--accent-color)';
+                }
+            }
+        }
+        
+        function ringBell() {
+            // Create and play bell sound (more realistic bell tone)
+            try {
+                var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Bell sound: multiple harmonics for richer tone
+                var baseFreq = 523.25; // C5 note
+                var duration = 0.6;
+                var t = audioContext.currentTime;
+                
+                // Create multiple oscillators for harmonics (bell-like sound)
+                var harmonics = [
+                    { freq: baseFreq, gain: 0.4 },      // Fundamental
+                    { freq: baseFreq * 2, gain: 0.2 },  // Octave
+                    { freq: baseFreq * 3, gain: 0.15 }, // Fifth
+                    { freq: baseFreq * 4.76, gain: 0.1 } // Minor third
+                ];
+                
+                harmonics.forEach(function(harmonic, index) {
+                    var osc = audioContext.createOscillator();
+                    var gain = audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.frequency.value = harmonic.freq;
+                    osc.type = 'sine';
+                    
+                    // Bell envelope: quick attack, slow decay
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(harmonic.gain, t + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+                    
+                    osc.start(t);
+                    osc.stop(t + duration);
+                });
+                
+                // Second strike after delay (like a real bell)
+                setTimeout(function() {
+                    var t2 = audioContext.currentTime;
+                    harmonics.forEach(function(harmonic) {
+                        var osc = audioContext.createOscillator();
+                        var gain = audioContext.createGain();
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.frequency.value = harmonic.freq * 1.05; // Slightly higher for second strike
+                        osc.type = 'sine';
+                        
+                        gain.gain.setValueAtTime(0, t2);
+                        gain.gain.linearRampToValueAtTime(harmonic.gain * 0.6, t2 + 0.01);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t2 + duration * 0.8);
+                        
+                        osc.start(t2);
+                        osc.stop(t2 + duration * 0.8);
+                    });
+                }, 300);
+            } catch (e) {
+                // Audio context might not be available, silently fail
+                console.log('Bell sound not available:', e);
+            }
+            
+            // Visual feedback
+            var bellBtn = document.getElementById('bell-btn');
+            if (bellBtn) {
+                bellBtn.style.transform = 'scale(1.2)';
+                setTimeout(function() {
+                    bellBtn.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            addLog('🔔 Bell rang!');
+        }
 
         // --- Initialization ---
         window.onload = function() {
@@ -1161,6 +1309,7 @@
             var minionPool = MINION_POOL.slice();
             shuffleArray(minionPool);
             var selectedMinions = [];
+            var baronSelected = false;
             for (var i = 0; i < dist.minions; i++) {
                 // If we need minions and Baron is available, use configured probability for first slot only
                 if (i === 0 && dist.minions > 0 && Math.random() * 100 < baronProbability) {
@@ -1169,10 +1318,19 @@
                     if (baronIndex !== -1) {
                         selectedMinions.push('Baron');
                         minionPool.splice(baronIndex, 1);
+                        baronSelected = true;
                     } else {
-                selectedMinions.push(minionPool[i]);
+                        selectedMinions.push(minionPool[i]);
                     }
                 } else {
+                    // For slots after the first, remove Baron from pool if it wasn't selected in first slot
+                    if (!baronSelected && i > 0) {
+                        var baronIndex = minionPool.indexOf('Baron');
+                        if (baronIndex !== -1) {
+                            minionPool.splice(baronIndex, 1);
+                        }
+                        baronSelected = true; // Mark as processed so we don't remove it multiple times
+                    }
                     selectedMinions.push(minionPool[i]);
                 }
             }
@@ -1198,6 +1356,7 @@
             // Select Outsiders - Drunk probability is configurable via slider (default 75%)
             var outsiderPool = OUTSIDER_POOL.slice();
             shuffleArray(outsiderPool);
+            var drunkSelected = false;
             for (var i = 0; i < adjustedOutsiders; i++) {
                 // If we need outsiders and Drunk is available, use configured probability for first slot only
                 if (i === 0 && adjustedOutsiders > 0 && Math.random() * 100 < drunkProbability) {
@@ -1206,10 +1365,19 @@
                     if (drunkIndex !== -1) {
                         selectedChars.push('Drunk');
                         outsiderPool.splice(drunkIndex, 1);
+                        drunkSelected = true;
                     } else {
                         selectedChars.push(outsiderPool[i]);
                     }
                 } else {
+                    // For slots after the first, remove Drunk from pool if it wasn't selected in first slot
+                    if (!drunkSelected && i > 0) {
+                        var drunkIndex = outsiderPool.indexOf('Drunk');
+                        if (drunkIndex !== -1) {
+                            outsiderPool.splice(drunkIndex, 1);
+                        }
+                        drunkSelected = true; // Mark as processed so we don't remove it multiple times
+                    }
                     selectedChars.push(outsiderPool[i]);
                 }
             }
@@ -1271,6 +1439,15 @@
             executions = 0;
             lastExecutionDay = 0;
             gameLog = [];
+            
+            // Reset timer (if elements exist)
+            if (typeof stopDayTimer === 'function') {
+                stopDayTimer();
+            }
+            var timerBellContainer = document.getElementById('day-timer-bell-container');
+            if (timerBellContainer) {
+                timerBellContainer.classList.add('hidden');
+            }
             
             currentDistIndex = 0;
             document.getElementById('dist-total-players').innerText = playerCount;
@@ -2711,6 +2888,12 @@
             document.getElementById('phase-display').className = 'phase-display phase-day';
             document.getElementById('phase-title').innerText = 'Day ' + currentDay;
             
+            // Show timer and bell for day phase
+            document.getElementById('day-timer-bell-container').classList.remove('hidden');
+            
+            // Start timer (5 minutes for first day, can be adjusted)
+            startDayTimer();
+            
             // Calculate important day phase info
             var livingPlayers = players.filter(p => p.alive);
             var livingCount = livingPlayers.length;
@@ -2774,6 +2957,14 @@
                 
                 '</div>' +
                 
+                '<!-- Alive Players List -->' +
+                '<div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid rgba(76, 175, 80, 0.3);">' +
+                '<div style="font-weight: 600; font-size: 1rem; color: var(--good-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">' +
+                '<span style="font-size: 1.2rem;">👥</span><span>Alive Players:</span>' +
+                '</div>' +
+                '<div style="font-size: 1rem; color: var(--text-primary); line-height: 1.8;">' + (livingNames || 'None') + '</div>' +
+                '</div>' +
+                
                 specialConditions;
             
             var actions = document.getElementById('action-buttons');
@@ -2787,19 +2978,25 @@
                 '</div>' +
                 '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">' +
                 '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">' +
-                '<span style="font-size: 1.2rem;">📋</span><span>Detailed Execution Rules</span>' +
+                '<span style="font-size: 1.2rem;">⚙️</span><span>Important Implementation Notes</span>' +
                 '</summary>' +
                 '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
                 '<ul style="margin: 0; padding-left: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
-                '<li><strong style="color: var(--text-primary);">Nominations:</strong> Any living player can nominate another living player</li>' +
-                '<li><strong style="color: var(--text-primary);">One Nomination Per Player:</strong> Each player nominates once per day</li>' +
-                '<li><strong style="color: var(--text-primary);">Voting:</strong> After nomination, all players may vote</li>' +
-                '<li><strong style="color: var(--text-primary);">Dead Vote Limit:</strong> Dead players have ONE vote for entire game</li>' +
-                '<li><strong style="color: var(--text-primary);">Execution Threshold:</strong> ' + votesNeeded + '+ votes required</li>' +
-                '<li><strong style="color: var(--text-primary);">One Per Day:</strong> Maximum one execution per day (highest votes)</li>' +
-                '<li><strong style="color: var(--text-primary);">No Reveal:</strong> Executed characters NOT revealed</li>' +
-                '<li><strong style="color: var(--text-primary);">Dead Can Talk:</strong> Dead players participate in discussions</li>' +
-                '<li><strong style="color: var(--text-primary);">Slayer:</strong> Can be used during day (once per game)</li>' +
+                '<li><strong style="color: var(--text-primary);">Poisoned by Poisoner:</strong> Receives <strong>100% INCORRECT</strong> information (opposite of truth). Chef gets wrong number, Empath gets wrong count, Fortune Teller gets opposite YES/NO.</li>' +
+                '<li><strong style="color: var(--text-primary);">Drunk:</strong> Receives <strong>75% INCORRECT</strong> information (like Poisoner) and <strong>25% RANDOM</strong> information (arbitrary).</li>' +
+                '<li><strong style="color: var(--text-primary);">Virgin Ability:</strong> Manual action button (like Slayer). Anyone can claim, but only real Virgin triggers. Nominator dies if they are Townsfolk.</li>' +
+                '<li><strong style="color: var(--text-primary);">Slayer Ability:</strong> Manual action button. Anyone can claim, but only real Slayer can kill Demon.</li>' +
+                '<li><strong style="color: var(--text-primary);">Drunk/Slayer/Virgin:</strong> Drunk cannot use Slayer or Virgin abilities even if they think they are those roles (checks use real character, not fake).</li>' +
+                '<li><strong style="color: var(--text-primary);">All Players Wake at Night:</strong> All living players are included in night order to prevent meta-gaming, even passive roles see "No Action" button.</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Bluffs:</strong> If no Outsiders in game, Imp only gets Townsfolk bluffs (no Outsider bluffs).</li>' +
+                '<li><strong style="color: var(--text-primary);">Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only). If not selected in first slot, they are removed from the pool for subsequent slots - probability directly reflects their chance of being in the game.</li>' +
+                '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
+                '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
+                '<li><strong style="color: var(--text-primary);">Fortune Teller Red Herring:</strong> One good player is randomly selected as the red herring on the first night (automated random selection, not storyteller choice).</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
+                '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
+                '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
+                '<li><strong style="color: var(--text-primary);">Undertaker:</strong> Only learns about executed players (not night deaths). Information is given at night, but only if someone was executed the previous day.</li>' +
                 '</ul>' +
                 '</div>' +
                 '</details>' +
@@ -2850,6 +3047,10 @@
             
             // Check win conditions after night deaths
             checkWinConditions();
+            
+            // Hide timer and bell during night phase (will be shown again in startDayPhase)
+            document.getElementById('day-timer-bell-container').classList.add('hidden');
+            stopDayTimer();
             
             // Start the day phase
             startDayPhase();
@@ -2969,6 +3170,7 @@
             // Return to day phase - restore the proper day phase layout
             var livingPlayers = players.filter(p => p.alive);
             var livingCount = livingPlayers.length;
+            var livingNames = livingPlayers.map(p => p.name).join(', ');
             var votesNeeded = Math.ceil(livingCount / 2);
             
             // Check for special conditions
@@ -3010,6 +3212,14 @@
                 
                 '</div>' +
                 
+                '<!-- Alive Players List -->' +
+                '<div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid rgba(76, 175, 80, 0.3);">' +
+                '<div style="font-weight: 600; font-size: 1rem; color: var(--good-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">' +
+                '<span style="font-size: 1.2rem;">👥</span><span>Alive Players:</span>' +
+                '</div>' +
+                '<div style="font-size: 1rem; color: var(--text-primary); line-height: 1.8;">' + (livingNames || 'None') + '</div>' +
+                '</div>' +
+                
                 specialConditions;
             
             var actions = document.getElementById('action-buttons');
@@ -3023,19 +3233,25 @@
                 '</div>' +
                 '<details style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">' +
                 '<summary style="font-weight: 600; font-size: 1rem; cursor: pointer; user-select: none; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">' +
-                '<span style="font-size: 1.2rem;">📋</span><span>Detailed Execution Rules</span>' +
+                '<span style="font-size: 1.2rem;">⚙️</span><span>Important Implementation Notes</span>' +
                 '</summary>' +
                 '<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">' +
                 '<ul style="margin: 0; padding-left: 25px; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">' +
-                '<li><strong style="color: var(--text-primary);">Nominations:</strong> Any living player can nominate another living player</li>' +
-                '<li><strong style="color: var(--text-primary);">One Nomination Per Player:</strong> Each player nominates once per day</li>' +
-                '<li><strong style="color: var(--text-primary);">Voting:</strong> After nomination, all players may vote</li>' +
-                '<li><strong style="color: var(--text-primary);">Dead Vote Limit:</strong> Dead players have ONE vote for entire game</li>' +
-                '<li><strong style="color: var(--text-primary);">Execution Threshold:</strong> ' + votesNeeded + '+ votes required</li>' +
-                '<li><strong style="color: var(--text-primary);">One Per Day:</strong> Maximum one execution per day (highest votes)</li>' +
-                '<li><strong style="color: var(--text-primary);">No Reveal:</strong> Executed characters NOT revealed</li>' +
-                '<li><strong style="color: var(--text-primary);">Dead Can Talk:</strong> Dead players participate in discussions</li>' +
-                '<li><strong style="color: var(--text-primary);">Slayer:</strong> Can be used during day (once per game)</li>' +
+                '<li><strong style="color: var(--text-primary);">Poisoned by Poisoner:</strong> Receives <strong>100% INCORRECT</strong> information (opposite of truth). Chef gets wrong number, Empath gets wrong count, Fortune Teller gets opposite YES/NO.</li>' +
+                '<li><strong style="color: var(--text-primary);">Drunk:</strong> Receives <strong>75% INCORRECT</strong> information (like Poisoner) and <strong>25% RANDOM</strong> information (arbitrary).</li>' +
+                '<li><strong style="color: var(--text-primary);">Virgin Ability:</strong> Manual action button (like Slayer). Anyone can claim, but only real Virgin triggers. Nominator dies if they are Townsfolk.</li>' +
+                '<li><strong style="color: var(--text-primary);">Slayer Ability:</strong> Manual action button. Anyone can claim, but only real Slayer can kill Demon.</li>' +
+                '<li><strong style="color: var(--text-primary);">Drunk/Slayer/Virgin:</strong> Drunk cannot use Slayer or Virgin abilities even if they think they are those roles (checks use real character, not fake).</li>' +
+                '<li><strong style="color: var(--text-primary);">All Players Wake at Night:</strong> All living players are included in night order to prevent meta-gaming, even passive roles see "No Action" button.</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Bluffs:</strong> If no Outsiders in game, Imp only gets Townsfolk bluffs (no Outsider bluffs).</li>' +
+                '<li><strong style="color: var(--text-primary);">Baron/Drunk Probability:</strong> Configurable via sliders in setup (default 75% for first slot only). If not selected in first slot, they are removed from the pool for subsequent slots - probability directly reflects their chance of being in the game.</li>' +
+                '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
+                '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
+                '<li><strong style="color: var(--text-primary);">Fortune Teller Red Herring:</strong> One good player is randomly selected as the red herring on the first night (automated random selection, not storyteller choice).</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
+                '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
+                '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
+                '<li><strong style="color: var(--text-primary);">Undertaker:</strong> Only learns about executed players (not night deaths). Information is given at night, but only if someone was executed the previous day.</li>' +
                 '</ul>' +
                 '</div>' +
                 '</details>' +
@@ -3264,10 +3480,27 @@
         }
 
         function endDay() {
+            // Stop timer when day ends
+            stopDayTimer();
+            var timerBellContainer = document.getElementById('day-timer-bell-container');
+            if (timerBellContainer) {
+                timerBellContainer.classList.add('hidden');
+            }
+            
             var living = players.filter(p => p.alive).length;
             if (living <= 2) {
                 endGame('evil', 'Only ' + living + ' players remain! Evil wins!');
                 return;
+            }
+            
+            // Check for Mayor's win condition: if exactly 3 players alive, Mayor is alive, and no execution occurred today
+            if (living === 3 && lastExecutionDay !== currentDay) {
+                var mayor = players.find(p => p.alive && p.characterDef.name === 'Mayor');
+                if (mayor) {
+                    // No execution happened today, exactly 3 players remain, and Mayor is alive - good wins
+                    endGame('good', 'Mayor\'s win condition: 3 players alive (including Mayor) and no execution occurred today! Good wins!');
+                    return;
+                }
             }
             
             currentDay++;
@@ -3296,15 +3529,7 @@
                 return;
             }
             
-            // Check for Mayor's special win condition: if only 3 players remain and Mayor dies, good wins
-            if (living === 3) {
-                var mayor = players.find(p => p.characterDef.name === 'Mayor');
-                if (mayor && !mayor.alive) {
-                    // Mayor died with exactly 3 players remaining - good wins
-                    endGame('good', 'Mayor died with only 3 players remaining! Good wins!');
-                    return;
-                }
-            }
+            // Mayor win condition is checked in endDay() function, not here
             
             if (living <= 2) {
                 endGame('evil', 'Only ' + living + ' players remain! Evil wins!');
