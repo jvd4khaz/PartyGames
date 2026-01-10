@@ -416,17 +416,30 @@
 
     <!-- Role Distribution Screen -->
     <div id="role-dist-screen" class="container hidden" style="justify-content: center; text-align: center;">
-        <h2 id="dist-player-name" style="font-size: 2rem; color: var(--accent-color); margin-bottom: 30px;">Player Name</h2>
-        <div id="role-card" class="mission-card" style="min-height: 250px;">
-            <div id="role-title" class="mission-title" style="font-size: 2.5rem; margin-bottom: 20px;">...</div>
-            <div id="role-desc" class="mission-desc" style="font-size: 1.2rem; margin-top: 20px;">...</div>
-            <div id="hakem-announcement" style="margin-top: 30px; padding: 20px; background: rgba(255, 152, 0, 0.2); border-radius: 12px; border: 2px solid var(--accent-color); display: none;">
-                <div style="font-size: 2rem; margin-bottom: 10px;">👑</div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent-color);">You are the first Hakem!</div>
-                <div style="font-size: 1rem; margin-top: 10px; color: #333;">You are the first to select a mission.</div>
-            </div>
+        <!-- Confirmation View -->
+        <div id="role-confirm-view">
+            <div style="font-size: 4rem; margin-bottom: 20px;">📱</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--text-secondary);">Pass device to player:</h2>
+            <h2 id="confirm-player-name" style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 30px;">Player Name</h2>
+            <p style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 30px;">Player <span id="confirm-player-num">1</span> of <span id="confirm-total-players">4</span></p>
+            <button onclick="confirmPlayerIdentity()" style="background-color: var(--accent-color); color: #000; padding: 16px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%;">I am this player</button>
         </div>
-        <button onclick="nextPlayerRole()" style="background-color: var(--accent-color); color: #000; padding: 16px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 30px; width: 100%;">Next</button>
+        
+        <!-- Role Reveal View -->
+        <div id="role-reveal-view" class="hidden">
+            <h2 id="dist-player-name" style="font-size: 2rem; color: var(--accent-color); margin-bottom: 30px;">Player Name</h2>
+            <div id="role-card" class="mission-card" style="min-height: 250px;">
+                <div id="role-title" class="mission-title" style="font-size: 2.5rem; margin-bottom: 20px;">...</div>
+                <div id="role-desc" class="mission-desc" style="font-size: 1.2rem; margin-top: 20px;">...</div>
+                <div id="hakem-announcement" style="margin-top: 30px; padding: 20px; background: rgba(255, 152, 0, 0.2); border-radius: 12px; border: 2px solid var(--accent-color); display: none;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">👑</div>
+                    <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent-color);">You are the first Hakem!</div>
+                    <div style="font-size: 1rem; margin-top: 10px; color: #333;">You are the first to select a mission.</div>
+                </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 20px; margin-bottom: 10px;">Memorize your role and hide it.</p>
+            <button onclick="nextPlayerRole()" style="background-color: var(--accent-color); color: #000; padding: 16px 24px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%;">Hide & Next</button>
+        </div>
     </div>
 
 <!-- Rules Modal -->
@@ -745,6 +758,24 @@
         gameState.currentDistIndex = 0;
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('role-dist-screen').classList.remove('hidden');
+        showPlayerConfirmation();
+    }
+
+    function showPlayerConfirmation() {
+        const player = gameState.players[gameState.currentDistIndex];
+        document.getElementById('confirm-player-name').innerText = player.name;
+        document.getElementById('confirm-player-num').innerText = gameState.currentDistIndex + 1;
+        document.getElementById('confirm-total-players').innerText = gameState.playerCount;
+        
+        // Show confirmation view, hide reveal view
+        document.getElementById('role-confirm-view').classList.remove('hidden');
+        document.getElementById('role-reveal-view').classList.add('hidden');
+    }
+
+    function confirmPlayerIdentity() {
+        // Hide confirmation, show role reveal
+        document.getElementById('role-confirm-view').classList.add('hidden');
+        document.getElementById('role-reveal-view').classList.remove('hidden');
         showPlayerRole();
     }
 
@@ -782,7 +813,7 @@
             document.getElementById('game-screen').classList.remove('hidden');
             initGame();
         } else {
-            showPlayerRole();
+            showPlayerConfirmation();
         }
     }
 
