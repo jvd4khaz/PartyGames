@@ -736,14 +736,8 @@
             gameState.players[i].role = (i === insiderIndex) ? 'insider' : 'agent';
         }
         
-        let hakemIndex;
-        if (gameState.playerCount === 1) {
-            hakemIndex = 0;
-        } else {
-            do {
-                hakemIndex = Math.floor(Math.random() * gameState.playerCount);
-            } while (hakemIndex === insiderIndex);
-        }
+        // Randomly assign first Hakem (anyone can be hakem, including Insider)
+        const hakemIndex = Math.floor(Math.random() * gameState.playerCount);
         gameState.firstHakemIndex = hakemIndex;
         
         gameState.winLimitMissions = WIN_CONFIG[gameState.playerCount].missions;
