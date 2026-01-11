@@ -757,6 +757,7 @@
         var players = [];
         var savedPlayers = [];
         var currentDistIndex = 0;
+        var startingPlayerIndex = 0; // Random starting player for role viewing order
         var baronProbability = 75; // Percentage chance for Baron in first minion slot
         var drunkProbability = 75; // Percentage chance for Drunk in first outsider slot
 
@@ -872,7 +873,8 @@
                         virginTriggered: virginTriggered,
                         virginClaimants: virginClaimants,
                         fortuneTellerRedHerrings: fortuneTellerRedHerrings,
-                        currentDistIndex: currentDistIndex
+                        currentDistIndex: currentDistIndex,
+                        startingPlayerIndex: startingPlayerIndex
                     };
                     localStorage.setItem('botc_game_state', JSON.stringify(state));
                 }
@@ -913,6 +915,7 @@
                         virginClaimants = state.virginClaimants || [];
                         fortuneTellerRedHerrings = state.fortuneTellerRedHerrings || {};
                         currentDistIndex = state.currentDistIndex;
+                        startingPlayerIndex = state.startingPlayerIndex || 0;
                         
                         isGameInProgress = true;
                         preventAccidentalNavigation();
@@ -921,7 +924,7 @@
                         if (currentDistIndex < players.length) {
                             // Still in distribution phase
                             showScreen('distribution-screen');
-                            updateDistributionScreen();
+                            updateDistScreen();
                         } else if (players.length > 0) {
                             // Game is in progress
                             showScreen('game-screen');
@@ -1472,6 +1475,8 @@
                 bellContainer.classList.add('hidden');
             }
             
+            // Randomize starting player for role viewing order
+            startingPlayerIndex = Math.floor(Math.random() * playerCount);
             currentDistIndex = 0;
             document.getElementById('dist-total-players').innerText = playerCount;
             document.getElementById('setup-screen').classList.add('hidden');
@@ -1480,12 +1485,16 @@
         }
 
         function updateDistScreen() {
+            // Calculate actual player index with rotation starting from startingPlayerIndex
+            var actualPlayerIndex = (startingPlayerIndex + currentDistIndex) % playerCount;
             document.getElementById('dist-player-num').innerText = currentDistIndex + 1;
-            document.getElementById('dist-player-name').innerText = players[currentDistIndex].name;
+            document.getElementById('dist-player-name').innerText = players[actualPlayerIndex].name;
         }
 
         function revealRole() {
-            var player = players[currentDistIndex];
+            // Calculate actual player index with rotation starting from startingPlayerIndex
+            var actualPlayerIndex = (startingPlayerIndex + currentDistIndex) % playerCount;
+            var player = players[actualPlayerIndex];
             document.getElementById('reveal-name-header').innerText = player.name;
             
             var title = document.getElementById('role-title');
@@ -1584,11 +1593,12 @@
                 
                 renderDistChoiceEN(player, charName, nightActionDiv, function() {
                     nextBtn.disabled = false;
+            var actualPlayerIndex = (startingPlayerIndex + currentDistIndex) % playerCount;
             if (currentDistIndex === playerCount - 1) {
-                        nextBtn.innerText = "Finish & Start Day";
-                    } else {
-                        nextBtn.innerText = "Hide & Next";
-                    }
+                nextBtn.innerText = "Finish & Start Day";
+            } else {
+                nextBtn.innerText = "Hide & Next";
+            }
                 });
             }
             
@@ -1867,6 +1877,22 @@
             currentNightOrder.sort(function(a, b) {
                 return a.player.index - b.player.index;
             });
+            
+            // Rotate the order so it starts from the startingPlayerIndex
+            // Find the index of the first player >= startingPlayerIndex
+            var startIdx = 0;
+            for (var i = 0; i < currentNightOrder.length; i++) {
+                if (currentNightOrder[i].player.index >= startingPlayerIndex) {
+                    startIdx = i;
+                    break;
+                }
+            }
+            // Rotate the array
+            if (startIdx > 0) {
+                var beforeStart = currentNightOrder.slice(0, startIdx);
+                var fromStart = currentNightOrder.slice(startIdx);
+                currentNightOrder = fromStart.concat(beforeStart);
+            }
         }
 
         function processNightPhase() {
