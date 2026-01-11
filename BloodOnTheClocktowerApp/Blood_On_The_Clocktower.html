@@ -2866,11 +2866,31 @@
                     return;
                 }
                 
-                // Imp kills itself and passes role to a random Minion
+                // Imp kills itself and passes role to a Minion
                 markedForDeath = impPlayer;
                 
-                // Randomly select a living Minion to become the new Imp
-                var newImp = livingMinions[Math.floor(Math.random() * livingMinions.length)];
+                // Priority: 1) Scarlet Woman, 2) Next evil player (next Minion by player index)
+                var newImp = null;
+                
+                // First, check if Scarlet Woman is alive
+                var scarletWoman = livingMinions.find(p => p.characterDef.name === 'Scarlet Woman');
+                if (scarletWoman) {
+                    newImp = scarletWoman;
+                } else {
+                    // Find the next Minion by player index (the one with lowest index after Imp, or wrap around)
+                    var impIndex = impPlayer.index;
+                    var nextMinions = livingMinions.filter(p => p.index > impIndex);
+                    if (nextMinions.length > 0) {
+                        // Sort by index and take the first one
+                        nextMinions.sort((a, b) => a.index - b.index);
+                        newImp = nextMinions[0];
+                    } else {
+                        // Wrap around - find the Minion with the lowest index
+                        livingMinions.sort((a, b) => a.index - b.index);
+                        newImp = livingMinions[0];
+                    }
+                }
+                
                 newImp.characterDef = CHARACTERS['Imp'];
                 
                 addLog('Imp (' + impPlayer.name + ') killed themselves and ' + newImp.name + ' became the new Imp!');
@@ -3017,7 +3037,7 @@
                 '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
                 '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
                 '<li><strong style="color: var(--text-primary);">Fortune Teller:</strong> Can choose themselves as one of the two players to check. The red herring (one good player who registers as Demon) is randomly selected on the first night and CAN be the Fortune Teller themselves.</li>' +
-                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, Scarlet Woman becomes the new Imp (if alive). If Scarlet Woman is not in the game or not alive, the next evil player (next Minion by player index) becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
                 '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
                 '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
                 '<li><strong style="color: var(--text-primary);">Undertaker:</strong> Only learns about executed players (not night deaths). Information is given at night, but only if someone was executed the previous day.</li>' +
@@ -3273,7 +3293,7 @@
                 '<li><strong style="color: var(--text-primary);">Recluse:</strong> Always registers as <strong>evil (Imp)</strong> to Chef and Empath (100% chance). Always registers as <strong>Demon</strong> to Fortune Teller (100% chance). This is a fixed implementation choice, not storyteller discretion.</li>' +
                 '<li><strong style="color: var(--text-primary);">Spy:</strong> Always appears as <strong>good</strong> to all information abilities (Chef, Empath, Fortune Teller, Investigator, etc.), even though they are a Minion. Never registers as evil.</li>' +
                 '<li><strong style="color: var(--text-primary);">Fortune Teller:</strong> Can choose themselves as one of the two players to check. The red herring (one good player who registers as Demon) is randomly selected on the first night and CAN be the Fortune Teller themselves.</li>' +
-                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, a random living Minion becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
+                '<li><strong style="color: var(--text-primary);">Imp Starpass (Self-Kill):</strong> When Imp kills itself, Scarlet Woman becomes the new Imp (if alive). If Scarlet Woman is not in the game or not alive, the next evil player (next Minion by player index) becomes the new Imp. The new Imp is NOT immediately notified - they will discover their new role in the next night phase.</li>' +
                 '<li><strong style="color: var(--text-primary);">Mayor:</strong> If attacked at night, another player might die instead (NOT automated - requires manual storyteller intervention). If exactly 3 players are alive at the end of the day (including the Mayor) AND no execution occurred that day, good wins. The Mayor must be alive.</li>' +
                 '<li><strong style="color: var(--text-primary);">Butler Voting:</strong> Butler\'s master choice is tracked and shown in Grimoire, but voting is NOT automatically enforced. Storyteller must manually ensure Butler votes like their master.</li>' +
                 '<li><strong style="color: var(--text-primary);">Undertaker:</strong> Only learns about executed players (not night deaths). Information is given at night, but only if someone was executed the previous day.</li>' +

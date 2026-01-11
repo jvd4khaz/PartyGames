@@ -2937,11 +2937,31 @@
                     return;
                 }
                 
-                // Imp kills itself and passes role to a random Minion
+                // Imp kills itself and passes role to a Minion
                 markedForDeath = impPlayer;
                 
-                // Randomly select a living Minion to become the new Imp
-                var newImp = livingMinions[Math.floor(Math.random() * livingMinions.length)];
+                // Priority: 1) Scarlet Woman, 2) Next evil player (next Minion by player index)
+                var newImp = null;
+                
+                // First, check if Scarlet Woman is alive
+                var scarletWoman = livingMinions.find(p => p.characterDef.name === 'زن سرخ');
+                if (scarletWoman) {
+                    newImp = scarletWoman;
+                } else {
+                    // Find the next Minion by player index (the one with lowest index after Imp, or wrap around)
+                    var impIndex = impPlayer.index;
+                    var nextMinions = livingMinions.filter(p => p.index > impIndex);
+                    if (nextMinions.length > 0) {
+                        // Sort by index and take the first one
+                        nextMinions.sort((a, b) => a.index - b.index);
+                        newImp = nextMinions[0];
+                    } else {
+                        // Wrap around - find the Minion with the lowest index
+                        livingMinions.sort((a, b) => a.index - b.index);
+                        newImp = livingMinions[0];
+                    }
+                }
+                
                 newImp.characterDef = CHARACTERS['Imp'];
                 
                 addLog('شیطان (' + impPlayer.name + ') خود را کشت و ' + newImp.name + ' تبدیل به شیطان جدید شد!');
@@ -3086,7 +3106,7 @@
                 '<li><strong style="color: var(--text-primary);">گوشه‌نشین:</strong> همیشه به عنوان <strong>شریر (شیطان)</strong> برای آشپز و هم‌دل ثبت می‌شود (۱۰۰٪ احتمال). همیشه به عنوان <strong>شیطان</strong> برای فال‌گیر ثبت می‌شود (۱۰۰٪ احتمال). این یک انتخاب ثابت پیاده‌سازی است، نه اختیار قصه‌گو.</li>' +
                 '<li><strong style="color: var(--text-primary);">جاسوس:</strong> همیشه به عنوان <strong>خوب</strong> برای همه توانایی‌های اطلاعاتی ظاهر می‌شود (آشپز، هم‌دل، فال‌گیر، بازپرس و غیره)، حتی اگر خادم شیطانی باشد. هرگز به عنوان شریر ثبت نمی‌شود.</li>' +
                 '<li><strong style="color: var(--text-primary);">فال‌گیر:</strong> می‌تواند خود را به عنوان یکی از دو بازیکن برای بررسی انتخاب کند. نشان کاذب (یک بازیکن خوب که به عنوان شیطان ثبت می‌شود) به صورت تصادفی در شب اول انتخاب می‌شود و می‌تواند خود فال‌گیر باشد.</li>' +
-                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، یک خادم شیطانی زنده به صورت تصادفی به شیطان جدید تبدیل می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، زن سرخ تبدیل به شیطان جدید می‌شود (اگر زنده باشد). اگر زن سرخ در بازی نباشد یا زنده نباشد، بازیکن شریر بعدی (خادم بعدی بر اساس شماره بازیکن) تبدیل به شیطان جدید می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
                 '<li><strong style="color: var(--text-primary);">شهردار:</strong> اگر در شب مورد حمله قرار گیرد، ممکن است بازیکن دیگری به جای او بمیرد (خودکار نیست - نیاز به مداخله دستی قصه‌گو). اگر دقیقاً ۳ بازیکن در پایان روز زنده باشند (شامل شهردار) و هیچ اعدامی در آن روز رخ نداده باشد، خوب‌ها برنده می‌شوند. شهردار باید زنده باشد.</li>' +
                 '<li><strong style="color: var(--text-primary);">رای‌دهی پیشخدمت:</strong> انتخاب ارباب پیشخدمت ثبت و در کتاب طلسم نشان داده می‌شود، اما رای‌دهی به صورت خودکار اعمال نمی‌شود. قصه‌گو باید به صورت دستی اطمینان حاصل کند که پیشخدمت مانند ارباب خود رای می‌دهد.</li>' +
                 '<li><strong style="color: var(--text-primary);">مرده‌شوی:</strong> فقط درباره بازیکنان اعدام شده یاد می‌گیرد (نه مرگ‌های شب). اطلاعات در شب داده می‌شود، اما فقط اگر کسی روز قبل اعدام شده باشد.</li>' +
@@ -3339,7 +3359,7 @@
                 '<li><strong style="color: var(--text-primary);">گوشه‌نشین:</strong> همیشه به عنوان <strong>شریر (شیطان)</strong> برای آشپز و هم‌دل ثبت می‌شود (۱۰۰٪ احتمال). همیشه به عنوان <strong>شیطان</strong> برای فال‌گیر ثبت می‌شود (۱۰۰٪ احتمال). این یک انتخاب ثابت پیاده‌سازی است، نه اختیار قصه‌گو.</li>' +
                 '<li><strong style="color: var(--text-primary);">جاسوس:</strong> همیشه به عنوان <strong>خوب</strong> برای همه توانایی‌های اطلاعاتی ظاهر می‌شود (آشپز، هم‌دل، فال‌گیر، بازپرس و غیره)، حتی اگر خادم شیطانی باشد. هرگز به عنوان شریر ثبت نمی‌شود.</li>' +
                 '<li><strong style="color: var(--text-primary);">فال‌گیر:</strong> می‌تواند خود را به عنوان یکی از دو بازیکن برای بررسی انتخاب کند. نشان کاذب (یک بازیکن خوب که به عنوان شیطان ثبت می‌شود) به صورت تصادفی در شب اول انتخاب می‌شود و می‌تواند خود فال‌گیر باشد.</li>' +
-                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، یک خادم شیطانی زنده به صورت تصادفی به شیطان جدید تبدیل می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
+                '<li><strong style="color: var(--text-primary);">کشتن خود شیطان (استارپس):</strong> وقتی شیطان خود را می‌کشد، زن سرخ تبدیل به شیطان جدید می‌شود (اگر زنده باشد). اگر زن سرخ در بازی نباشد یا زنده نباشد، بازیکن شریر بعدی (خادم بعدی بر اساس شماره بازیکن) تبدیل به شیطان جدید می‌شود. شیطان جدید بلافاصله مطلع نمی‌شود - آنها نقش جدید خود را در فاز شب بعدی کشف خواهند کرد.</li>' +
                 '<li><strong style="color: var(--text-primary);">شهردار:</strong> اگر در شب مورد حمله قرار گیرد، ممکن است بازیکن دیگری به جای او بمیرد (خودکار نیست - نیاز به مداخله دستی قصه‌گو). اگر دقیقاً ۳ بازیکن در پایان روز زنده باشند (شامل شهردار) و هیچ اعدامی در آن روز رخ نداده باشد، خوب‌ها برنده می‌شوند. شهردار باید زنده باشد.</li>' +
                 '<li><strong style="color: var(--text-primary);">رای‌دهی پیشخدمت:</strong> انتخاب ارباب پیشخدمت ثبت و در کتاب طلسم نشان داده می‌شود، اما رای‌دهی به صورت خودکار اعمال نمی‌شود. قصه‌گو باید به صورت دستی اطمینان حاصل کند که پیشخدمت مانند ارباب خود رای می‌دهد.</li>' +
                 '<li><strong style="color: var(--text-primary);">مرده‌شوی:</strong> فقط درباره بازیکنان اعدام شده یاد می‌گیرد (نه مرگ‌های شب). اطلاعات در شب داده می‌شود، اما فقط اگر کسی روز قبل اعدام شده باشد.</li>' +
