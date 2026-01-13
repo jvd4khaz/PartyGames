@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Crew: Playing Card Edition</title>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #1a1f2b;
+            --accent: #3a86ff;
+            --text: #e0e0e0;
+            --text-dim: #a0a0a0;
+            --hearts: #ff4d6d;
+            --diamonds: #ff758f;
+            --clubs: #48cae4;
+            --spades: #ade8f4;
+            --trump: #8338ec;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 0;
+            background: #161b22;
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; color: var(--accent); }
+
+        .container {
+            width: 95%;
+            max-width: 800px;
+            padding: 20px 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid #30363d;
+        }
+
+        /* Rebus Mission Grid */
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .mission-item {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+            position: relative;
+        }
+
+        .mission-item:hover { border-color: var(--accent); transform: scale(1.02); }
+        .mission-item.active { border-color: var(--accent); background: #2d333b; }
+
+        .m-num { font-weight: bold; font-size: 0.8rem; color: var(--accent); margin-bottom: 5px; }
+        .m-title { font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+        
+        .rebus-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            font-size: 0.7rem;
+            align-items: center;
+        }
+
+        .icon-tag {
+            background: #30363d;
+            padding: 2px 5px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        /* Quick Setup Rebus */
+        .rebus-header-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .rebus-box {
+            background: rgba(255,255,255,0.03);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px dashed #444;
+            font-size: 0.65rem;
+        }
+
+        /* Playing Cards */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .playing-card {
+            aspect-ratio: 2/3;
+            background: #fff;
+            color: #000;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .playing-card.hearts, .playing-card.diamonds { color: #d00; }
+        .playing-card.clubs, .playing-card.spades { color: #000; }
+        
+        .task-token {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--trump);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1.5px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .special-box {
+            background: rgba(255, 123, 114, 0.1);
+            border-left: 4px solid #ff7b72;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            white-space: pre-line;
+        }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button.primary { background: var(--accent); color: white; border: none; }
+        button.secondary { background: #21262d; color: var(--text); border: 1px solid #30363d; }
+
+        .hidden { display: none; }
+        .suit-icon { font-size: 1.2rem; }
+
+        #guide-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        #guide-content li {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>THE CREW: CARD EDITION</h1>
+</header>
+
+<div class="container">
+    <!-- Quick Setup -->
+    <div class="card">
+        <div class="rebus-header-grid">
+            <div class="rebus-box">
+                <div style="font-size: 1.2rem">♠️(10-K)</div>
+                TRUMPS (1-4)
+            </div>
+            <div class="rebus-box">
+                <div style="font-size: 1.2rem">♥️♦️♣️♠️</div>
+                A-9 ONLY
+            </div>
+            <div class="rebus-box">
+                <div style="font-size: 1.1rem">🪙 × 3-5</div>
+                COMM TOKEN<br>
+                <span style="font-size: 0.6rem; opacity: 0.7;">1 PER PLAYER</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Guide -->
+    <div class="card" style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleGuide()">
+            <div style="font-weight: bold; color: var(--accent);">📖 QUICK GUIDE</div>
+            <div id="guide-toggle" style="font-size: 1.2rem;">▼</div>
+        </div>
+        <div id="guide-content" class="hidden" style="margin-top: 15px; font-size: 0.85rem; line-height: 1.6;">
+            <div style="margin-bottom: 15px;">
+                <strong style="color: var(--accent);">SETUP:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>Players:</strong> 3, 4, or 5 players</li>
+                    <li><strong>Deal cards:</strong> All 40 cards (36 color + 4 trumps)
+                        <ul style="margin: 3px 0; padding-left: 15px; font-size: 0.9em;">
+                            <li>3 players: 13, 13, 14 cards (1 card unused)</li>
+                            <li>4 players: 10 cards each</li>
+                            <li>5 players: 8 cards each</li>
+                        </ul>
+                    </li>
+                    <li><strong>Commander:</strong> Player with King of Spades (leads first trick)</li>
+                    <li><strong>Communication Token:</strong> Each player needs 1 item (coin, stone, button, etc.)</li>
+                </ul>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong style="color: var(--accent);">TASK CARDS:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>This app automatically generates</strong> random task cards when you select a mission</li>
+                    <li>Number shown (e.g., "🎴x4") = how many tasks to complete</li>
+                    <li>Click "RETRY" to generate new random tasks</li>
+                    <li><strong>Manual method (without app):</strong> Shuffle all 36 possible cards (A-9 of each suit), draw the required number, place face-up</li>
+                    <li>Players take turns selecting tasks (Commander picks first)</li>
+                    <li>Each player must take at least 1 task</li>
+                    <li>Place order tokens on tasks if mission requires them</li>
+                </ul>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong style="color: var(--accent);">COMMUNICATION TOKEN:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>Use any item:</strong> Coin, stone, button, paper clip, etc.</li>
+                    <li><strong>Once per mission:</strong> Place on ONE card in your hand</li>
+                    <li><strong>Position indicates meaning:</strong>
+                        <ul style="margin: 3px 0; padding-left: 15px; font-size: 0.9em;">
+                            <li><strong>Top of card:</strong> "This is my HIGHEST card of this suit"</li>
+                            <li><strong>Middle of card:</strong> "This is my ONLY card of this suit"</li>
+                            <li><strong>Bottom of card:</strong> "This is my LOWEST card of this suit"</li>
+                        </ul>
+                    </li>
+                    <li><strong>Place before mission starts</strong> (unless Disruption rule applies)</li>
+                    <li><strong>Cannot move</strong> once placed until next mission</li>
+                </ul>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong style="color: var(--accent);">SYMBOLS:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>❓ DEAD ZONE:</strong> Show card, but NO High/Low/Only indicator</li>
+                    <li><strong>⚡ DISRUPTION:</strong> No communication until specified trick</li>
+                    <li><strong>⬇️ COMMANDER'S DECISION:</strong> Commander assigns ALL tasks to one player</li>
+                    <li><strong>🔱 COMMANDER'S DISTRIBUTION:</strong> Commander assigns tasks one-by-one</li>
+                    <li><strong>⚖️ BALANCE:</strong> No player wins 2+ more tricks than another</li>
+                    <li><strong>🎯 TARGET:</strong> Specific card/trick requirement</li>
+                    <li><strong>🚫 RESTRICTION:</strong> Cannot win with specific cards</li>
+                    <li><strong>🚀 TRUMP SEQUENCE:</strong> Trumps must win in order</li>
+                    <li><strong>🔄 SWAP:</strong> May rearrange task tokens</li>
+                    <li><strong>🔀 CONFUSION:</strong> Special card-swapping rule</li>
+                </ul>
+            </div>
+            <div>
+                <strong style="color: var(--accent);">ORDER TOKENS:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><strong>① ② ③ ④ ⑤:</strong> Sequential order (1st, 2nd, 3rd...)</li>
+                    <li><strong>Ω:</strong> Must be completed LAST</li>
+                    <li><strong>> >> >>> >>>>:</strong> Relative order (>> after >, etc.)</li>
+                    <li><em>Use any markers: numbered stones, paper tokens, etc.</em></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Selector Grid -->
+    <div id="setup-view">
+        <div style="margin-bottom: 10px; font-weight: bold; color: var(--text-dim)">SELECT MISSION:</div>
+        <div class="mission-grid" id="mission-grid">
+            <!-- Missions generated by JS -->
+        </div>
+    </div>
+
+    <!-- Active Mission View -->
+    <div id="mission-view" class="hidden">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start">
+                <div>
+                    <div id="m-view-num" style="color: var(--accent); font-weight: bold; font-size: 0.9rem">MISSION 1</div>
+                    <div id="m-view-title" style="font-size: 1.3rem; font-weight: bold; margin: 5px 0">Team Building</div>
+                </div>
+                <div id="m-view-diff" style="color: var(--yellow)">★★★</div>
+            </div>
+
+            <p id="m-view-narrative" style="font-style: italic; color: var(--text-dim); line-height: 1.4; margin: 15px 0"></p>
+
+            <div id="m-view-special" class="special-box hidden"></div>
+
+            <div style="font-weight: bold; font-size: 0.9rem; margin-top: 20px">ASSIGN THESE TASKS:</div>
+            <div class="tasks-grid" id="tasks-grid"></div>
+
+            <div class="btn-row">
+                <button class="secondary" onclick="showSetup()">BACK TO LIST</button>
+                <button class="primary" onclick="retryMission()">RETRY</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const missions = [
+        { num: 1, title: "Team Building", tasks: 1, diff: 1, narrative: "Congratulations! You have been selected for the search for the unknown 9th planet." },
+        { num: 2, title: "Control Technique", tasks: 2, diff: 2, narrative: "It quickly turns out that you are perfectly coordinated. Face training phases 2 and 3." },
+        { num: 3, title: "Energy Supply", tasks: 2, tokens: ["①", "②"], diff: 2, narrative: "This course requires high logical thinking to understand and apply the links." },
+        { num: 4, title: "Recalibration", tasks: 3, diff: 3, narrative: "Last training phases: recalibration of modules and spacesuits." },
+        { num: 5, title: "Sick Crew Member", tasks: 0, diff: "Special", special: "⬇️ COMMANDER'S DECISION:\n• Commander picks 1 player who is ill.\n• Ill player CANNOT win any tricks.", narrative: "One of you is sick and stuck in bed." },
+        { num: 6, title: "Dead Spot Training", tasks: 3, tokens: [">", ">>"], diff: 3, special: "❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "Reception dead spot simulation. Pass the final tests." },
+        { num: 7, title: "Lift Off", tasks: 3, tokens: ["Ω"], diff: 3, narrative: "The completion of your training is the beginning of your adventure." },
+        { num: 8, title: "Lunar Orbit", tasks: 3, tokens: ["①", "②", "③"], diff: 3, narrative: "Weightlessness sets in. You look back at Earth." },
+        { num: 9, title: "NAVI Module", tasks: 0, special: "🎯 TARGET:\n• A 1-value card (Ace) MUST win a trick.", narrative: "Small piece of metal jammed in electronics." },
+        { num: 10, title: "Leaving the Moon", tasks: 4, diff: 4, narrative: "Start control instruments and ignite engines." },
+        { num: 11, title: "Meteorite Field", tasks: 4, tokens: ["①"], special: "🚫 RESTRICTION:\n• Commander picks 1 player who CANNOT communicate at all this mission.", narrative: "Radar reports meteorite field." },
+        { num: 12, title: "Passing Meteorites", tasks: 4, tokens: ["Ω"], special: "🔀 CONFUSION:\n• After the 1st trick, everyone draws a random card from the player to their right.", narrative: "Strenuous confusion ensues." },
+        { num: 13, title: "Thrust Test", tasks: 0, special: "🚀 THRUST TEST:\n• Win a trick with EACH Trump card (10, J, Q, and K Spades).", narrative: "Malfunction on the drive. Pinpoint with a thrust test." },
+        { num: 14, title: "Mars Photography", tasks: 4, tokens: [">", ">>", ">>>"], diff: 4, special: "❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "Take photographs of Phobos and Deimos." },
+        { num: 15, title: "Meteorite Hit", tasks: 4, tokens: ["①", "②", "③", "④"], diff: 4, narrative: "Hit by a meteorite! Seal off damaged modules." },
+        { num: 16, title: "9th Module Failed", tasks: 0, special: "🚫 RESTRICTION:\n• No player can win a trick with ANY 9-value card.", narrative: "Suit monitoring failed." },
+        { num: 17, title: "Repair 9th Module", tasks: 2, diff: 2, special: "🚫 RESTRICTION:\n• Still NO 9-value cards allowed to win tricks.", narrative: "Invest more time in repair." },
+        { num: 18, title: "Dust Cloud", tasks: 5, diff: 5, special: "⚡ DISRUPTION:\n• 📵 No communication allowed until Trick 2 starts.", narrative: "Communication module total failure." },
+        { num: 19, title: "Deeper Cloud", tasks: 5, diff: 5, tokens: ["①"], special: "⚡ DISRUPTION:\n• 📵 No communication allowed until Trick 3 starts.", narrative: "Strange deflections in module." },
+        { num: 20, title: "Radar Repair", tasks: 2, special: "⬇️ COMMANDER'S DECISION:\n• Commander assigns ALL 2 tasks to one player (not themselves).", narrative: "Radar sensors damaged." },
+        { num: 21, title: "Jupiter Gravity", tasks: 5, diff: 5, tokens: ["①", "②"], special: "❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "2.5-fold gravity influences course." },
+        { num: 22, title: "Temperature Drop", tasks: 5, diff: 5, tokens: [">", ">>", ">>>", ">>>>"], narrative: "Temperature drops. Reroute power to modules." },
+        { num: 23, title: "Callisto", tasks: 5, diff: 5, tokens: ["①", "②", "③", "④", "⑤"], special: "🔄 SWAP:\n• Before choosing tasks, you may swap the positions of two task tokens.", narrative: "Escaped the frost field." },
+        { num: 24, title: "Commander's Plan", tasks: 6, diff: 6, special: "🔱 COMMANDER'S DISTRIBUTION:\n• Commander uncovers tasks one by one and hand-picks who takes each.", narrative: "Unexpected incident messed up operations." },
+        { num: 25, title: "Saturn Rings", tasks: 6, diff: 6, tokens: [">", ">>"], special: "❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "Pause to admire Saturn's rock tracks." },
+        { num: 26, title: "Hull Damage", tasks: 0, special: "🎯 TARGET:\n• Two separate 1-value cards (Aces) must win one trick each.", narrative: "Stones stuck in hull." },
+        { num: 27, title: "Flux Compensator", tasks: 3, special: "⬇️ COMMANDER'S DECISION:\n• Commander assigns ALL 3 tasks to one player (not themselves).", narrative: "Repair necessary to return home." },
+        { num: 28, title: "Cosmic Radiation", tasks: 6, diff: 6, tokens: ["①", "Ω"], special: "⚡ DISRUPTION:\n• 📵 No communication until Trick 3 starts.", narrative: "Radio messages time-delayed." },
+        { num: 29, title: "Coordination", tasks: 0, special: "⚖️ BALANCE:\n• No player may win 2+ more tricks than any other.\n\n❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "Repair requires precise coordination." },
+        { num: 30, title: "Uranus Approach", tasks: 6, diff: 6, tokens: [">", ">>", ">>>"], special: "⚡ DISRUPTION:\n• 📵 No communication until Trick 2 starts.", narrative: "Heading for Uranus." },
+        { num: 31, title: "Uranus Moons", tasks: 6, diff: 6, tokens: ["①", "②", "③"], narrative: "Collect metadata from Rosalind, Belinda, and Puck." },
+        { num: 32, title: "Confrontation", tasks: 7, diff: 7, special: "🔱 COMMANDER'S DISTRIBUTION:\n• Commander reveals and assigns 7 tasks individually.", narrative: "Human characteristics come to light." },
+        { num: 33, title: "Hatch Repair", tasks: 0, special: "🎯 TARGET:\n• Commander selects member who must win EXACTLY 1 trick.\n• 🚀 Trick cannot be won with a Trump.", narrative: "Defective hatch. Commander asks for willingness." },
+        { num: 34, title: "Neptune Shakes", tasks: 0, special: "⚖️ BALANCE:\n• No player may win 2+ more tricks than another.\n• 🎯 Commander MUST win first and last trick.", narrative: "Neptune in sight." },
+        { num: 35, title: "Alpha 5", tasks: 7, diff: 7, tokens: [">", ">>", ">>>"], narrative: "Spacecraft Alpha 5 needs sensor repair." },
+        { num: 36, title: "Crew Bonding", tasks: 7, diff: 7, tokens: ["①", "②"], special: "🔱 COMMANDER'S DISTRIBUTION:\n• Commander reveals and assigns 7 tasks individually.", narrative: "Relieved of a burden." },
+        { num: 37, title: "Pluto Course", tasks: 4, special: "⬇️ COMMANDER'S DECISION:\n• Commander assigns ALL 4 tasks to one player (not themselves).", narrative: "Ship must be kept on course past Pluto." },
+        { num: 38, title: "Heliopause", tasks: 8, diff: 8, special: "⚡ DISRUPTION:\n• 📵 No communication until Trick 3 starts.", narrative: "Edge of the solar system." },
+        { num: 39, title: "Radio Signal Out", tasks: 8, diff: 8, tokens: [">", ">>", ">>>"], special: "❓ DEAD ZONE:\n• You may show a card to communicate.\n• 📵 You CANNOT indicate if it's High, Low, or Only.\n• Teammates must guess the meaning.", narrative: "Giant object effects massive signal interruption." },
+        { num: 40, title: "Planet 9 Found!", tasks: 8, diff: 8, tokens: ["①", "②", "③"], special: "🔄 SWAP:\n• Before choosing tasks, you may place an Order tile on another order without one.", narrative: "Boundless euphoria!" },
+        { num: 41, title: "Landing Prep", tasks: 0, special: "🎯 TARGET:\n• Selected member wins ONLY 1st and Last trick.\n• 🚀 Neither can be won with a Trump.", narrative: "Adjusting engines." },
+        { num: 42, title: "The Anomaly", tasks: 9, diff: 9, narrative: "Extreme cold. Glaring errors." },
+        { num: 43, title: "Wormhole", tasks: 9, diff: 9, special: "🔱 COMMANDER'S DISTRIBUTION:\n• Commander reveals and assigns 9 tasks individually.", narrative: "Discovery of a wormhole." },
+        { num: 44, title: "Jump Preparation", tasks: 0, special: "🚀 TRUMP SEQUENCE:\n• Trumps must win tricks in order: 10, then J, then Q, then K.", narrative: "Prepare engines for the jump." },
+        { num: 45, title: "The Jump", tasks: 9, diff: 9, tokens: [">", ">>", ">>>"], narrative: "Massive impact!" },
+        { num: 46, title: "Warning Lights", tasks: 0, special: "🎯 TARGET:\n• The player to the LEFT of the Spades 9 owner must win ALL Spade cards (A-9).", narrative: "Reacting to danger sources instinctively." },
+        { num: 47, title: "Counting Down", tasks: 10, diff: 10, narrative: "Suddenly burst out of the wormhole." },
+        { num: 48, title: "Venus Heat", tasks: 3, diff: 3, tokens: ["Ω"], special: "🎯 TARGET:\n• The Omega (Ω) task must be won in the VERY last trick of the mission.", narrative: "Extreme heat." },
+        { num: 49, title: "Venus Link", tasks: 10, diff: 10, tokens: [">", ">>", ">>>"], narrative: "Wormhole link to Planet 9." },
+        { num: 50, title: "Final Approach", tasks: 0, special: "🤝 TEAM TASK:\n• One player wins tricks 1-4.\n• Another wins ONLY the last trick.\n• Others win all between.", narrative: "Final approach to Earth." }
+    ];
+
+    const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+    const suitIcons = { hearts: '&hearts;', diamonds: '&diams;', clubs: '&clubs;', spades: '&spades;' };
+    let currentMission = null;
+
+    function getMissionSymbol(special) {
+        if(!special) return '';
+        if(special.includes('❓ DEAD ZONE')) return '❓';
+        if(special.includes('⚡ DISRUPTION')) return '⚡';
+        if(special.includes('⬇️ COMMANDER\'S DECISION')) return '⬇️';
+        if(special.includes('🔱 COMMANDER\'S DISTRIBUTION')) return '🔱';
+        if(special.includes('⚖️ BALANCE')) return '⚖️';
+        if(special.includes('🎯 TARGET')) return '🎯';
+        if(special.includes('🚫 RESTRICTION')) return '🚫';
+        if(special.includes('🚀 TRUMP SEQUENCE') || special.includes('🚀 THRUST TEST')) return '🚀';
+        if(special.includes('🔄 SWAP')) return '🔄';
+        if(special.includes('🔀 CONFUSION')) return '🔀';
+        if(special.includes('🤝 TEAM TASK')) return '🤝';
+        return '⚠️';
+    }
+
+    function renderMissionGrid() {
+        const grid = document.getElementById('mission-grid');
+        missions.forEach(m => {
+            const el = document.createElement('div');
+            el.className = 'mission-item';
+            el.onclick = () => selectMission(m.num);
+            
+            let tokensHtml = '';
+            if(m.tokens) m.tokens.forEach(t => tokensHtml += `<span class="icon-tag">${t}</span>`);
+            
+            const symbol = getMissionSymbol(m.special);
+            
+            el.innerHTML = `
+                <div class="m-num">M${m.num}</div>
+                <div class="m-title">${m.title}</div>
+                <div class="rebus-icons">
+                    ${m.tasks > 0 ? `<span class="icon-tag">🎴x${m.tasks}</span>` : ''}
+                    ${tokensHtml}
+                    ${symbol ? `<span class="icon-tag" title="${m.special ? m.special.split(':')[0] : ''}">${symbol}</span>` : ''}
+                </div>
+            `;
+            grid.appendChild(el);
+        });
+    }
+
+    function toggleGuide() {
+        const content = document.getElementById('guide-content');
+        const toggle = document.getElementById('guide-toggle');
+        if(content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            toggle.textContent = '▲';
+        } else {
+            content.classList.add('hidden');
+            toggle.textContent = '▼';
+        }
+    }
+
+    function selectMission(num) {
+        currentMission = missions.find(m => m.num === num);
+        document.getElementById('setup-view').classList.add('hidden');
+        document.getElementById('mission-view').classList.remove('hidden');
+        
+        document.getElementById('m-view-num').textContent = `MISSION ${currentMission.num}`;
+        document.getElementById('m-view-title').textContent = currentMission.title;
+        document.getElementById('m-view-narrative').textContent = currentMission.narrative;
+        document.getElementById('m-view-diff').textContent = '★'.repeat(currentMission.diff || 0);
+        
+        const specialBox = document.getElementById('m-view-special');
+        if(currentMission.special) {
+            specialBox.textContent = currentMission.special;
+            specialBox.classList.remove('hidden');
+        } else {
+            specialBox.classList.add('hidden');
+        }
+
+        generateTasks();
+        window.scrollTo(0,0);
+    }
+
+    function generateTasks() {
+        const grid = document.getElementById('tasks-grid');
+        grid.innerHTML = '';
+        const drawn = [];
+        
+        while(drawn.length < currentMission.tasks) {
+            const s = suits[Math.floor(Math.random()*4)];
+            const v = Math.floor(Math.random()*9)+1;
+            const id = `${s}-${v}`;
+            if(!drawn.find(d => d.id === id)) drawn.push({id, s, v});
+        }
+
+        drawn.forEach((c, i) => {
+            const el = document.createElement('div');
+            el.className = `playing-card ${c.s}`;
+            el.innerHTML = `<div>${c.v==1?'A':c.v}</div><div class="suit-icon">${suitIcons[c.s]}</div>`;
+            if(currentMission.tokens && currentMission.tokens[i]) {
+                const t = document.createElement('div');
+                t.className = 'task-token';
+                t.textContent = currentMission.tokens[i];
+                el.appendChild(t);
+            }
+            grid.appendChild(el);
+        });
+    }
+
+    function showSetup() {
+        document.getElementById('setup-view').classList.remove('hidden');
+        document.getElementById('mission-view').classList.add('hidden');
+    }
+
+    function retryMission() {
+        generateTasks();
+    }
+
+    renderMissionGrid();
+</script>
+
+</body>
+</html>
