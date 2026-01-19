@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air, Land, & Sea - Card Games Reference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .game-card {
+            background: #fafafa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        
+        .game-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .game-icon {
+            font-size: 3rem;
+        }
+        
+        .game-title {
+            font-size: 1.8rem;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: #c62828;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #ffebee;
+            border-left: 4px solid #c62828;
+            border-radius: 4px;
+        }
+        
+        .section-content {
+            padding-left: 15px;
+        }
+        
+        .section-content ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .section-content li {
+            margin-bottom: 8px;
+        }
+        
+        .setup-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .setup-list li {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            border-left: 3px solid #2e7d32;
+        }
+        
+        .setup-list li::before {
+            content: "✓ ";
+            color: #2e7d32;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .rules-list {
+            list-style: decimal;
+            margin-left: 20px;
+        }
+        
+        .rules-list li {
+            margin-bottom: 10px;
+        }
+        
+        .highlight-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .highlight-box strong {
+            color: #1976d2;
+        }
+        
+        .table-box {
+            background: #fff9c4;
+            border: 2px solid #fbc02d;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .table-box table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table-box th,
+        .table-box td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .table-box th {
+            background: #fbc02d;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .table-box td {
+            background: #fff;
+        }
+        
+        .theater-box {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .theater-item {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            border-left: 4px solid #2e7d32;
+            text-align: center;
+        }
+        
+        .theater-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .theater-name {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .rebus-box {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        .rebus-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .rebus-title::before {
+            content: "⚡";
+            font-size: 1.2rem;
+        }
+        
+        .rebus-line {
+            margin: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .rebus-line::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .rebus-symbol {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+            
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+            
+            .container {
+                background: white;
+                padding: 0;
+            }
+            
+            .game-card {
+                background: white;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+            
+            .game-title {
+                color: #2e7d32;
+            }
+            
+            .section-title {
+                color: #c62828;
+            }
+            
+            .info-item {
+                background: #f5f5f5;
+                border-left: 4px solid #667eea;
+            }
+            
+            .highlight-box {
+                background: #e3f2fd;
+                border-color: #2196f3;
+            }
+            
+            .table-box {
+                background: #fff9c4;
+                border-color: #fbc02d;
+            }
+            
+            .theater-item {
+                background: #e8f5e9;
+                border-left: 4px solid #2e7d32;
+            }
+            
+            .rebus-box {
+                background: #e8f5e9;
+                border-color: #4caf50;
+            }
+            
+            .rebus-title {
+                color: #2e7d32;
+            }
+            
+            .rebus-symbol {
+                color: #2e7d32;
+            }
+            
+            .rebus-line::before {
+                color: #2e7d32;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .theater-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Card Games</a>
+        
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-icon">✈️</div>
+                <div class="game-title">Air, Land, & Sea</div>
+            </div>
+            
+            <div class="rebus-box">
+                <div class="rebus-title">Quick Reference</div>
+                <div class="rebus-line"><span class="rebus-symbol">Goal:</span> Win 12 points total (multiple rounds). Win 2 theaters per round OR withdraw.</div>
+                <div class="rebus-line"><span class="rebus-symbol">Setup:</span> Shuffle, deal 6 each. Randomly arrange theaters: ✈️ AIR → 🪖 LAND → ⚓ SEA.</div>
+                <div class="rebus-line"><span class="rebus-symbol">Turn:</span> Play card (face-up or down). Resolve ability. Check winner.</div>
+                <div class="rebus-line"><span class="rebus-symbol">Strength:</span> Higher total wins theater. Face-down = Strength 2.</div>
+            </div>
+            
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Players</div>
+                    <div class="info-value">2 players</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Deck</div>
+                    <div class="info-value">Standard 52-card deck</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Difficulty</div>
+                    <div class="info-value">Medium</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Play Time</div>
+                    <div class="info-value">15-20 minutes</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Goal & Scoring</div>
+                <div class="section-content">
+                    <div class="highlight-box">
+                        <strong>Win: 12 Points</strong><br>
+                        First player to reach 12 points wins (multiple rounds).
+                    </div>
+                    
+                    <h3 style="margin-top: 15px; margin-bottom: 10px; color: #333;">Per Round Goal</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 15px;">
+                        <li>Win 2 theaters</li>
+                        <li>OR withdraw</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 15px; margin-bottom: 10px; color: #333;">Scoring</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 15px;">
+                        <li><strong>Higher strength wins</strong> - Compare total strength per theater. Higher total wins that theater.</li>
+                        <li><strong>Face-down: Strength 2</strong> - Cards played face-down have strength 2 by default.</li>
+                    </ul>
+                    
+                    <div class="table-box">
+                        <strong>Withdrawal Scoring</strong>
+                        <p style="margin-top: 10px; margin-bottom: 10px;">If you withdraw, opponent gets points based on cards left in your hand:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Points</th>
+                                    <th>1st Player</th>
+                                    <th>2nd Player</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>2 pts</strong></td>
+                                    <td>4-6 cards</td>
+                                    <td>5-6 cards</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 pts</strong></td>
+                                    <td>2-3 cards</td>
+                                    <td>3-4 cards</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>4 pts</strong></td>
+                                    <td>1 card</td>
+                                    <td>2 cards</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>6 pts</strong></td>
+                                    <td>0 cards</td>
+                                    <td>0-1 cards</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Setup & Rules</div>
+                <div class="section-content">
+                    <ol class="setup-list">
+                        <li>Shuffle, deal 6 each</li>
+                        <li>Randomly arrange theaters: ✈️ AIR → 🪖 LAND → ⚓ SEA</li>
+                    </ol>
+                    
+                    <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Turn</h3>
+                    <ol class="rules-list">
+                        <li>Play card (face-up or down)</li>
+                        <li>Resolve ability (if any)</li>
+                        <li>Check winner</li>
+                    </ol>
+                    
+                    <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Concepts</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>⚡ <strong>Instant</strong> - One-time ability</li>
+                        <li>🔄 <strong>Ongoing</strong> - Continuous effect</li>
+                        <li><strong>Adjacent</strong> - Left/Right theaters</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Theaters</div>
+                <div class="section-content">
+                    <p style="margin-bottom: 15px;">Three theaters are randomly arranged at the start of each game:</p>
+                    <div class="theater-box">
+                        <div class="theater-item">
+                            <div class="theater-icon">✈️</div>
+                            <div class="theater-name">AIR (Blue)</div>
+                        </div>
+                        <div class="theater-item">
+                            <div class="theater-icon">🪖</div>
+                            <div class="theater-name">LAND (Green)</div>
+                        </div>
+                        <div class="theater-item">
+                            <div class="theater-icon">⚓</div>
+                            <div class="theater-name">SEA (Navy)</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;">Players compete to control 2 of the 3 theaters by having higher total strength in each theater.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
