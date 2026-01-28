@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Two - Card Games Reference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .game-card {
+            background: #fafafa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        
+        .game-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .game-icon {
+            font-size: 3rem;
+        }
+        
+        .game-title {
+            font-size: 1.8rem;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: #c62828;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #ffebee;
+            border-left: 4px solid #c62828;
+            border-radius: 4px;
+        }
+        
+        .section-content {
+            padding-left: 15px;
+        }
+        
+        .section-content ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .section-content li {
+            margin-bottom: 8px;
+        }
+        
+        .setup-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .setup-list li {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            border-left: 3px solid #2e7d32;
+        }
+        
+        .setup-list li::before {
+            content: "✓ ";
+            color: #2e7d32;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .rules-list {
+            list-style: decimal;
+            margin-left: 20px;
+        }
+        
+        .rules-list li {
+            margin-bottom: 10px;
+        }
+        
+        .highlight-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .highlight-box strong {
+            color: #1976d2;
+        }
+        
+        .table-box {
+            background: #fff9c4;
+            border: 2px solid #fbc02d;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .table-box table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table-box th,
+        .table-box td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .table-box th {
+            background: #fbc02d;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .table-box td {
+            background: #fff;
+        }
+        
+        .rebus-box {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        .rebus-title {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .rebus-title::before {
+            content: "⚡";
+            font-size: 1.2rem;
+        }
+        
+        .rebus-line {
+            margin: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .rebus-line::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .rebus-symbol {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .small-note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+            
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+            
+            .container {
+                background: white;
+                padding: 0;
+            }
+            
+            .game-card {
+                background: white;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+            
+            .game-title {
+                color: #2e7d32;
+            }
+            
+            .section-title {
+                color: #c62828;
+            }
+            
+            .info-item {
+                background: #f5f5f5;
+                border-left: 4px solid #667eea;
+            }
+            
+            .highlight-box {
+                background: #e3f2fd;
+                border-color: #2196f3;
+            }
+            
+            .table-box {
+                background: #fff9c4;
+                border-color: #fbc02d;
+            }
+            
+            .rebus-box {
+                background: #e8f5e9;
+                border-color: #4caf50;
+            }
+            
+            .rebus-title {
+                color: #2e7d32;
+            }
+            
+            .rebus-symbol {
+                color: #2e7d32;
+            }
+            
+            .rebus-line::before {
+                color: #2e7d32;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Card Games</a>
+        
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-icon">🃏</div>
+                <div class="game-title">Big Two</div>
+            </div>
+            
+            <div class="rebus-box">
+                <div class="rebus-title">Quick Reference</div>
+                <div class="rebus-line"><span class="rebus-symbol">Goal:</span> Get rid of all cards first. Others score penalty points for cards left.</div>
+                <div class="rebus-line"><span class="rebus-symbol">Start:</span> Player with the weakest card (usually the Green 3) leads the first trick.</div>
+                <div class="rebus-line"><span class="rebus-symbol">On turn:</span> Play a stronger combo with the same card count, or Pass.</div>
+                <div class="rebus-line"><span class="rebus-symbol">Trick ends:</span> When everyone else passes after a play. Last player to play leads next.</div>
+            </div>
+            
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Players</div>
+                    <div class="info-value">3-4 players</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Deck</div>
+                    <div class="info-value">Standard 52-card deck (basic rules)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Difficulty</div>
+                    <div class="info-value">Medium</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Play Time</div>
+                    <div class="info-value">20-40 minutes</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Overview</div>
+                <div class="section-content">
+                    <p><strong>Big Two</strong> is a traditional climbing card game from East Asia. Players must play a combination that beats the previous combination. The <strong>2</strong> is the strongest rank. If a player cannot (or does not want to) beat the current play, they pass.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Components (as referenced)</div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>52 basic cards:</strong> 2-10, J, Q, K, A in four colors each</li>
+                        <li><strong>Optional:</strong> 2 dragon cards, 4 reference cards, 3 additional cards (not used in basic rules)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Game Setup (Basic Rules)</div>
+                <div class="section-content">
+                    <ol class="setup-list">
+                        <li>Each player receives 1 reference card.</li>
+                        <li>Shuffle the 52 basic cards and deal:
+                            <ul>
+                                <li><strong>3 players:</strong> 17 cards each</li>
+                                <li><strong>4 players:</strong> 13 cards each</li>
+                            </ul>
+                            <div class="small-note">If any cards remain (3-player games or variant rules), set them aside face down without looking.</div>
+                        </li>
+                        <li>Players hold their cards hidden. The game begins.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Card Strength</div>
+                <div class="section-content">
+                    <div class="highlight-box">
+                        <strong>Rank order (weak → strong):</strong><br>
+                        3 &lt; 4 &lt; … &lt; 9 &lt; 10 &lt; J &lt; Q &lt; K &lt; A &lt; 2
+                    </div>
+                    <div class="highlight-box">
+                        <strong>If ranks tie, compare color (weak → strong):</strong><br>
+                        Green &lt; Yellow &lt; Red &lt; Purple
+                    </div>
+                    <p class="small-note">Strongest single card: Purple 2. Weakest single card: Green 3.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Objective & Scoring</div>
+                <div class="section-content">
+                    <p>Big Two is played over several rounds. The first player to play all their cards wins the round and gains points equal to the total penalty points of the other players.</p>
+                    <div class="table-box">
+                        <strong>Penalty Points (Basic Rules)</strong>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Player Count</th>
+                                    <th>Remaining Cards</th>
+                                    <th>Penalty Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>4 players</strong></td>
+                                    <td>1-8 cards</td>
+                                    <td>cards × 1</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>4 players</strong></td>
+                                    <td>9-12 cards</td>
+                                    <td>cards × 2</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 players</strong></td>
+                                    <td>1-11 cards</td>
+                                    <td>cards × 1</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 players</strong></td>
+                                    <td>12 cards</td>
+                                    <td>cards × 2</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 players</strong></td>
+                                    <td>13 cards</td>
+                                    <td>cards × 3</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3 players</strong></td>
+                                    <td>17 cards</td>
+                                    <td>cards × 3</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small-note"><strong>Game end:</strong> If any player reaches -100 points or below, the game ends. Highest score wins.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Gameplay (Tricks)</div>
+                <div class="section-content">
+                    <ol class="rules-list">
+                        <li><strong>Lead:</strong> Player with the weakest card starts the first trick by playing a legal combination (face up).</li>
+                        <li><strong>Follow:</strong> Next players (counterclockwise) must play a stronger combination with the same number of cards, or Pass.</li>
+                        <li><strong>Passing:</strong> A player who passed may play again when their turn comes around.</li>
+                        <li><strong>Trick ends:</strong> If all other players pass consecutively after a play, the trick ends. Played cards are set aside.</li>
+                        <li><strong>Next trick:</strong> The last player to play leads the next trick with any legal combination.</li>
+                    </ol>
+                    <div class="highlight-box">
+                        <strong>Note:</strong> Players should not hide how many cards remain in their hand. Anyone may ask at any time.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Card Combinations</div>
+                <div class="section-content">
+                    <p>Cards are played in combinations of <strong>1, 2, 3, or 5</strong>. Combinations are compared only against other combinations with the same number of cards.</p>
+                    <div class="table-box">
+                        <strong>Valid Combinations</strong>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th># Cards</th>
+                                    <th>Name</th>
+                                    <th>Condition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><strong>Single</strong></td>
+                                    <td>Any 1 card</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><strong>Pair</strong></td>
+                                    <td>2 cards of the same rank</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><strong>Triple</strong></td>
+                                    <td>3 cards of the same rank</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><strong>Straight</strong></td>
+                                    <td>5 consecutive ranks</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><strong>Flush</strong></td>
+                                    <td>5 cards of the same color</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><strong>Full House</strong></td>
+                                    <td>Triple + Pair</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><strong>4 card + single</strong></td>
+                                    <td>4 of a kind + any 1 card</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><strong>Straight Flush</strong></td>
+                                    <td>Straight + Flush</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <strong>5-card combo strength (weak → strong):</strong><br>
+                        Straight &lt; Flush &lt; Full House &lt; 4 card + single &lt; Straight Flush
+                    </div>
+                    
+                    <p><strong>How comparisons work:</strong> Compare the strongest card ranks first (then second/third if needed). If ranks fully tie, compare the strongest card’s color.</p>
+                    
+                    <div class="highlight-box">
+                        <strong>Special straight rule:</strong> A can only be the beginning or end of a straight. Only two A-straights exist: A-2-3-4-5 and 10-J-Q-K-A.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Advanced Rules (Optional Levels)</div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Level 1 – Strong but Risky 2:</strong> Flashy Finish (last play is Single 2 doubles others’ penalties). Excessive Patience (any player holding a 2 doubles their penalty once).</li>
+                        <li><strong>Level 2 – Dragons:</strong> Add dragon cards. As singles they are strongest. In combos, they can act as any rank/color. Follow Level 1 scoring doubling rules.</li>
+                        <li><strong>Level 3 – Bombs:</strong> Treat “4 card + single” and “Straight Flush” as bombs. They can be played over non-5-card tricks and only beaten by stronger bombs. Also trigger doubling in scoring.</li>
+                        <li><strong>Level 4 – Equal Start:</strong> Low hand score can request reshuffle (count only J/Q/K/A/2 with 1/2/3/4/5 points respectively; if ≤3, reshuffle).</li>
+                        <li><strong>Level 5 – Irregular Dragons:</strong> Dragons can be played anytime as singles, but any card can beat dragons. Other rules same as Level 4.</li>
+                    </ul>
+                    <p class="small-note">When using advanced rules, score swings are larger. Recommended game end is -200 points.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
