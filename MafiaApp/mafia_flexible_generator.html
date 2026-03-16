@@ -176,6 +176,9 @@
         .citizen-text { color: var(--citizen-color); }
         .indep-text { color: var(--indep-color); }
 
+        .input-group { margin-bottom: 15px; text-align: right; width: 100%; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem; }
+
         /* Inputs */
         .player-input {
             width: 100%;
@@ -216,6 +219,27 @@
     <!-- 1. Builder Screen -->
     <div id="builder-screen" class="container" style="padding-bottom: 80px;">
         <h1>ساخت سناریو</h1>
+
+        <!-- Player setup (like Quest app) -->
+        <div class="input-group" style="margin-top: 15px;">
+            <label>تعداد بازیکنان:</label>
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                <button type="button" class="ctrl-btn btn-minus" style="width:44px; height:44px;" onclick="updatePlayerCount(-1)">−</button>
+                <span id="player-count-display" style="font-size:1.5rem; font-weight:bold;">۶</span>
+                <button type="button" class="ctrl-btn btn-plus" style="width:44px; height:44px;" onclick="updatePlayerCount(1)">+</button>
+            </div>
+        </div>
+        <div id="player-inputs-container" style="width:100%; margin-top:10px;"></div>
+        <div id="saved-players-section" style="margin-top: 12px; text-align: right; width: 100%;">
+            <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">تاریخچه اسامی (برای پر کردن لمس کنید):</div>
+            <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;"></div>
+            <div style="margin-top: 8px;">
+                <button type="button" onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
+                <span style="color:#444;"> | </span>
+                <button type="button" onclick="clearSavedPlayers()" style="background:none; border:none; color:#F44336; font-size:0.8rem; cursor:pointer; opacity: 0.7;">حذف تاریخچه</button>
+            </div>
+        </div>
+        <div style="width:100%; border-bottom: 1px solid #333; margin: 20px 0 15px 0;"></div>
         
         <!-- Mafia Roles -->
         <div class="role-category">
@@ -234,29 +258,13 @@
             <div class="cat-title indep-text">مستقل / سایر</div>
             <div id="other-list"></div>
         </div>
-
-        <!-- Player Names Section -->
-        <div id="names-section" class="role-category hidden" style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
-            <div class="cat-title" style="color: white; display:flex; justify-content:space-between;">
-                <span>اسامی بازیکنان (اختیاری)</span>
-                <button onclick="clearInputs()" style="background:none; border:none; color:#aaa; cursor:pointer; font-size:0.8rem;">پاک کردن</button>
-            </div>
-            <div id="player-inputs-container"></div>
-            
-            <!-- Saved Players Chips -->
-            <div id="saved-players-section" style="margin-top: 15px; text-align: right;">
-                <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">تاریخچه اسامی:</div>
-                <div id="saved-list" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end;"></div>
-                <button onclick="clearSavedPlayers()" style="background:none; border:none; color:#F44336; font-size:0.8rem; margin-top:10px; cursor:pointer; opacity: 0.7;">حذف تاریخچه</button>
-            </div>
-        </div>
     </div>
 
     <!-- Bottom Bar for Builder -->
     <div id="builder-bar" class="bottom-bar">
         <div class="total-info">
-            <div>تعداد بازیکن: <span id="total-players" style="color: white; font-weight: bold;">0</span></div>
-            <div style="font-size: 0.8rem; color: #888;">ترکیب خود را بسازید</div>
+            <div>نقش‌ها: <span id="total-players" style="color: white; font-weight: bold;">۰</span> از <span id="total-players-target" style="color: white; font-weight: bold;">۶</span> بازیکن</div>
+            <div id="total-hint" style="font-size: 0.8rem; color: #888;">ترکیب خود را بسازید (تعداد نقش‌ها = تعداد بازیکنان)</div>
         </div>
         <button class="action-btn" id="start-btn" onclick="startGame()" disabled>شروع توزیع</button>
     </div>
@@ -327,12 +335,18 @@
         };
 
         // --- State ---
+        var playerCount = 6;
         var selectedRoles = {}; // Map id -> count
         var gameRoleList = [];
         var playerNames = [];
         var currentPlayerIndex = 0;
         var savedPlayers = [];
         var isGameInProgress = false;
+
+        var FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+        function toFarsiNum(n) {
+            return String(n).replace(/\d/g, function(d) { return FA_DIGITS[parseInt(d, 10)]; });
+        }
         
         // Completely prevent accidental refresh/back navigation
         // Set up event listeners once (always active, check flag when firing)
@@ -394,8 +408,37 @@
         // --- Init ---
         window.onload = function() {
             loadSavedPlayers();
+            renderPlayerInputs();
+            document.getElementById('player-count-display').innerText = toFarsiNum(playerCount);
             renderBuilder();
+            updateTotal();
         };
+
+        function updatePlayerCount(delta) {
+            var newCount = playerCount + delta;
+            if (newCount >= 2 && newCount <= 20) {
+                playerCount = newCount;
+                document.getElementById('player-count-display').innerText = toFarsiNum(playerCount);
+                renderPlayerInputs();
+                updateTotal();
+            }
+        }
+
+        function renderPlayerInputs() {
+            var container = document.getElementById('player-inputs-container');
+            var currentValues = [];
+            var inputs = container.querySelectorAll('.player-input');
+            for (var i = 0; i < inputs.length; i++) currentValues.push(inputs[i].value);
+            container.innerHTML = '';
+            for (var i = 0; i < playerCount; i++) {
+                var inp = document.createElement('input');
+                inp.type = 'text';
+                inp.className = 'player-input';
+                inp.placeholder = 'بازیکن ' + toFarsiNum(i + 1);
+                if (currentValues[i]) inp.value = currentValues[i];
+                container.appendChild(inp);
+            }
+        }
 
         function loadSavedPlayers() {
             var stored = localStorage.getItem('mafia_flexible_players');
@@ -492,35 +535,21 @@
                     total += selectedRoles[key];
                 }
             }
-            document.getElementById('total-players').innerText = total;
-            document.getElementById('start-btn').disabled = (total === 0);
-            
-            updateNameInputs(total);
-        }
-
-        function updateNameInputs(total) {
-            var section = document.getElementById('names-section');
-            var container = document.getElementById('player-inputs-container');
-            
-            if (total > 0) {
-                section.classList.remove('hidden');
+            document.getElementById('total-players').innerText = toFarsiNum(total);
+            document.getElementById('total-players-target').innerText = toFarsiNum(playerCount);
+            var startBtn = document.getElementById('start-btn');
+            var hintEl = document.getElementById('total-hint');
+            var match = (total === playerCount && total > 0);
+            startBtn.disabled = !match;
+            if (match) {
+                hintEl.textContent = 'آماده شروع';
+                hintEl.style.color = 'var(--citizen-color)';
+            } else if (total === 0) {
+                hintEl.textContent = 'ترکیب خود را بسازید (تعداد نقش‌ها = تعداد بازیکنان)';
+                hintEl.style.color = '#888';
             } else {
-                section.classList.add('hidden');
-                return;
-            }
-
-            // Preserve existing values
-            var currentInputs = document.querySelectorAll('.player-input');
-            var values = [];
-            for(var i=0; i<currentInputs.length; i++) values.push(currentInputs[i].value);
-
-            container.innerHTML = "";
-            for(var i=0; i<total; i++) {
-                var inp = document.createElement('input');
-                inp.className = 'player-input';
-                inp.placeholder = 'بازیکن ' + (i+1);
-                if(values[i]) inp.value = values[i];
-                container.appendChild(inp);
+                hintEl.textContent = total < playerCount ? 'نقش بیشتری اضافه کنید' : 'نقش کمتری انتخاب کنید';
+                hintEl.style.color = 'var(--accent-color)';
             }
         }
 
