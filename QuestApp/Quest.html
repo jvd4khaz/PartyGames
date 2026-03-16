@@ -580,6 +580,19 @@
         </div>
 
         <button class="action-btn" onclick="showRoleSelection()">Configure Roles</button>
+        <button class="secondary-btn" onclick="showReferenceScreen()" style="margin-top:10px;">View mission reference (play with cards)</button>
+    </div>
+
+    <!-- Mission reference screen: five circles only, for playing with physical cards -->
+    <div id="reference-screen" class="container hidden">
+        <h1>Mission reference</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">Use this view when playing with physical cards. Set players and roles on the previous screen first.</p>
+        <div id="reference-summary" style="margin: 15px 0; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; text-align: left;"></div>
+        <div class="quest-board-visual" id="reference-quest-board">
+            <!-- Five mission circles rendered here -->
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">Good wins 3 missions; Evil wins 3 failures. 🔮 = Vision after this mission.</p>
+        <button class="secondary-btn" onclick="showScreen('setup-screen')" style="margin-top: 15px;">Back to setup</button>
     </div>
 
     <!-- Role Selection Screen -->
@@ -683,6 +696,8 @@
                 <!-- Amulets will be generated here -->
             </div>
         </div>
+        <!-- Redistribute roles (same players) -->
+        <button class="secondary-btn" onclick="redistributeRolesSamePlayers()" style="margin-bottom: 8px;">Redistribute roles (same players)</button>
         <!-- Game Log -->
         <button class="secondary-btn" onclick="toggleLog()">Toggle Game Log</button>
         <div id="game-log" class="hidden" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
@@ -1256,6 +1271,52 @@
             }
         }
 
+        function showReferenceScreen() {
+            var rolesToShow = (selectedRoles.length === playerCount) ? selectedRoles.slice() : RECOMMENDED_ROLES[playerCount].slice();
+            var summaryEl = document.getElementById('reference-summary');
+            if (summaryEl) {
+                var goodRoles = rolesToShow.filter(function(r) { return ROLE_DEFINITIONS[r] && ROLE_DEFINITIONS[r].alignment === 'good'; });
+                var evilRoles = rolesToShow.filter(function(r) { return ROLE_DEFINITIONS[r] && ROLE_DEFINITIONS[r].alignment === 'evil'; });
+                summaryEl.innerHTML = '<strong>' + playerCount + ' players</strong><br>' +
+                    'Good: ' + goodRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join(', ') + '<br>' +
+                    'Evil: ' + evilRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join(', ');
+            }
+            renderReferenceQuestBoard();
+            showScreen('reference-screen');
+        }
+
+        function renderReferenceQuestBoard() {
+            var config = QUEST_CONFIG[playerCount];
+            var board = document.getElementById('reference-quest-board');
+            if (!config || !board) return;
+            board.innerHTML = '';
+            for (var q = 1; q <= config.quests.length; q++) {
+                var marker = document.createElement('div');
+                marker.className = 'quest-marker';
+                var teamSize = config.quests[q - 1];
+                if (playerCount === 4 && q === 3) teamSize = 3;
+                var size = document.createElement('div');
+                size.className = 'quest-size';
+                size.innerText = teamSize;
+                marker.appendChild(size);
+                if (config.fails[q - 1] === 2) {
+                    var failNote = document.createElement('div');
+                    failNote.className = 'quest-fail-note';
+                    failNote.innerText = '2 fails';
+                    marker.appendChild(failNote);
+                }
+                var amuletConfig = AMULET_CONFIG[playerCount] || [];
+                if (amuletConfig.indexOf(q) !== -1) {
+                    var amuletMarker = document.createElement('div');
+                    amuletMarker.className = 'quest-amulet-marker';
+                    amuletMarker.title = 'Vision available after this mission';
+                    amuletMarker.innerText = '🔮';
+                    marker.appendChild(amuletMarker);
+                }
+                board.appendChild(marker);
+            }
+        }
+
         function showRoleSelection() {
             // Hide setup screen and show role selection first
             var setupScreen = document.getElementById('setup-screen');
@@ -1668,6 +1729,28 @@
                 document.getElementById('dist-reveal-view').classList.add('hidden');
                 updateDistScreen();
             }
+        }
+
+        function redistributeRolesSamePlayers() {
+            if (players.length === 0) return;
+            var roleKeys = players.map(function(p) { return p.roleKey; });
+            shuffleArray(roleKeys);
+            for (var i = 0; i < playerCount; i++) {
+                var roleDef = ROLE_DEFINITIONS[roleKeys[i]];
+                if (!roleDef) continue;
+                players[i].roleKey = roleKeys[i];
+                players[i].role = roleDef.name;
+                players[i].alignment = roleDef.alignment;
+                players[i].description = roleDef.description;
+            }
+            currentLeader = Math.floor(Math.random() * playerCount);
+            currentDistIndex = 0;
+            document.getElementById('dist-pass-view').classList.remove('hidden');
+            document.getElementById('dist-reveal-view').classList.add('hidden');
+            document.getElementById('dist-total-players').innerText = playerCount;
+            addLog('Roles redistributed to same players. Pass device to each player to reveal new role.');
+            showScreen('distribution-screen');
+            updateDistScreen();
         }
 
         function announceFirstLeader() {
@@ -2802,7 +2885,7 @@
         }
 
         function showScreen(id) {
-            var screens = ['setup-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
+            var screens = ['setup-screen', 'reference-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
             screens.forEach(s => {
                 var el = document.getElementById(s);
                 if (el) el.classList.add('hidden');

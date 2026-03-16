@@ -581,6 +581,7 @@
         </div>
 
         <button class="action-btn" onclick="showRoleSelection()">تنظیم نقش‌ها</button>
+        <button class="secondary-btn" onclick="showReferenceScreen()" style="margin-top:10px;">نمایش مرجع پیکارها (بازی با کارت)</button>
         
         <!-- Thematic Introduction -->
         <div class="setup-info" style="margin-top: 20px; background: rgba(255, 152, 0, 0.1); border: 2px solid rgba(255, 152, 0, 0.3);">
@@ -598,6 +599,18 @@
                 <p style="margin: 10px 0; font-weight: bold; color: var(--accent-color);">پیکار آغاز می‌شود! ای سالار، نخستین گروهِ خویش را برای پیکار برگزین!</p>
             </div>
         </div>
+    </div>
+
+    <!-- Mission reference screen: five circles only, for playing with physical cards -->
+    <div id="reference-screen" class="container hidden">
+        <h1>مرجع پیکارها</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">از این صفحه هنگام بازی با کارت فیزیکی استفاده کنید. ابتدا تعداد یاران و نقش‌ها را در صفحه قبل تنظیم کنید.</p>
+        <div id="reference-summary" style="margin: 15px 0; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; text-align: right;"></div>
+        <div class="quest-board-visual" id="reference-quest-board">
+            <!-- Five mission circles rendered here -->
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">سپاه فریدون با ۳ پیکار پیروز می‌شود؛ لشکر ضحاک با ۳ شکست. 🔮 = جام جهان‌نما پس از این پیکار.</p>
+        <button class="secondary-btn" onclick="showScreen('setup-screen')" style="margin-top: 15px;">بازگشت به تنظیمات</button>
     </div>
 
     <!-- Role Selection Screen -->
@@ -713,6 +726,8 @@
             </div>
         </div>
 
+        <!-- Redistribute roles (same players) -->
+        <button class="secondary-btn" onclick="redistributeRolesSamePlayers()" style="margin-bottom: 8px;">توزیع دوباره نقش‌ها (همان یاران)</button>
         <!-- Game Log -->
         <button class="secondary-btn" onclick="toggleLog()">نمایش/پنهان لاگ بازی</button>
         <div id="game-log" class="hidden" style="margin-top: 15px; max-height: 200px; overflow-y: auto; text-align: right; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
@@ -1303,6 +1318,52 @@
             }
         }
 
+        function showReferenceScreen() {
+            var rolesToShow = (selectedRoles.length === playerCount) ? selectedRoles.slice() : RECOMMENDED_ROLES[playerCount].slice();
+            var summaryEl = document.getElementById('reference-summary');
+            if (summaryEl) {
+                var goodRoles = rolesToShow.filter(function(r) { return ROLE_DEFINITIONS[r] && ROLE_DEFINITIONS[r].alignment === 'good'; });
+                var evilRoles = rolesToShow.filter(function(r) { return ROLE_DEFINITIONS[r] && ROLE_DEFINITIONS[r].alignment === 'evil'; });
+                summaryEl.innerHTML = '<strong>' + toFarsiNum(playerCount) + ' یار</strong><br>' +
+                    'سپاه فریدون: ' + goodRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join('، ') + '<br>' +
+                    'لشکر ضحاک: ' + evilRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join('، ');
+            }
+            renderReferenceQuestBoard();
+            showScreen('reference-screen');
+        }
+
+        function renderReferenceQuestBoard() {
+            var config = QUEST_CONFIG[playerCount];
+            var board = document.getElementById('reference-quest-board');
+            if (!config || !board) return;
+            board.innerHTML = '';
+            for (var q = 1; q <= config.quests.length; q++) {
+                var marker = document.createElement('div');
+                marker.className = 'quest-marker';
+                var teamSize = config.quests[q - 1];
+                if (playerCount === 4 && q === 3) teamSize = 3;
+                var size = document.createElement('div');
+                size.className = 'quest-size';
+                size.innerText = toFarsiNum(teamSize);
+                marker.appendChild(size);
+                if (config.fails[q - 1] === 2) {
+                    var failNote = document.createElement('div');
+                    failNote.className = 'quest-fail-note';
+                    failNote.innerText = '۲ شکست';
+                    marker.appendChild(failNote);
+                }
+                var amuletConfig = AMULET_CONFIG[playerCount] || [];
+                if (amuletConfig.indexOf(q) !== -1) {
+                    var amuletMarker = document.createElement('div');
+                    amuletMarker.className = 'quest-amulet-marker';
+                    amuletMarker.title = 'جام جهان‌نما پس از این پیکار';
+                    amuletMarker.innerText = '🔮';
+                    marker.appendChild(amuletMarker);
+                }
+                board.appendChild(marker);
+            }
+        }
+
         function showRoleSelection() {
             // Hide setup screen and show role selection first
             var setupScreen = document.getElementById('setup-screen');
@@ -1719,6 +1780,28 @@
                 document.getElementById('dist-reveal-view').classList.add('hidden');
                 updateDistScreen();
             }
+        }
+
+        function redistributeRolesSamePlayers() {
+            if (players.length === 0) return;
+            var roleKeys = players.map(function(p) { return p.roleKey; });
+            shuffleArray(roleKeys);
+            for (var i = 0; i < playerCount; i++) {
+                var roleDef = ROLE_DEFINITIONS[roleKeys[i]];
+                if (!roleDef) continue;
+                players[i].roleKey = roleKeys[i];
+                players[i].role = roleDef.name;
+                players[i].alignment = roleDef.alignment;
+                players[i].description = roleDef.description;
+            }
+            currentLeader = Math.floor(Math.random() * playerCount);
+            currentDistIndex = 0;
+            document.getElementById('dist-pass-view').classList.remove('hidden');
+            document.getElementById('dist-reveal-view').classList.add('hidden');
+            document.getElementById('dist-total-players').innerText = toFarsiNum(playerCount);
+            addLog('نقش‌ها بین همان یاران دوباره توزیع شد. دستگاه را به هر یار بدهید تا نقش جدید را ببیند.');
+            showScreen('distribution-screen');
+            updateDistScreen();
         }
 
         // --- Game Logic ---
@@ -2835,7 +2918,7 @@
         }
 
         function showScreen(id) {
-            var screens = ['setup-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
+            var screens = ['setup-screen', 'reference-screen', 'role-selection-screen', 'distribution-screen', 'leader-announce-screen', 'game-screen'];
             screens.forEach(s => {
                 var el = document.getElementById(s);
                 if (el) el.classList.add('hidden');
