@@ -504,6 +504,8 @@
             <div style="font-size:4rem; margin:20px;">📱</div>
             <p>Player <span id="dist-player-num">1</span> of <span id="dist-total-players">7</span></p>
             <button class="action-btn" onclick="revealRole()">Reveal Role</button>
+            <p style="margin-top: 14px; font-size: 0.85rem; color: var(--text-secondary);">If something went wrong, reshuffle and show roles again:</p>
+            <button type="button" class="secondary-btn" onclick="openRerunRolesModal()" style="margin-top: 6px;">New random roles (same names)</button>
         </div>
 
         <div id="dist-reveal-view" class="hidden">
@@ -561,9 +563,10 @@
         <div id="action-buttons" style="margin-top: 20px;"></div>
 
         <!-- Grimoire View (Storyteller Only) -->
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; justify-content:center;">
             <button class="secondary-btn" onclick="showPlayerGuide()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📖 Guide</button>
             <button class="secondary-btn" onclick="showCheatSheet()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📜 Roles</button>
+            <button type="button" class="secondary-btn" onclick="openRerunRolesModal()" style="background-color: rgba(46, 125, 50, 0.25); font-weight: bold;" title="Two-step confirmation. Same names, new random roles.">New roles (same players)</button>
         </div>
         <div id="grimoire-view" class="grimoire-view hidden"></div>
 
@@ -579,6 +582,35 @@
                 <h1 id="end-game-title" style="margin-bottom: 20px;">GAME OVER</h1>
                 <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
                 <button class="action-btn" onclick="location.reload()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rerun roles: two-step confirmation (same names, new random roles). Outside game-screen so it works from distribution too. -->
+    <div id="rerun-roles-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rerun-roles-title-1">
+        <div class="container" style="max-width: 480px; border: 1px solid rgba(255,255,255,0.15); text-align: left;">
+            <div id="rerun-step-1">
+                <h2 id="rerun-roles-title-1" style="margin-top: 0; margin-bottom: 12px; color: var(--accent-color);">New random roles (same players)?</h2>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 12px;">Use this when the group wants another round with the same people and names, or if something went wrong and role pass-around should start over.</p>
+                <ul style="margin: 0 0 16px; padding-left: 1.25em; line-height: 1.6; color: #ddd; font-size: 0.95rem;">
+                    <li>Player names and seating order stay the same.</li>
+                    <li>Roles are randomly drawn again (new Imp, new information roles, etc.).</li>
+                    <li>All day and night progress, the game log, and first-night setup choices for the <em>current</em> run are cleared.</li>
+                </ul>
+                <p style="font-size: 0.9rem; color: #e57373; margin-bottom: 16px;">This is not a full page refresh. The next step asks for a final confirmation.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="secondary-btn" onclick="closeRerunRolesModal()">Cancel</button>
+                    <button type="button" class="action-btn" onclick="goToRerunStep2()">Next</button>
+                </div>
+            </div>
+            <div id="rerun-step-2" class="hidden">
+                <h2 id="rerun-roles-title-2" style="margin-top: 0; margin-bottom: 12px; color: #e57373;">Final confirmation</h2>
+                <p style="color: #ddd; font-size: 0.95rem; line-height: 1.5; margin-bottom: 8px;">Starting now will return to the role pass-around. There is no undo for the current game state and log.</p>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">If that is not intended, go back or cancel.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="secondary-btn" onclick="backToRerunStep1()">Back</button>
+                    <button type="button" class="action-btn" onclick="executeRerunRoleDistributionSamePlayers()" style="background: linear-gradient(135deg, #c62828 0%, #8e0000 100%);">Yes, new random roles</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1281,20 +1313,75 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
-            isGameInProgress = true;
-            preventAccidentalNavigation();
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
             for (var i = 0; i < inputs.length; i++) {
                 var val = inputs[i].value.trim() || inputs[i].placeholder;
                 names.push(val);
-                
                 if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
                     savedPlayers.push(val);
                 }
             }
             localStorage.setItem('botc_players', JSON.stringify(savedPlayers));
             renderSavedList();
+            beginRoleDistributionFromNames(names);
+        }
+
+        function openRerunRolesModal() {
+            if (!players || players.length === 0) {
+                alert('No game to rerun. Add players and start from the setup screen first.');
+                return;
+            }
+            var m = document.getElementById('rerun-roles-modal');
+            if (!m) return;
+            document.getElementById('rerun-step-1').classList.remove('hidden');
+            document.getElementById('rerun-step-2').classList.add('hidden');
+            m.classList.remove('hidden');
+        }
+
+        function closeRerunRolesModal() {
+            var m = document.getElementById('rerun-roles-modal');
+            if (m) m.classList.add('hidden');
+            var s1 = document.getElementById('rerun-step-1');
+            var s2 = document.getElementById('rerun-step-2');
+            if (s1) s1.classList.remove('hidden');
+            if (s2) s2.classList.add('hidden');
+        }
+
+        function goToRerunStep2() {
+            document.getElementById('rerun-step-1').classList.add('hidden');
+            document.getElementById('rerun-step-2').classList.remove('hidden');
+        }
+
+        function backToRerunStep1() {
+            document.getElementById('rerun-step-2').classList.add('hidden');
+            document.getElementById('rerun-step-1').classList.remove('hidden');
+        }
+
+        function executeRerunRoleDistributionSamePlayers() {
+            if (!players || players.length === 0) {
+                closeRerunRolesModal();
+                return;
+            }
+            closeRerunRolesModal();
+            var toHide = ['night-modal', 'nomination-modal', 'end-game-modal', 'info-modal', 'slayer-result-modal', 'spy-grimoire-modal', 'guide-modal', 'cheat-sheet-modal', 'rerun-roles-modal'];
+            for (var h = 0; h < toHide.length; h++) {
+                var el = document.getElementById(toHide[h]);
+                if (el) el.classList.add('hidden');
+            }
+            if (typeof stopDayTimer === 'function') {
+                stopDayTimer();
+            }
+            var names = players.map(function(p) { return p.name; });
+            beginRoleDistributionFromNames(names);
+        }
+
+        function beginRoleDistributionFromNames(names) {
+            if (!names || names.length === 0) {
+                alert('No player names were provided.');
+                return;
+            }
+            playerCount = names.length;
 
             // Get character distribution
             var dist = CHARACTER_DISTRIBUTION[playerCount];
@@ -1302,6 +1389,8 @@
                 alert('Invalid player count: ' + playerCount);
                 return;
             }
+            isGameInProgress = true;
+            preventAccidentalNavigation();
 
             // Select characters
             var selectedChars = [];
@@ -1445,9 +1534,13 @@
             }
             
             // Initialize player info tracking
+            playerInfo = {};
             for (var i = 0; i < players.length; i++) {
                 playerInfo[i] = [];
             }
+            currentDay = 1;
+            isNightPhase = false;
+            nightIndex = 0;
             
             // Reset game state variables for Distribution phase
             poisonedPlayers = [];
@@ -1479,6 +1572,17 @@
             startingPlayerIndex = Math.floor(Math.random() * playerCount);
             currentDistIndex = 0;
             document.getElementById('dist-total-players').innerText = playerCount;
+            var passView = document.getElementById('dist-pass-view');
+            var revealView = document.getElementById('dist-reveal-view');
+            if (passView) passView.classList.remove('hidden');
+            if (revealView) revealView.classList.add('hidden');
+            var nextBtnReset = document.getElementById('next-dist-btn');
+            if (nextBtnReset) {
+                nextBtnReset.innerText = 'Hide & Next';
+                nextBtnReset.style.backgroundColor = '#b71c1c';
+                nextBtnReset.disabled = false;
+                nextBtnReset.onclick = nextDistribute;
+            }
             document.getElementById('setup-screen').classList.add('hidden');
             showScreen('distribution-screen');
             updateDistScreen();

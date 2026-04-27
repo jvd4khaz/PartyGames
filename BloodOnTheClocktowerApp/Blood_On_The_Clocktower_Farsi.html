@@ -565,6 +565,8 @@
             <div style="font-size:4rem; margin:20px;">📱</div>
             <p>بازیکن <span id="dist-player-num">1</span> از <span id="dist-total-players">7</span></p>
             <button class="action-btn" onclick="revealRole()">نمایش نقش</button>
+            <p style="margin-top: 14px; font-size: 0.85rem; color: var(--text-secondary);">اگر اشتباهی پیش آمد و می‌خواهید دوباره از توزیع نقش شروع کنید:</p>
+            <button type="button" class="secondary-btn" onclick="openRerunRolesModal()" style="margin-top: 6px;">نقش‌های تصادفی دوباره (همان اسامی)</button>
         </div>
 
         <div id="dist-reveal-view" class="hidden">
@@ -622,9 +624,10 @@
         <div id="action-buttons" style="margin-top: 20px;"></div>
 
         <!-- Grimoire View (Storyteller Only) -->
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; justify-content:center;">
             <button class="secondary-btn" onclick="showPlayerGuide()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📖 راهنمای بازیکن</button>
             <button class="secondary-btn" onclick="showCheatSheet()" style="background-color: rgba(183, 28, 28, 0.2); font-weight: bold;">📜 خلاصه نقش‌ها</button>
+            <button type="button" class="secondary-btn" onclick="openRerunRolesModal()" style="background-color: rgba(46, 125, 50, 0.25); font-weight: bold;" title="دو مرحلهٔ تأیید. همان نام‌ها، نقش‌های تصادفی تازه.">نقش‌های تازه (همان بازیکن‌ها)</button>
         </div>
         <div id="grimoire-view" class="grimoire-view hidden"></div>
 
@@ -640,6 +643,35 @@
                 <h1 id="end-game-title" style="margin-bottom: 20px;">پایان بازی</h1>
                 <p id="end-game-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
                 <button class="action-btn" onclick="location.reload()">بازی جدید</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rerun roles: two-step confirmation. Outside game-screen so it works from distribution too. -->
+    <div id="rerun-roles-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rerun-roles-title-1-fa">
+        <div class="container" dir="rtl" style="max-width: 480px; border: 1px solid rgba(255,255,255,0.15); text-align: right;">
+            <div id="rerun-step-1">
+                <h2 id="rerun-roles-title-1-fa" style="margin-top: 0; margin-bottom: 12px; color: var(--accent-color);">نقش‌های تصادفی دوباره (همان بازیکن‌ها)؟</h2>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 12px;">وقتی گروه می‌خواهد با همان افراد دور دیگری بازی کند، یا اگر در توزیع نقش مشکلی پیش آمده و باید از پاس دادن دستگاه دوباره شروع شود.</p>
+                <ul style="margin: 0 0 16px; padding-right: 1.25em; padding-left: 0; line-height: 1.65; color: #ddd; font-size: 0.95rem;">
+                    <li>اسامی و ترتیب جایگاه مثل قبل می‌ماند.</li>
+                    <li>نقش‌ها دوباره به‌طور تصادفی انتخاب می‌شود (مثلاً شيطان/ایمپ و اطلاعات شبانهٔ تازه).</li>
+                    <li>پیشرفت روز و شب، گزارش بازی، و انتخاب‌های شبی که در همین اجرا ثبت شده پاک می‌شود.</li>
+                </ul>
+                <p style="font-size: 0.9rem; color: #e57373; margin-bottom: 16px;">این همان رفرش کامل صفحه نیست. مرحلهٔ بعدی، تأیید نهایی است.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="secondary-btn" onclick="closeRerunRolesModal()">لغو</button>
+                    <button type="button" class="action-btn" onclick="goToRerunStep2()">بعدی</button>
+                </div>
+            </div>
+            <div id="rerun-step-2" class="hidden">
+                <h2 id="rerun-roles-title-2-fa" style="margin-top: 0; margin-bottom: 12px; color: #e57373;">تأیید نهایی</h2>
+                <p style="color: #ddd; font-size: 0.95rem; line-height: 1.7; margin-bottom: 8px;">با ادامه، دوباره از مرحلهٔ پاس دادن دستگاه و دیدن نقش شروع می‌شود. برای وضعیت و گزارش فعلی بازگشتی در نظر گرفته نشده است.</p>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">اگر این هدف نیست، بازگردید یا لغو کنید.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="secondary-btn" onclick="backToRerunStep1()">بازگشت</button>
+                    <button type="button" class="action-btn" onclick="executeRerunRoleDistributionSamePlayers()" style="background: linear-gradient(135deg, #c62828 0%, #8e0000 100%);">بله، نقش‌های تازه</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1341,27 +1373,84 @@
 
         // --- Role Distribution ---
         function startRoleDistribution() {
-            isGameInProgress = true;
-            preventAccidentalNavigation();
             var inputs = document.querySelectorAll('.player-input');
             var names = [];
             for (var i = 0; i < inputs.length; i++) {
                 var val = inputs[i].value.trim() || inputs[i].placeholder;
                 names.push(val);
-                
                 if (inputs[i].value.trim() !== '' && savedPlayers.indexOf(val) === -1) {
                     savedPlayers.push(val);
                 }
             }
             localStorage.setItem('botc_players', JSON.stringify(savedPlayers));
             renderSavedList();
+            beginRoleDistributionFromNames(names);
+        }
+
+        function openRerunRolesModal() {
+            if (!players || players.length === 0) {
+                alert('بازی فعالی برای اجرای دوباره وجود ندارد. از صفحهٔ تنظیمات بازیکنان را اضافه و بازی را شروع کنید.');
+                return;
+            }
+            var m = document.getElementById('rerun-roles-modal');
+            if (!m) return;
+            document.getElementById('rerun-step-1').classList.remove('hidden');
+            document.getElementById('rerun-step-2').classList.add('hidden');
+            m.classList.remove('hidden');
+        }
+
+        function closeRerunRolesModal() {
+            var m = document.getElementById('rerun-roles-modal');
+            if (m) m.classList.add('hidden');
+            var s1 = document.getElementById('rerun-step-1');
+            var s2 = document.getElementById('rerun-step-2');
+            if (s1) s1.classList.remove('hidden');
+            if (s2) s2.classList.add('hidden');
+        }
+
+        function goToRerunStep2() {
+            document.getElementById('rerun-step-1').classList.add('hidden');
+            document.getElementById('rerun-step-2').classList.remove('hidden');
+        }
+
+        function backToRerunStep1() {
+            document.getElementById('rerun-step-2').classList.add('hidden');
+            document.getElementById('rerun-step-1').classList.remove('hidden');
+        }
+
+        function executeRerunRoleDistributionSamePlayers() {
+            if (!players || players.length === 0) {
+                closeRerunRolesModal();
+                return;
+            }
+            closeRerunRolesModal();
+            var toHide = ['night-modal', 'nomination-modal', 'end-game-modal', 'info-modal', 'slayer-result-modal', 'spy-grimoire-modal', 'guide-modal', 'cheat-sheet-modal', 'rerun-roles-modal'];
+            for (var h = 0; h < toHide.length; h++) {
+                var el = document.getElementById(toHide[h]);
+                if (el) el.classList.add('hidden');
+            }
+            if (typeof stopDayTimer === 'function') {
+                stopDayTimer();
+            }
+            var names = players.map(function(p) { return p.name; });
+            beginRoleDistributionFromNames(names);
+        }
+
+        function beginRoleDistributionFromNames(names) {
+            if (!names || names.length === 0) {
+                alert('اسم بازیکنی وارد نشده است.');
+                return;
+            }
+            playerCount = names.length;
 
             // Get character distribution
             var dist = CHARACTER_DISTRIBUTION[playerCount];
             if (!dist) {
-                alert('Invalid player count: ' + playerCount);
+                alert('تعداد بازیکن نامعتبر است: ' + playerCount);
                 return;
             }
+            isGameInProgress = true;
+            preventAccidentalNavigation();
 
             // Select characters
             var selectedChars = [];
@@ -1505,9 +1594,13 @@
             }
             
             // Initialize player info tracking
+            playerInfo = {};
             for (var i = 0; i < players.length; i++) {
                 playerInfo[i] = [];
             }
+            currentDay = 1;
+            isNightPhase = false;
+            nightIndex = 0;
             
             // Reset game state variables for Distribution phase
             poisonedPlayers = [];
@@ -1539,6 +1632,17 @@
             startingPlayerIndex = Math.floor(Math.random() * playerCount);
             currentDistIndex = 0;
             document.getElementById('dist-total-players').innerText = playerCount;
+            var passView = document.getElementById('dist-pass-view');
+            var revealView = document.getElementById('dist-reveal-view');
+            if (passView) passView.classList.remove('hidden');
+            if (revealView) revealView.classList.add('hidden');
+            var nextBtnReset = document.getElementById('next-dist-btn');
+            if (nextBtnReset) {
+                nextBtnReset.innerText = 'مخفی کردن و بعدی';
+                nextBtnReset.style.backgroundColor = '#b71c1c';
+                nextBtnReset.disabled = false;
+                nextBtnReset.onclick = nextDistribute;
+            }
             document.getElementById('setup-screen').classList.add('hidden');
             showScreen('distribution-screen');
             updateDistScreen();
