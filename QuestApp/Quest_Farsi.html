@@ -610,6 +610,11 @@
             <!-- Five mission circles rendered here -->
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">سپاه فریدون با ۳ پیکار پیروز می‌شود؛ لشکر ضحاک با ۳ شکست. 🔮 = جام جهان‌نما پس از این پیکار.</p>
+        <div class="setup-info" style="margin-top: 10px; text-align: right; background: rgba(156, 39, 176, 0.1); border: 1px solid var(--amulet-color);">
+            <strong style="color: var(--amulet-color);">👻 نحوه شناسایی نقاب‌دار (بازی با کارت):</strong><br>
+            <strong>۵-۴ نفره:</strong> همه اعضای لشکر ضحاک یکدیگر را می‌شناسند (نقاب‌دار انگشت شست خود را بلند می‌کند تا لشکر ضحاک او را بیابند).<br>
+            <strong>۶+ نفره:</strong> نقاب‌دار برای لشکر ضحاک ناشناس است. لشکر ضحاک چشمان خود را باز می‌کنند و فقط یکدیگر را می‌یابند (نه نقاب‌دار را). نقاب‌دار انگشت شست خود را بلند نمی‌کند.
+        </div>
         <button class="secondary-btn" onclick="showScreen('setup-screen')" style="margin-top: 15px;">بازگشت به تنظیمات</button>
     </div>
 
@@ -931,7 +936,7 @@
             'Archduke': { name: 'رستم دستان', symbol: '💪', rebus: '💪', alignment: 'good', description: 'می‌تواند یک دست را در واپسین پیکار عوض کند.', required: false },
             'Minion': { name: 'خائن', symbol: '🗡️', rebus: '🗡️', alignment: 'evil', description: 'خائنی که برای بدی می‌جنگد.', required: false },
             'Morgan': { name: 'ضحاک ماردوش', symbol: '🐉', rebus: '🐉', alignment: 'evil', description: 'می‌تواند درفش کاویان را نادیده بگیرد و نیرنگ یا همراهی کند.', required: false },
-            'Blind Hunter': { name: 'نقاب‌دار', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: 'سایر اعضای لشکر ضحاک را نمی‌شناسد. می‌تواند در پیکار نهایی شکار کند.', required: false }
+            'Blind Hunter': { name: 'نقاب‌دار', symbol: '🎭', rebus: '🎭', alignment: 'evil', description: '۵-۴ نفره: لشکر ضحاک نقاب‌دار را می‌شناسد. ۶+ نفره: لشکر ضحاک نقاب‌دار را نمی‌شناسد. نقاب‌دار هرگز لشکر ضحاک را نمی‌شناسد. می‌تواند در پیکار نهایی شکار کند.', required: false }
         };
 
         // Recommended roles by player count
@@ -1737,12 +1742,22 @@
             // Show teammates for evil players
             if (!isGood) {
                 if (player.roleKey === 'Blind Hunter') {
-                    // Blind Hunter never knows other evil players (any player count)
-                    extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند. شما تنها هستید.</div>';
+                    // Blind Hunter never knows other evil players
+                    // 4-5p: Evil know Blind Hunter (thumb extended). 6+p: Evil do NOT know Blind Hunter.
+                    if (playerCount <= 5) {
+                        extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند، اما آن‌ها شما را می‌شناسند. شما تنها هستید.</div>';
+                    } else {
+                        extra.innerHTML = '<div style="margin-top: 15px; padding: 10px; background: rgba(244, 67, 54, 0.2); border: 1px solid var(--evil-color); border-radius: 8px; color: #FFCDD2;"><strong>مهم:</strong> شما نمی‌دانید سایر اعضای لشکر ضحاک چه کسانی هستند، و آن‌ها نیز شما را نمی‌شناسند. شما تنها هستید.</div>';
+                    }
                 } else {
                     // Other evil players (Morgan, Minion)
-                    // Show all evil teammates including Blind Hunter
-                    var evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
+                    // 4-5p: all evil know each other (Blind Hunter extends thumb). 6+p: Blind Hunter is unknown.
+                    var evilPlayers;
+                    if (playerCount >= 6) {
+                        evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name && p.roleKey !== 'Blind Hunter');
+                    } else {
+                        evilPlayers = players.filter(p => p.alignment === 'evil' && p.name !== player.name);
+                    }
                     
                     if (evilPlayers.length > 0) {
                         var teamList = evilPlayers.map(p => {
