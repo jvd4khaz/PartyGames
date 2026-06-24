@@ -1,0 +1,35 @@
+# Runs the repo Python job on a cron schedule (UTC).
+# Adjust cron times as needed — GitHub allows high precision but schedules can drift.
+name: Scheduled Python
+
+on:
+  schedule:
+    # Example: 08:00, 14:00, 20:00 UTC daily
+    - cron: "0 8,14,20 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        if: hashFiles('requirements-scheduled.txt') != ''
+        run: pip install -r requirements-scheduled.txt
+
+      - name: Run scheduled script
+        env:
+          # Built-in token for this run; fine for API calls in THIS repo only.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: same Personal Access Token used locally for git/API, added in
+          # Repo → Settings → Secrets and variables → Actions (never commit the value).
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/gh_scheduled_run.py
