@@ -592,10 +592,7 @@
             <!-- Five mission circles rendered here -->
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">Good wins 3 missions; Evil wins 3 failures. 🔮 = Vision after this mission.</p>
-        <div class="setup-info" style="margin-top: 10px; text-align: left; background: rgba(156, 39, 176, 0.1); border: 1px solid var(--amulet-color);">
-            <strong style="color: var(--amulet-color);">👻 Ghost visibility (play with cards):</strong><br>
-            <strong>4-5 players:</strong> All Evil players know each other (Ghost extends thumb so Evil can find them).<br>
-            <strong>6+ players:</strong> Ghost is unknown to Evil. Evil open eyes and find only each other (not Ghost). Ghost does NOT extend thumb.
+        <div class="setup-info" id="ghost-visibility-guide" style="margin-top: 10px; text-align: left; background: rgba(156, 39, 176, 0.1); border: 1px solid var(--amulet-color);">
         </div>
         <button class="secondary-btn" onclick="showScreen('setup-screen')" style="margin-top: 15px;">Back to setup</button>
     </div>
@@ -1287,6 +1284,15 @@
                     'Evil: ' + evilRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join(', ');
             }
             renderReferenceQuestBoard();
+            // Ghost visibility guide
+            var ghostGuide = document.getElementById('ghost-visibility-guide');
+            if (ghostGuide) {
+                if (playerCount <= 5) {
+                    ghostGuide.innerHTML = '<strong style="color: var(--amulet-color);">👻 Ghost:</strong> extends thumb — known by other Evil.';
+                } else {
+                    ghostGuide.innerHTML = '<strong style="color: var(--amulet-color);">👻 Ghost:</strong> no thumb — unknown to all.';
+                }
+            }
             showScreen('reference-screen');
         }
 

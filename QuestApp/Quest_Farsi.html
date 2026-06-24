@@ -610,10 +610,7 @@
             <!-- Five mission circles rendered here -->
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">سپاه فریدون با ۳ پیکار پیروز می‌شود؛ لشکر ضحاک با ۳ شکست. 🔮 = جام جهان‌نما پس از این پیکار.</p>
-        <div class="setup-info" style="margin-top: 10px; text-align: right; background: rgba(156, 39, 176, 0.1); border: 1px solid var(--amulet-color);">
-            <strong style="color: var(--amulet-color);">👻 نحوه شناسایی نقاب‌دار (بازی با کارت):</strong><br>
-            <strong>۵-۴ نفره:</strong> همه اعضای لشکر ضحاک یکدیگر را می‌شناسند (نقاب‌دار انگشت شست خود را بلند می‌کند تا لشکر ضحاک او را بیابند).<br>
-            <strong>۶+ نفره:</strong> نقاب‌دار برای لشکر ضحاک ناشناس است. لشکر ضحاک چشمان خود را باز می‌کنند و فقط یکدیگر را می‌یابند (نه نقاب‌دار را). نقاب‌دار انگشت شست خود را بلند نمی‌کند.
+        <div class="setup-info" id="ghost-visibility-guide" style="margin-top: 10px; text-align: right; background: rgba(156, 39, 176, 0.1); border: 1px solid var(--amulet-color);">
         </div>
         <button class="secondary-btn" onclick="showScreen('setup-screen')" style="margin-top: 15px;">بازگشت به تنظیمات</button>
     </div>
@@ -1334,6 +1331,15 @@
                     'لشکر ضحاک: ' + evilRoles.map(function(r) { return ROLE_DEFINITIONS[r] ? ROLE_DEFINITIONS[r].name : r; }).join('، ');
             }
             renderReferenceQuestBoard();
+            // Ghost visibility guide (نقاب‌دار)
+            var ghostGuide = document.getElementById('ghost-visibility-guide');
+            if (ghostGuide) {
+                if (playerCount <= 5) {
+                    ghostGuide.innerHTML = '<strong style="color: var(--amulet-color);">👻 نقاب‌دار:</strong> انگشت شست بالا — لشکر ضحاک او را می‌شناسند.';
+                } else {
+                    ghostGuide.innerHTML = '<strong style="color: var(--amulet-color);">👻 نقاب‌دار:</strong> بدون انگشت شست — برای همه ناشناس.';
+                }
+            }
             showScreen('reference-screen');
         }
 
